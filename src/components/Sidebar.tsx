@@ -2,12 +2,31 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { MENU_ITEMS } from "@/constants/menuItems";
 import { LogOut, ChevronRight } from "lucide-react";
+import toast from "react-hot-toast";
 
 export const Sidebar = () => {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        toast.success("Logged out successfully");
+        router.push("/login");
+      } else {
+        toast.error(data.message || "Logout failed");
+      }
+    } catch (error) {
+      toast.error("Logout error. Please try again.");
+    }
+  };
 
   return (
     <div className="flex flex-col h-full w-64 flex-none bg-white text-gray-900 border-r border-gray-100 ease-in-out">
@@ -40,7 +59,10 @@ export const Sidebar = () => {
       </nav>
 
       <div className="p-4 border-t border-gray-100">
-        <button className="flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all duration-200 group">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all duration-200 group"
+        >
           <LogOut size={20} />
           <span className="font-medium">Logout</span>
         </button>
@@ -48,3 +70,4 @@ export const Sidebar = () => {
     </div>
   );
 };
+

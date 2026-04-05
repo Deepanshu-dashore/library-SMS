@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@heroicons/react':
+        specifier: ^2.2.0
+        version: 2.2.0(react@19.2.4)
+      bcryptjs:
+        specifier: ^3.0.3
+        version: 3.0.3
       cloudinary:
         specifier: ^2.9.0
         version: 2.9.0
@@ -29,6 +35,9 @@ importers:
       react-dom:
         specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
+      react-hot-toast:
+        specifier: ^2.6.0
+        version: 2.6.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
@@ -174,6 +183,11 @@ packages:
   '@eslint/plugin-kit@0.4.1':
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@heroicons/react@2.2.0':
+    resolution: {integrity: sha512-LMcepvRaS9LYHJGsF0zzmgKCUim/X3N/DQKc4jepAXJ7l8QxJ1PmxJzqplF2Z3FE4PqBAIGyJAQ/w4B5dsqbtQ==}
+    peerDependencies:
+      react: '>= 16 || ^19.0.0-rc'
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -816,6 +830,10 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
+  bcryptjs@3.0.3:
+    resolution: {integrity: sha512-GlF5wPWnSa/X5LKM1o0wz0suXIINz1iHRLvTS+sLyi7XPbe5ycmYI3DlZqVGZZtDgl4DmasFg7gOB3JYbphV5g==}
+    hasBin: true
+
   brace-expansion@1.1.13:
     resolution: {integrity: sha512-9ZLprWS6EENmhEOpjCYW2c8VkmOvckIJZfkr7rBW6dObmfgJ/L1GpSYW5Hpo9lDz4D1+n0Ckz8rU7FwHDQiG/w==}
 
@@ -1217,6 +1235,11 @@ packages:
   globalthis@1.0.4:
     resolution: {integrity: sha512-DpLKbNU4WylpxJykQujfCcwYWiV/Jhm50Goo0wrVILAv5jOr9d+H+UR3PhSCD2rCCEIg0uc+G+muBTwD54JhDQ==}
     engines: {node: '>= 0.4'}
+
+  goober@2.1.18:
+    resolution: {integrity: sha512-2vFqsaDVIT9Gz7N6kAL++pLpp41l3PfDuusHcjnGLfR6+huZkl6ziX+zgVC3ZxpqWhzH6pyDdGrCeDhMIvwaxw==}
+    peerDependencies:
+      csstype: ^3.0.10
 
   gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
@@ -1794,6 +1817,13 @@ packages:
     peerDependencies:
       react: ^19.2.4
 
+  react-hot-toast@2.6.0:
+    resolution: {integrity: sha512-bH+2EBMZ4sdyou/DPrfgIouFpcRLCJ+HoCA32UoAYHn6T3Ur5yfcDCeSr5mwldl6pFOsiocmrXMuoCJ1vV8bWg==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: '>=16'
+      react-dom: '>=16'
+
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -2260,6 +2290,10 @@ snapshots:
     dependencies:
       '@eslint/core': 0.17.0
       levn: 0.4.1
+
+  '@heroicons/react@2.2.0(react@19.2.4)':
+    dependencies:
+      react: 19.2.4
 
   '@humanfs/core@0.19.1': {}
 
@@ -2802,6 +2836,8 @@ snapshots:
   balanced-match@4.0.4: {}
 
   baseline-browser-mapping@2.10.14: {}
+
+  bcryptjs@3.0.3: {}
 
   brace-expansion@1.1.13:
     dependencies:
@@ -3364,6 +3400,10 @@ snapshots:
       define-properties: 1.2.1
       gopd: 1.2.0
 
+  goober@2.1.18(csstype@3.2.3):
+    dependencies:
+      csstype: 3.2.3
+
   gopd@1.2.0: {}
 
   graceful-fs@4.2.11: {}
@@ -3900,6 +3940,13 @@ snapshots:
     dependencies:
       react: 19.2.4
       scheduler: 0.27.0
+
+  react-hot-toast@2.6.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+    dependencies:
+      csstype: 3.2.3
+      goober: 2.1.18(csstype@3.2.3)
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
 
   react-is@16.13.1: {}
 
