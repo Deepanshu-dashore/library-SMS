@@ -40,6 +40,22 @@ export const STATUS_STYLES: Record<string, StatusStyle> = {
     label: "Completed",
     color: "bg-indigo-100 text-indigo-700",
   },
+  electricity: {
+    label: "Electricity",
+    color: "bg-amber-100 text-amber-700",
+  },
+  water: {
+    label: "Water",
+    color: "bg-cyan-100 text-cyan-700",
+  },
+  rent: {
+    label: "Rent",
+    color: "bg-purple-100 text-purple-700",
+  },
+  maintenance: {
+    label: "Maintenance",
+    color: "bg-emerald-100 text-emerald-700",
+  },
 };
 
 export const getStatusStyle = (status: string): StatusStyle => {

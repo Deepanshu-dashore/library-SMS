@@ -6,7 +6,7 @@ import { LibraryService } from "./library.service";
 import { NextRequest, NextResponse } from "next/server";
 
 export class LibraryController {
-  static async createLibrary(req: NextRequest, res: NextResponse) {
+  static async createLibrary(req: NextRequest) {
     try {
       const body = await req.json();
       const { name, email, password } = body;
@@ -29,7 +29,7 @@ export class LibraryController {
     }
   }
 
-  static async loginLibrary(req: NextRequest, res: NextResponse) {
+  static async loginLibrary(req: NextRequest) {
     try {
       const body = await req.json();
       const { email, password } = body;
@@ -77,7 +77,6 @@ export class LibraryController {
 
   static async updateLibrary(
     req: NextRequest,
-    res: NextResponse,
     { params }: { params: Promise<{ id: string }> },
   ) {
     try {
@@ -96,7 +95,6 @@ export class LibraryController {
 
   static async deleteLibrary(
     req: NextRequest,
-    res: NextResponse,
     { params }: { params: Promise<{ id: string }> },
   ) {
     try {
@@ -114,7 +112,6 @@ export class LibraryController {
 
   static async getLibrary(
     req: NextRequest,
-    res: NextResponse,
     { params }: { params: Promise<{ id: string }> },
   ) {
     try {
@@ -130,7 +127,7 @@ export class LibraryController {
     }
   }
 
-  static async getAllLibraries(req: NextRequest, res: NextResponse) {
+  static async getAllLibraries(req: NextRequest) {
     try {
       const library = await verifyJWT();
       if (!library) {
@@ -138,6 +135,33 @@ export class LibraryController {
       }
       const result = await LibraryService.getAllLibraries();
       return ApiResponse(200, result, "Libraries fetched successfully");
+    } catch (error: any) {
+      return ApiResponse(500, null, error);
+    }
+  }
+
+  static async getProfile(req: NextRequest) {
+    try {
+      const payload = await verifyJWT();
+      if (!payload || !payload.id) {
+        return ApiResponse(401, null, "Unauthorized request");
+      }
+      const result = await LibraryService.getLibrary(payload.id);
+      return ApiResponse(200, result, "Library fetched successfully");
+    } catch (error: any) {
+      return ApiResponse(500, null, error);
+    }
+  }
+
+  static async updateProfile(req: NextRequest) {
+    try {
+      const payload = await verifyJWT();
+      if (!payload || !payload.id) {
+        return ApiResponse(401, null, "Unauthorized request");
+      }
+      const body = await req.json();
+      const result = await LibraryService.updateLibrary(body, payload.id);
+      return ApiResponse(200, result, "Library updated successfully");
     } catch (error: any) {
       return ApiResponse(500, null, error);
     }

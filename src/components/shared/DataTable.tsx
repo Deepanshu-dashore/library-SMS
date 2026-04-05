@@ -161,8 +161,8 @@ function DropdownMenu<T>({
 }
 
 export function DataTable<T>({
-  data,
-  columns,
+  data = [],
+  columns = [],
   loading = false,
   searchPlaceholder = "Search...",
   onSearch,
@@ -205,7 +205,7 @@ export function DataTable<T>({
   }
 
   // Internal filter/sort
-  let processedData = [...data];
+  let processedData = Array.isArray(data) ? [...data] : [];
   
   // Pseudo-search mapping
   if (query && !onSearch) {
@@ -243,7 +243,7 @@ export function DataTable<T>({
   };
 
   return (
-    <div className="w-full bg-white rounded-2xl shadow-sm border border-border-light font-sans text-sm flex flex-col">
+    <div className="w-full bg-white rounded-2xl shadow-sm border border-gray-200 font-sans text-sm flex flex-col">
       
       {/* 1. Tabs Overlay */}
       {tabs && tabs.length > 0 && (
@@ -319,7 +319,7 @@ export function DataTable<T>({
                {columns.map((col, idx) => (
                  <th 
                    key={idx} 
-                   className={`px-4 py-4 text-[13px] font-bold text-gray-500 tracking-wide select-none ${
+                   className={`px-4 py-4 text-[14px] font-semibold text-gray-500 tracking-wide select-none ${
                      col.sortable ? 'cursor-pointer hover:text-gray-700' : ''
                    } ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
                    onClick={() => col.sortable && handleSort(col.key)}
