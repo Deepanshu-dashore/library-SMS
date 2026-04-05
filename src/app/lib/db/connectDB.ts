@@ -1,0 +1,28 @@
+import mongoose from "mongoose";
+
+type ConnectionObject = {
+  isConnected?: number;
+};
+
+const connection: ConnectionObject = {};
+
+export const connectDB = async (): Promise<void> => {
+    if (connection.isConnected) {
+        return;
+    }
+    if (mongoose.connection.readyState >= 1) {
+        return;
+    }
+    const connectionString = process.env.MONGODB_URI;
+    if(!connectionString){
+        throw new Error("MongoDB URI is not defined");
+    }
+    try {
+        const db = await mongoose.connect(connectionString);
+        connection.isConnected = db.connections[0].readyState;
+        console.log("NLRI-Database connected");
+    } catch (error) {
+        console.error("NLRI-Database connection error:", error);
+        throw error;
+    }
+}
