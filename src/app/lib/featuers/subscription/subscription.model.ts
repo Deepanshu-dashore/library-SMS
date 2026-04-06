@@ -22,14 +22,17 @@ const subscriptionSchema = new Schema(
       required: true,
     },
 
-    plan: {
-      type: String, // "15 days", "1 month"
-    },
-
     status: {
       type: String,
-      enum: ["active", "expired", "cancelled"],
+      enum: ["active", "expired", "cancelled", "transferred"],
       default: "active",
+    },
+
+    // NEW IMPORTANT FIELDS 👇
+    cancelledAt: Date,
+    transferredTo: {
+      type: Schema.Types.ObjectId,
+      ref: "Seat",
     },
 
     isRenewed: {

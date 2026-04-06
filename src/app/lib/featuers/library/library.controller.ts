@@ -75,6 +75,19 @@ export class LibraryController {
     }
   }
 
+  static async getLibraryFloors(req: NextRequest) {
+    try {
+      const library: any = await verifyJWT();
+      if (!library) {
+        return ApiResponse(401, null, "Unauthorized request");
+      }
+      const result = await LibraryService.getLibraryFloors(library.id);
+      return ApiResponse(200, result, "Library floors fetched successfully");
+    } catch (error: any) {
+      return ApiResponse(500, null, error);
+    }
+  }
+
   static async updateLibrary(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> },

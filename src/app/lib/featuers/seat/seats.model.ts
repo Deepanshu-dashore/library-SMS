@@ -7,9 +7,13 @@ const seatSchema = new Schema(
       required: true,
       unique: true, // S1, S2, A1 etc.
     },
+    price: {
+      type: Number,
+      required: true,
+    },
     type: {
       type: String,
-      enum: ["normal", "ac", "premium"],
+      enum: ["normal", "ac"],
       default: "normal",
     },
     floor: {

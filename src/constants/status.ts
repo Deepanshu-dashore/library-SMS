@@ -4,8 +4,8 @@ export type StatusStyle = {
 };
 
 export const STATUS_STYLES: Record<string, StatusStyle> = {
-  pending: {
-    label: "Pending",
+  unverify: {
+    label: "Unverify",
     color: "bg-yellow-100 text-yellow-800",
   },
   resolved: {
@@ -55,6 +55,22 @@ export const STATUS_STYLES: Record<string, StatusStyle> = {
   maintenance: {
     label: "Maintenance",
     color: "bg-emerald-100 text-emerald-700",
+  },
+  normal: {
+    label: "Normal",
+    color: "bg-gray-100 text-gray-700",
+  },
+  ac: {
+    label: "AC",
+    color: "bg-blue-100 text-blue-700",
+  },
+  available: {
+    label: "Available",
+    color: "bg-green-100 text-green-700",
+  },
+  occupied: {
+    label: "Occupied",
+    color: "bg-red-100 text-red-700",
   },
 };
 

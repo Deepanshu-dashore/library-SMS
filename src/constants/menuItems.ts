@@ -1,4 +1,13 @@
-import { Home, Users, Settings, Briefcase, FileText, LayoutDashboard, Database, CreditCard } from "lucide-react";
+import {
+  Home,
+  Users,
+  Settings,
+  Briefcase,
+  FileText,
+  LayoutDashboard,
+  Database,
+  CreditCard,
+} from "lucide-react";
 
 export const MENU_ITEMS = [
   {
@@ -20,6 +29,16 @@ export const MENU_ITEMS = [
     title: "Manage Expenses",
     path: "/expenses",
     icon: CreditCard,
+  },
+  {
+    title: "Manage Members",
+    path: "/users",
+    icon: Users,
+  },
+  {
+    title: "Reports",
+    path: "/reports",
+    icon: FileText,
   },
   {
     title: "Settings",

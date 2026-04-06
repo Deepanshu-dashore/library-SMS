@@ -1,142 +1,275 @@
 "use client";
 
-import React, { useState } from "react";
-import { 
-  Users, 
-  MapPin, 
-  CreditCard, 
-  Plus, 
-  Search, 
-  Filter,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  ArrowUpRight
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Plus, Database, Grid, List, Edit3, Trash2, Layers
 } from "lucide-react";
+import toast from "react-hot-toast";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { DataTable, ColumnDef } from "@/components/shared/DataTable";
 
-const TABS = [
-  { id: "set-manage", label: "Set Manage", icon: Users },
-  { id: "allocate", label: "Allocate", icon: MapPin },
-  { id: "manage-expenses", label: "Manage Expenses", icon: CreditCard },
-];
+interface Seat {
+  _id: string;
+  seatNumber: string;
+  price: number;
+  type: "normal" | "ac";
+  floor: string;
+  status?: string; // 'available' | 'occupied' | 'maintenance'
+}
 
-export default function SeatManagementPage() {
-  const [activeTab, setActiveTab] = useState("set-manage");
+const FLOOR_ALL = "All";
+const STATUS_ALL = "All";
+const TYPE_ALL = "All";
+
+export default function SeatManagement() {
+  const router = useRouter();
+  const [seats, setSeats] = useState<Seat[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
+
+  // Filters
+  const [floorFilter, setFloorFilter] = useState(FLOOR_ALL);
+  const [statusFilter, setStatusFilter] = useState(STATUS_ALL);
+  const [typeFilter, setTypeFilter] = useState(TYPE_ALL);
+
+  const fetchSeats = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/seat");
+      const data = await res.json();
+      if (data.success) setSeats(data.data);
+      else toast.error("Failed to load seats.");
+    } catch {
+      toast.error("Internal Server Error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchSeats(); }, []);
+
+  const handleDelete = async (seat: Seat) => {
+    if (!confirm(`Confirm deletion of ${seat.seatNumber}?`)) return;
+    const t = toast.loading("Deleting seat...");
+    try {
+      const res = await fetch(`/api/seat/${seat._id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) { toast.success("Seat deleted", { id: t }); fetchSeats(); }
+      else toast.error(data.message, { id: t });
+    } catch {
+      toast.error("An error occurred", { id: t });
+    }
+  };
+
+  // Compute unique floors from data
+  const floors = [FLOOR_ALL, ...Array.from(new Set(seats.map(s => s.floor).filter(Boolean))).sort()];
+
+  // Apply all filters
+  const filteredSeats = seats.filter(s => {
+    const matchFloor = floorFilter === FLOOR_ALL || s.floor === floorFilter;
+    const matchStatus = statusFilter === STATUS_ALL || (s.status || "available") === statusFilter;
+    const matchType = typeFilter === TYPE_ALL || s.type === typeFilter;
+    return matchFloor && matchStatus && matchType;
+  });
+
+  const columns: ColumnDef<Seat>[] = [
+    {
+      key: "seatNumber", label: "Seat", type: "custom", sortable: true,
+      render: (row) => (
+        <div className="flex items-center gap-3">
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs ${row.type === "ac" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"}`}>
+            {row.seatNumber.slice(0, 1)}
+          </div>
+          <span className="font-bold text-gray-900">{row.seatNumber}</span>
+        </div>
+      ),
+    },
+    {
+      key: "price", label: "Price / Month", type: "custom", sortable: true,
+      render: (row) => <span className="font-black text-emerald-600">₹{row.price}</span>,
+    },
+    { key: "type",   label: "Category", type: "status", getStatus: (row) => row.type,                   sortable: true },
+    { key: "floor",  label: "Floor",    type: "text",                                                    sortable: true },
+    { key: "status", label: "Status",   type: "status", getStatus: (row) => row.status || "available", sortable: true },
+  ];
+
+  // ── filter pill helpers ──────────────────────────────────────────────────────
+  function FilterPills({
+    label, options, value, onChange,
+  }: { label: string; options: string[]; value: string; onChange: (v: string) => void }) {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-black uppercase tracking-widest text-gray-300 shrink-0">{label}:</span>
+        {options.map(opt => (
+          <button
+            key={opt}
+            onClick={() => onChange(opt)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-black whitespace-nowrap transition-all ${
+              value === opt
+                ? "bg-gray-900 text-white"
+                : "bg-white border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-400"
+            }`}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 font-sans">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Seat Management</h1>
-            <p className="text-gray-500 mt-1 text-sm font-medium">Efficiently manage and allocate seats for your library.</p>
-          </div>
-          <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-xl shadow-blue-600/20 active:scale-95 text-sm">
-            <Plus size={20} />
-            Add New Seat
-          </button>
-        </div>
+    <div className="bg-gray-50/50 min-h-screen pb-20">
+      <div className="max-w-[1280px] mx-auto p-4 md:p-8">
 
-        {/* Tab Navigation */}
-        <div className="flex items-center gap-1 bg-gray-100/50 p-1.5 rounded-2xl w-fit border border-gray-100 shadow-inner">
-          {TABS.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
+        <PageHeader
+          title="Seat Management"
+          breadcrumbs={[
+            { label: "Dashboard", href: "/" },
+            { label: "Inventory" },
+          ]}
+          actionNode={
+            <div className="flex gap-3">
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                  isActive
-                    ? "bg-white text-blue-600 shadow-xl shadow-gray-100 ring-1 ring-gray-100"
-                    : "text-gray-400 hover:text-gray-900 hover:bg-white/50"
-                }`}
+                onClick={() => setViewMode(v => v === "grid" ? "table" : "grid")}
+                className="p-3 bg-white border border-gray-200 text-gray-600 rounded-2xl hover:bg-gray-50 transition-all shadow-sm"
+                title={viewMode === "grid" ? "Table View" : "Grid View"}
               >
-                <Icon size={18} />
-                {tab.label}
+                {viewMode === "grid" ? <List size={20} /> : <Grid size={20} />}
               </button>
-            );
-          })}
-        </div>
-      </div>
+              <button
+                onClick={() => toast.promise(fetchSeats(), { loading: "Refreshing...", success: "Synced", error: "Error" })}
+                className="p-3 bg-white border border-gray-200 text-gray-600 rounded-2xl hover:bg-gray-50 transition-all shadow-sm"
+                title="Refresh"
+              >
+                <Database size={20} />
+              </button>
+              <button
+                onClick={() => router.push("/seat-management/add")}
+                className="bg-white border border-gray-200 text-gray-700 px-5 py-3 rounded-2xl font-black transition-all active:scale-95 flex items-center gap-2 hover:bg-gray-50 shadow-sm"
+              >
+                <Plus size={18} /> Add Seat
+              </button>
+              <button
+                onClick={() => router.push("/seat-management/bulk-add")}
+                className="bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-2xl font-black transition-all shadow-xl active:scale-95 flex items-center gap-2"
+              >
+                <Layers size={18} /> Bulk Add
+              </button>
+            </div>
+          }
+        />
 
-      {/* Search and Filter */}
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-300 group-focus-within:text-blue-500 transition-colors" />
-          <input 
-            type="text" 
-            placeholder="Search by seat number, user or status..."
-            className="w-full bg-white border border-gray-100 rounded-2xl py-4 pl-12 pr-4 text-gray-900 outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm placeholder-gray-300"
+        {/* Stats Row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {[
+            { label: "Total Seats",  value: seats.length,                                        color: "text-gray-900" },
+            { label: "Available",    value: seats.filter(s => (s.status || "available") === "available").length, color: "text-green-600" },
+            { label: "Occupied",     value: seats.filter(s => s.status === "occupied").length,   color: "text-red-500"  },
+            { label: "AC Seats",     value: seats.filter(s => s.type === "ac").length,           color: "text-blue-600" },
+          ].map((stat, i) => (
+            <div key={i} className="bg-white rounded-[24px] p-5 border border-gray-100 shadow-sm">
+              <p className="text-[11px] font-black uppercase tracking-widest text-gray-400">{stat.label}</p>
+              <h4 className={`text-3xl font-black mt-1 ${stat.color}`}>{stat.value}</h4>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Filter Bar ──────────────────────────────────────────────────── */}
+        <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm px-6 py-4 mb-8 flex flex-wrap gap-x-8 gap-y-4 items-center">
+          <FilterPills
+            label="Floor"
+            options={floors}
+            value={floorFilter}
+            onChange={setFloorFilter}
           />
+          <div className="h-5 w-px bg-gray-100 hidden md:block" />
+          <FilterPills
+            label="Status"
+            options={[STATUS_ALL, "available", "occupied", "maintenance"]}
+            value={statusFilter}
+            onChange={setStatusFilter}
+          />
+          <div className="h-5 w-px bg-gray-100 hidden md:block" />
+          <FilterPills
+            label="Type"
+            options={[TYPE_ALL, "normal", "ac"]}
+            value={typeFilter}
+            onChange={setTypeFilter}
+          />
+          {(floorFilter !== FLOOR_ALL || statusFilter !== STATUS_ALL || typeFilter !== TYPE_ALL) && (
+            <button
+              onClick={() => { setFloorFilter(FLOOR_ALL); setStatusFilter(STATUS_ALL); setTypeFilter(TYPE_ALL); }}
+              className="ml-auto text-xs font-black text-gray-400 hover:text-red-500 transition-colors"
+            >
+              Clear filters ✕
+            </button>
+          )}
         </div>
-        <button className="flex items-center gap-2 bg-white border border-gray-100 px-6 py-4 rounded-2xl text-gray-700 font-bold hover:bg-gray-50 transition-all shadow-sm hover:shadow-md">
-          <Filter size={18} />
-          Filters
-        </button>
-      </div>
 
-      {/* Dynamic Content Based on Tab */}
-      <div className="bg-white border border-gray-100 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-200/40">
-        <div className="p-20 min-h-[400px] flex flex-col items-center justify-center text-center">
-            {activeTab === "set-manage" && (
-                <div className="space-y-4 max-w-md">
-                    <div className="w-24 h-24 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner">
-                        <Users className="text-blue-600 h-10 w-10" />
-                    </div>
-                    <h2 className="text-2xl font-black text-gray-900 tracking-tight">Seat Layout & Setup</h2>
-                    <p className="text-gray-500 font-medium leading-relaxed">Configure your library seating arrangements, define seat types, and manage availability across sections.</p>
-                </div>
-            )}
-            
-            {activeTab === "allocate" && (
-                <div className="space-y-4 max-w-md">
-                    <div className="w-24 h-24 bg-purple-50 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner">
-                        <MapPin className="text-purple-600 h-10 w-10" />
-                    </div>
-                    <h2 className="text-2xl font-black text-gray-900 tracking-tight">Seat Allocation System</h2>
-                    <p className="text-gray-500 font-medium leading-relaxed">Assign seats to members, handle reservation requests, and monitor check-ins/check-outs in real-time.</p>
-                </div>
-            )}
+        {/* Result count */}
+        <p className="text-[12px] font-black text-gray-400 uppercase tracking-widest mb-4">
+          Showing {filteredSeats.length} of {seats.length} seats
+        </p>
 
-            {activeTab === "manage-expenses" && (
-                <div className="space-y-4 max-w-md">
-                    <div className="w-24 h-24 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner">
-                        <CreditCard className="text-emerald-600 h-10 w-10" />
-                    </div>
-                    <h2 className="text-2xl font-black text-gray-900 tracking-tight">Financial Management</h2>
-                    <p className="text-gray-500 font-medium leading-relaxed">Track maintenance costs, subscription revenues, and overhead expenses related to seat management.</p>
-                </div>
-            )}
-        </div>
-      </div>
+        {/* Grid / Table */}
+        {viewMode === "grid" ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5 animate-in fade-in duration-500">
+            {loading
+              ? Array.from({ length: 12 }).map((_, i) => (
+                  <div key={i} className="aspect-square bg-white rounded-[28px] border-2 border-dashed border-gray-100 animate-pulse" />
+                ))
+              : filteredSeats.length === 0
+              ? <div className="col-span-full py-20 text-center text-gray-400 font-bold italic">No seats match the selected filters.</div>
+              : filteredSeats.map(seat => (
+                  <div
+                    key={seat._id}
+                    className="group bg-white rounded-[28px] p-5 shadow-sm border-2 border-transparent hover:border-blue-100 hover:shadow-xl hover:shadow-blue-50/50 transition-all flex flex-col items-center justify-center relative overflow-hidden aspect-square"
+                  >
+                    <div className={`absolute inset-x-0 top-0 h-1 ${seat.type === "ac" ? "bg-blue-500" : "bg-gray-200"}`} />
+                    <span className={`text-[9px] font-black uppercase tracking-[0.2em] mb-1 mt-2 ${seat.type === "ac" ? "text-blue-400" : "text-gray-300"}`}>
+                      {seat.type}
+                    </span>
+                    <h5 className="text-2xl font-black text-gray-900 tracking-tighter select-none">{seat.seatNumber}</h5>
+                    <p className="text-emerald-500 font-black text-xs mt-0.5">₹{seat.price}</p>
+                    <p className="text-[9px] font-bold text-gray-300 mt-0.5">{seat.floor}</p>
 
-      {/* Simple Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="bg-white border border-gray-100 p-8 rounded-3xl group transition-all shadow-sm hover:shadow-2xl hover:shadow-gray-200/50">
-            <div className="flex items-center gap-3 mb-6">
-                <CheckCircle2 size={20} className="text-emerald-500" />
-                <span className="text-gray-400 text-xs font-black uppercase tracking-widest">Available</span>
-            </div>
-            <div className="text-4xl font-black text-gray-900">142</div>
-            <div className="mt-3 text-xs text-gray-400 font-medium">Seats currently free for use</div>
-        </div>
-        <div className="bg-white border border-gray-100 p-8 rounded-3xl group transition-all shadow-sm hover:shadow-2xl hover:shadow-gray-200/50">
-            <div className="flex items-center gap-3 mb-6">
-                <Clock size={20} className="text-blue-500" />
-                <span className="text-gray-400 text-xs font-black uppercase tracking-widest">Occupied</span>
-            </div>
-            <div className="text-4xl font-black text-gray-900">58</div>
-            <div className="mt-3 text-xs text-gray-400 font-medium">Ongoing active sessions</div>
-        </div>
-        <div className="bg-white border border-gray-100 p-8 rounded-3xl group transition-all shadow-sm hover:shadow-2xl hover:shadow-gray-200/50">
-            <div className="flex items-center gap-3 mb-6">
-                <AlertCircle size={20} className="text-amber-500" />
-                <span className="text-gray-400 text-xs font-black uppercase tracking-widest">Maintenance</span>
-            </div>
-            <div className="text-4xl font-black text-gray-900">12</div>
-            <div className="mt-3 text-xs text-gray-400 font-medium">Requires repair or cleaning</div>
-        </div>
+                    <div className="mt-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => router.push(`/seat-management/${seat._id}/edit`)}
+                        className="p-1.5 bg-gray-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors"
+                        title="Edit"
+                      >
+                        <Edit3 size={13} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(seat)}
+                        className="p-1.5 bg-gray-50 rounded-lg text-gray-400 hover:text-red-500 transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+
+                    <div className={`absolute bottom-3 right-3 w-2 h-2 rounded-full ring-4 ${
+                      seat.status === "occupied"     ? "bg-red-400 ring-red-50"
+                      : seat.status === "maintenance" ? "bg-amber-400 ring-amber-50"
+                      : "bg-green-500 ring-green-50"
+                    }`} />
+                  </div>
+                ))}
+          </div>
+        ) : (
+          <DataTable
+            data={filteredSeats}
+            columns={columns}
+            loading={loading}
+            rowKey={(r) => r._id}
+            onEdit={(r) => router.push(`/seat-management/${r._id}/edit`)}
+            onDelete={handleDelete}
+            hiddenActions={["view"]}
+          />
+        )}
       </div>
     </div>
   );
