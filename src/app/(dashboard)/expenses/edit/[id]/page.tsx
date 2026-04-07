@@ -69,15 +69,19 @@ export default function EditExpensePage({ params }: EditExpenseProps) {
     setLoading(true);
 
     try {
+      const dataToSend = new FormData();
+      dataToSend.append("title", formData.title);
+      dataToSend.append("amount", formData.amount);
+      dataToSend.append("category", formData.category);
+      dataToSend.append("date", formData.date);
+      dataToSend.append("note", formData.note);
+      if (receipt) {
+        dataToSend.append("receipt", receipt);
+      }
+
       const response = await fetch(`/api/expence/${id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          amount: Number(formData.amount),
-        }),
+        body: dataToSend,
       });
 
       const data = await response.json();

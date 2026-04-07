@@ -44,6 +44,6 @@ export class LibraryService {
   }
   static async getAllLibraries() {
     await connectDB();
-    return await Library.find();
+    return await Library.find().lean();
   }
 }

@@ -1,6 +1,8 @@
 import { verifyJWT } from "../../middlewares/verifyJWT";
 import { comparePasswords, hashPassword } from "../../security/password";
+import { CloudinaryService } from "../../services/cloudinary.service";
 import { ApiResponse } from "../../utils/ApiResponse";
+import { getUrls } from "../../utils/geturl";
 import { JWTHelper } from "../../utils/JWTHelper";
 import { LibraryService } from "./library.service";
 import { NextRequest, NextResponse } from "next/server";
@@ -98,8 +100,39 @@ export class LibraryController {
         return ApiResponse(401, null, "Unauthorized request");
       }
       const { id } = await params;
-      const body = await req.json();
-      const result = await LibraryService.updateLibrary(body, id);
+      const existingLibrary = await LibraryService.getLibrary(id);
+      if (!existingLibrary) {
+        return ApiResponse(404, null, "Library not found");
+      }
+      const formData = await req.formData();
+      const file = formData.get("logo") as File | null;
+      const name = formData.get("name") as string;
+      const email = formData.get("email") as string;
+      const phone = formData.get("phone") as string;
+      const address = formData.get("address") as string;
+      const helpDesk = formData.get("helpDesk") as string;
+      const floors = formData.get("floors") as string;
+
+      let logoUrl = existingLibrary.logo;
+      if (file && file.size > 0) {
+        if (existingLibrary.logo) {
+          await CloudinaryService.delete(existingLibrary.logo);
+        }
+        logoUrl =
+          (await CloudinaryService.upload(file, "library", "image"))?.url || "";
+      }
+      const result = await LibraryService.updateLibrary(
+        {
+          name,
+          email,
+          phone,
+          address,
+          helpDesk,
+          floors,
+          logo: logoUrl,
+        },
+        id,
+      );
       return ApiResponse(200, result, "Library updated successfully");
     } catch (error: any) {
       return ApiResponse(500, null, error);
@@ -116,6 +149,13 @@ export class LibraryController {
         return ApiResponse(401, null, "Unauthorized request");
       }
       const { id } = await params;
+      const existingLibrary = await LibraryService.getLibrary(id);
+      if (!existingLibrary) {
+        return ApiResponse(404, null, "Library not found");
+      }
+      if (existingLibrary.logo) {
+        await CloudinaryService.delete(existingLibrary.logo);
+      }
       const result = await LibraryService.deleteLibrary(id);
       return ApiResponse(200, result, "Library deleted successfully");
     } catch (error: any) {
@@ -134,6 +174,11 @@ export class LibraryController {
       }
       const { id } = await params;
       const result = await LibraryService.getLibrary(id);
+      if (!result) {
+        return ApiResponse(404, null, "Library not found");
+      }
+      const buildUrl = getUrls.getUrl(result.logo);
+      result.logo = buildUrl;
       return ApiResponse(200, result, "Library fetched successfully");
     } catch (error: any) {
       return ApiResponse(500, null, error);
@@ -147,7 +192,11 @@ export class LibraryController {
         return ApiResponse(401, null, "Unauthorized request");
       }
       const result = await LibraryService.getAllLibraries();
-      return ApiResponse(200, result, "Libraries fetched successfully");
+      const libraries = result.map((library: any) => {
+        library.logo = getUrls.getUrl(library.logo);
+        return library;
+      });
+      return ApiResponse(200, libraries, "Libraries fetched successfully");
     } catch (error: any) {
       return ApiResponse(500, null, error);
     }
@@ -172,9 +221,43 @@ export class LibraryController {
       if (!payload || !payload.id) {
         return ApiResponse(401, null, "Unauthorized request");
       }
-      const body = await req.json();
-      const result = await LibraryService.updateLibrary(body, payload.id);
-      return ApiResponse(200, result, "Library updated successfully");
+
+      const existingLibrary = await LibraryService.getLibrary(payload.id);
+      if (!existingLibrary) {
+        return ApiResponse(404, null, "Library not found");
+      }
+
+      const contentType = req.headers.get("content-type") || "";
+      let updateData: any = {};
+      let logoUrl = existingLibrary.logo;
+
+      if (contentType.includes("multipart/form-data")) {
+        const formData = await req.formData();
+        const file = formData.get("logo") as File | null;
+
+        updateData = {
+          name: formData.get("name") || existingLibrary.name,
+          email: formData.get("email") || existingLibrary.email,
+          phone: formData.get("phone") || existingLibrary.phone,
+          address: formData.get("address") || existingLibrary.address,
+          helpDesk: formData.get("helpDesk") || existingLibrary.helpDesk,
+        };
+
+        if (file && file.size > 0) {
+          if (existingLibrary.logo) {
+            await CloudinaryService.delete(existingLibrary.logo);
+          }
+          logoUrl =
+            (await CloudinaryService.upload(file, "library"))?.url || "";
+        }
+      } else {
+        updateData = await req.json();
+      }
+
+      updateData.logo = logoUrl;
+
+      const result = await LibraryService.updateLibrary(updateData, payload.id);
+      return ApiResponse(200, result, "Library profile updated successfully");
     } catch (error: any) {
       return ApiResponse(500, null, error);
     }
