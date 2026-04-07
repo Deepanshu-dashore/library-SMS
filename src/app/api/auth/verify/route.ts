@@ -1,7 +1,7 @@
 import { verifyJWT } from "@/app/lib/middlewares/verifyJWT";
 import { ApiResponse } from "@/app/lib/utils/ApiResponse";
 
-export async function GET(req: Request, res: Response) {
+export async function GET(req: Request) {
   try {
     const library = await verifyJWT();
     if (!library) {
