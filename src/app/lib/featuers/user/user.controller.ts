@@ -19,7 +19,7 @@ export class UserController {
     }
   }
 
-  static async getVerificationAndSeatController(
+  static async getVerificationAndSeat(
     req: NextRequest,
     params: Promise<{ id: string }>,
   ) {
