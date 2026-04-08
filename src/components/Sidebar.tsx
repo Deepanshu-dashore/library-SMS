@@ -1,73 +1,195 @@
 "use client";
-
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import { Icon } from "@iconify/react";
+import { useSelector, useDispatch } from "react-redux";
+import { setIsCollapsed, handleNavDirection } from "../store/themeSlice";
+import { motion, AnimatePresence } from "framer-motion";
 import { MENU_ITEMS } from "@/constants/menuItems";
-import { LogOut, ChevronRight } from "lucide-react";
-import toast from "react-hot-toast";
 
 export const Sidebar = () => {
-  const pathname = usePathname();
+  const [openMenu, setOpenMenu] = useState<number | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
+  const dispatch = useDispatch();
 
-  const handleLogout = async () => {
-    try {
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
-      });
-      const data = await response.json();
-      if (response.ok && data.success) {
-        toast.success("Logged out successfully");
-        router.push("/login");
-      } else {
-        toast.error(data.message || "Logout failed");
-      }
-    } catch (error) {
-      toast.error("Logout error. Please try again.");
+  const { color, darkColor, mode, isCollapsed } = useSelector(
+    (state: any) => state.theme
+  );
+
+  const handleMenuClick = (index: number, path: string, hasSubItems: boolean) => {
+    if (hasSubItems) {
+      setOpenMenu(openMenu === index ? null : index);
+    } else if (path) {
+      router.push(path);
+      setOpenMenu(null);
     }
   };
 
+  const handleCollapseToggle = () => {
+    const newCollapsed = !isCollapsed;
+    dispatch(setIsCollapsed(newCollapsed));
+    dispatch(handleNavDirection(newCollapsed ? "nav-close" : "nav-open"));
+  };
+
+  const isActiveRoute = (path: string) => pathname === path;
+
   return (
-    <div className="flex flex-col h-full w-64 flex-none bg-white text-gray-900 border-r border-gray-100 ease-in-out">
-      <div className="p-6 flex items-center gap-3">
-        <div className="w-8 h-8 bg-linear-to-tr from-blue-600 to-purple-600 rounded-lg shadow-sm" />
-        <h1 className="text-xl font-bold tracking-tight text-gray-800">Library SMS</h1>
+    <motion.div
+      className="h-screen border-r relative overflow-visible"
+      style={{ backgroundColor: "var(--bg)", borderColor: "var(--border)" }}
+      initial={{ width: isCollapsed ? "4rem" : "16rem" }}
+      animate={{ width: isCollapsed ? "4rem" : "16rem" }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+    >
+      {/* Collapse Button */}
+      <button
+        onClick={handleCollapseToggle}
+        className={`p-1.5 absolute cursor-pointer ${isCollapsed ? "top-5 -right-4" : "top-5 right-3"
+          } z-50 rounded-md transition-all duration-200 hover:scale-105`}
+        style={{
+          backgroundColor: mode === "light" ? "var(--gray-200)" : "var(--gray-800)",
+          color: "var(--gray-500)",
+          border: "1px solid var(--border)",
+        }}
+      >
+        <Icon
+          icon={isCollapsed ? "lucide:chevron-right" : "lucide:chevron-left"}
+          className="text-sm"
+        />
+      </button>
+
+      {/* Logo */}
+      <div className="p-2.5 border-b" style={{ borderColor: "var(--border)" }}>
+        <div className="flex items-center gap-3 overflow-visible px-2">
+          <div className="w-8 h-8 rounded-lg overflow-hidden bg-gradient-to-tr from-blue-600 to-purple-600 flex-shrink-0" />
+          <AnimatePresence>
+            {!isCollapsed && (
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.3 }}
+              >
+                <h1 className="text-lg font-extrabold" style={{ color: "var(--text)" }}>
+                  Library SMS
+                </h1>
+                <p className="text-[9px]" style={{ color: "var(--gray-500)" }}>
+                  Smart Management System
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
-      <nav className="flex-1 px-4 py-4 space-y-1">
-        {MENU_ITEMS.map((item) => {
-          const isActive = pathname === item.path;
-          const Icon = item.icon;
-
-          return (
-            <Link
-              key={item.path}
-              href={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-                isActive
-                  ? "bg-blue-50 text-blue-600 font-semibold shadow-sm"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-              }`}
+      {/* Sidebar Menu */}
+      <div className="p-2 space-y-1 overflow-y-auto h-[calc(100vh-80px)] scrollbar-hide">
+        {MENU_ITEMS.map((item: any, index: number) => (
+          <motion.div
+            key={index}
+            className="relative"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.05 }}
+          >
+            {/* Parent */}
+            <div
+              className={`flex items-center justify-between cursor-pointer p-2 rounded-md transition-all duration-200 hover:bg-opacity-50`}
+              style={{
+                backgroundColor: isActiveRoute(item.path)
+                  ? `${color}15`
+                  : item.subItems && openMenu === index
+                    ? `var(--gray-100)`
+                    : "transparent",
+                color: isActiveRoute(item.path)
+                  ? color
+                  : item.subItems && openMenu === index
+                    ? `var(--gray-600)`
+                    : "var(--gray-500)",
+              }}
+              onClick={() => handleMenuClick(index, item.path, !!item.subItems)}
             >
-              <Icon size={20} className={isActive ? "text-blue-600" : "text-gray-400 group-hover:text-gray-900"} />
-              <span className="flex-1">{item.title}</span>
-              {isActive && <div className="w-1.5 h-1.5 rounded-full bg-blue-600 ml-auto" />}
-            </Link>
-          );
-        })}
-      </nav>
+              <div className="flex items-center gap-2">
+                <div
+                  className="p-1.5 text-lg rounded-md transition-all duration-200"
+                  style={{
+                    backgroundColor: isActiveRoute(item.path)
+                      ? `${color}20`
+                      : item.subItems && openMenu === index
+                        ? `var(--gray-200)`
+                        : `var(--gray-100)`,
+                    color: isActiveRoute(item.path)
+                      ? color
+                      : item.subItems && openMenu === index
+                        ? `var(--gray-600)`
+                        : "var(--gray-400)",
+                  }}
+                >
+                  <item.icon className="w-5 h-5"/>
+                </div>
+                {!isCollapsed && (
+                  <span className="text-[13.5px] font-medium">{item.title}</span>
+                )}
+              </div>
 
-      <div className="p-4 border-t border-gray-100">
-        <button 
-          onClick={handleLogout}
-          className="flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all duration-200 group"
-        >
-          <LogOut size={20} />
-          <span className="font-medium">Logout</span>
-        </button>
+              {!isCollapsed && item.subItems && (
+                <Icon
+                  icon={
+                    openMenu === index
+                      ? "lucide:chevron-up"
+                      : "lucide:chevron-down"
+                  }
+                  className="text-xs"
+                  style={{ color: "var(--gray-400)" }}
+                />
+              )}
+            </div>
+
+            {/* Sub-Items */}
+            <AnimatePresence>
+              {item.subItems && openMenu === index && !isCollapsed && (
+                <motion.div
+                  className="ml-6 mt-1 mb-2 space-y-0.5 pl-3"
+                  style={{ borderColor: "var(--border)" }}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {item.subItems.map((sub: any, subIndex: number) => (
+                    <div
+                      key={subIndex}
+                      className={`cursor-pointer relative -left-3.5 flex ${subIndex === 0 ? "pt-2" : ""}`}
+                    >
+                      <span
+                        className={`w-3 ${subIndex === 0 ? "h-6 -top-0" : "h-11.5 -top-7"
+                          } rounded-bl-sm border-l-2 border-b-2 border-[var(--gray-300)] absolute`}
+                      ></span>
+                      <Link
+                        key={subIndex}
+                        href={sub.path}
+                        className="block px-2 w-11/12 ml-3 py-2 text-xs rounded-md transition-all duration-200 hover:bg-opacity-50"
+                        style={{
+                          backgroundColor: isActiveRoute(sub.path)
+                            ? `${color}10`
+                            : "transparent",
+                          color: isActiveRoute(sub.path)
+                            ? color
+                            : "var(--gray-600)",
+                        }}
+                      >
+                        {sub.name}
+                      </Link>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        ))}
       </div>
-    </div>
+    </motion.div>
   );
-};
-
+}

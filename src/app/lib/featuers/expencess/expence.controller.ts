@@ -84,7 +84,7 @@ export class ExpenceController {
       const data = await ExpenceService.getExpenceById(id);
       const expence = {
         ...data,
-        receipt: data.receipt ? getUrls.getUrl(data.receipt) : "",
+        receipt: data.receipt ? data.receipt : "",
       };
       return ApiResponse(200, expence, "Expence fetched successfully");
     } catch (error) {
