@@ -37,13 +37,29 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (step !== 5) return; // Only submit on final step
+
     const loadingToast = toast.loading("Registering your membership...");
 
     try {
+      const formDataToSend = new FormData();
+      Object.keys(formData).forEach((key) => {
+        if (key === "address") {
+          Object.keys(formData.address).forEach((addrKey) => {
+            formDataToSend.append(`address.${addrKey}`, formData.address[addrKey as keyof typeof formData.address]);
+          });
+        } else if (key === "photo" || key === "signature") {
+          if ((formData as any)[key]) {
+            formDataToSend.append(key, (formData as any)[key]);
+          }
+        } else {
+          formDataToSend.append(key, (formData as any)[key]);
+        }
+      });
+
       const res = await fetch("/api/user/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: formDataToSend,
       });
 
       const data = await res.json();
@@ -152,7 +168,7 @@ export default function RegisterPage() {
 
           {/* Progress Indicators */}
           <div className="flex gap-2 mb-12">
-            {[1, 2, 3, 4].map((s) => (
+            {[1, 2, 3, 4, 5].map((s) => (
               <div 
                 key={s}
                 className={`h-2 flex-1 rounded-full transition-all duration-500 ${
@@ -444,23 +460,21 @@ export default function RegisterPage() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-gray-700">Photo URL</label>
+                      <label className="text-sm font-bold text-gray-700">Photo Upload</label>
                       <input 
-                        type="text"
-                        className="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-50 focus:border-indigo-600 transition-all outline-none"
-                        placeholder="Link to your profile photo"
-                        value={formData.photo}
-                        onChange={(e) => setFormData({...formData, photo: e.target.value})}
+                        type="file"
+                        accept="image/*"
+                        className="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-50 focus:border-indigo-600 transition-all outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                        onChange={(e) => setFormData({...formData, photo: e.target.files?.[0] as any})}
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-gray-700">Signature URL</label>
+                      <label className="text-sm font-bold text-gray-700">Signature Upload</label>
                       <input 
-                        type="text"
-                        className="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-50 focus:border-indigo-600 transition-all outline-none"
-                        placeholder="Link to your signature"
-                        value={formData.signature}
-                        onChange={(e) => setFormData({...formData, signature: e.target.value})}
+                        type="file"
+                        accept="image/*"
+                        className="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-50 focus:border-indigo-600 transition-all outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                        onChange={(e) => setFormData({...formData, signature: e.target.files?.[0] as any})}
                       />
                     </div>
                   </div>
@@ -480,6 +494,46 @@ export default function RegisterPage() {
                   <button 
                     type="button" 
                     onClick={() => setStep(3)}
+                    className="text-gray-500 font-bold hover:text-indigo-600 transition-colors"
+                  >
+                    Go Back
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setStep(5)}
+                    className="flex items-center gap-2 bg-indigo-600 text-white px-12 py-4 rounded-2xl font-black hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-95"
+                  >
+                    Preview Details
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 5: Preview & Final Submit */}
+            {step === 5 && (
+              <div className="space-y-8 animate-in slide-in-from-right-10 duration-500">
+                <div className="flex items-center gap-3 text-indigo-600 font-bold mb-4">
+                  <CheckCircle2 size={20} />
+                  <span>Preview Registration</span>
+                </div>
+
+                <div className="bg-white p-6 rounded-2xl border border-gray-200 grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
+                  <div><span className="text-gray-500">Name:</span> <p className="font-bold">{formData.name || "-"}</p></div>
+                  <div><span className="text-gray-500">Email:</span> <p className="font-bold">{formData.email || "-"}</p></div>
+                  <div><span className="text-gray-500">Mobile:</span> <p className="font-bold">{formData.number || "-"}</p></div>
+                  <div><span className="text-gray-500">DOB:</span> <p className="font-bold">{formData.dob || "-"}</p></div>
+                  <div><span className="text-gray-500">Gender:</span> <p className="font-bold">{formData.gender || "-"}</p></div>
+                  <div><span className="text-gray-500">Aadhar:</span> <p className="font-bold">{formData.adharNumber || "-"}</p></div>
+                  <div className="col-span-2"><span className="text-gray-500">Course:</span> <p className="font-bold">{formData.course || "-"}</p></div>
+                  <div className="col-span-2"><span className="text-gray-500">Address:</span> <p className="font-bold">{formData.address.detailedAddress}, {formData.address.tehsil}, {formData.address.district}, {formData.address.state} - {formData.address.pincode}</p></div>
+                  <div><span className="text-gray-500">Photo Attached:</span> <p className="font-bold font-mono text-indigo-500">{formData.photo ? (formData.photo as any).name || "Yes" : "No"}</p></div>
+                  <div><span className="text-gray-500">Signature Attached:</span> <p className="font-bold font-mono text-indigo-500">{formData.signature ? (formData.signature as any).name || "Yes" : "No"}</p></div>
+                </div>
+
+                <div className="flex justify-between pt-8">
+                  <button 
+                    type="button" 
+                    onClick={() => setStep(4)}
                     className="text-gray-500 font-bold hover:text-indigo-600 transition-colors"
                   >
                     Go Back

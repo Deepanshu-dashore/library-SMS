@@ -10,14 +10,7 @@ export class ExpenceService {
 
   static async getAllExpence() {
     await connectDB();
-    const data = (await Expense.find().sort({ createdAt: -1 }).lean()).map(
-      (item: any) => {
-        return {
-          ...item,
-          receipt: item.receipt ? getUrls.getUrl(item.receipt, "row") : "",
-        };
-      },
-    );
+    const data = await Expense.find().sort({ createdAt: -1 }).lean();
     const totalExpence = await Expense.aggregate([
       {
         $group: {
@@ -32,16 +25,12 @@ export class ExpenceService {
 
   static async getExpenceById(id: string) {
     await connectDB();
-    const data = (await Expense.findById(id).lean()) as any;
-    return {
-      ...data,
-      receipt: data.receipt ? getUrls.getUrl(data.receipt, "row") : "",
-    };
+    return await Expense.findById(id).lean();
   }
 
   static async updateExpence(id: string, data: any) {
     await connectDB();
-    return await Expense.findByIdAndUpdate(id, data, { new: true });
+    return await Expense.findByIdAndUpdate(id, data, { new: true }).lean();
   }
 
   static async deleteExpence(id: string) {

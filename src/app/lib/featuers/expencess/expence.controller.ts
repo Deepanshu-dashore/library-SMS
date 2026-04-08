@@ -35,9 +35,7 @@ export class ExpenceController {
       const file = formData.get("receipt") as File | null;
       if (file && file.size > 0) {
         const result = await CloudinaryService.upload(
-          file,
-          "expences",
-          "image",
+          file,"expence","image"
         );
         body.receipt = result?.url;
       }
@@ -58,7 +56,7 @@ export class ExpenceController {
       const expence = data.data.map((item: any) => {
         return {
           ...item,
-          receipt: item.receipt ? getUrls.getUrl(item.receipt) : "",
+          receipt: item.receipt ? getUrls.getUrl(item.receipt,"image") : "",
         };
       });
       return ApiResponse(
@@ -84,7 +82,7 @@ export class ExpenceController {
       const data = await ExpenceService.getExpenceById(id);
       const expence = {
         ...data,
-        receipt: data.receipt ? data.receipt : "",
+        receipt: data.receipt ? getUrls.getUrl(data.receipt, "image") : "",
       };
       return ApiResponse(200, expence, "Expence fetched successfully");
     } catch (error) {

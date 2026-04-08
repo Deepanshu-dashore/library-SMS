@@ -133,6 +133,9 @@ export class LibraryController {
         },
         id,
       );
+      if (result && result.logo) {
+        result.logo = getUrls.getUrl(result.logo);
+      }
       return ApiResponse(200, result, "Library updated successfully");
     } catch (error: any) {
       return ApiResponse(500, null, error);
@@ -209,6 +212,9 @@ export class LibraryController {
         return ApiResponse(401, null, "Unauthorized request");
       }
       const result = await LibraryService.getLibrary(payload.id);
+      if (result && result.logo) {
+        result.logo = getUrls.getUrl(result.logo);
+      }
       return ApiResponse(200, result, "Library fetched successfully");
     } catch (error: any) {
       return ApiResponse(500, null, error);
@@ -248,7 +254,7 @@ export class LibraryController {
             await CloudinaryService.delete(existingLibrary.logo);
           }
           logoUrl =
-            (await CloudinaryService.upload(file, "library"))?.url || "";
+            (await CloudinaryService.upload(file, "library", "image"))?.url || "";
         }
       } else {
         updateData = await req.json();
@@ -257,6 +263,9 @@ export class LibraryController {
       updateData.logo = logoUrl;
 
       const result = await LibraryService.updateLibrary(updateData, payload.id);
+      if (result && result.logo) {
+        result.logo = getUrls.getUrl(result.logo);
+      }
       return ApiResponse(200, result, "Library profile updated successfully");
     } catch (error: any) {
       return ApiResponse(500, null, error);

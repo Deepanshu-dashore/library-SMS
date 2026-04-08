@@ -46,6 +46,7 @@ export default function ViewExpensePage({ params }: ViewExpenseProps) {
       </div>
     );
   }
+  console.log(expense)
 
   if (!expense) return null;
 
