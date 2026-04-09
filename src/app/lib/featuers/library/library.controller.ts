@@ -121,14 +121,23 @@ export class LibraryController {
         logoUrl =
           (await CloudinaryService.upload(file, "library", "image"))?.url || "";
       }
+      let parsedHelpDesk = existingLibrary.helpDesk;
+      if (typeof helpDesk === "string" && helpDesk.trim().startsWith("{")) {
+        try { parsedHelpDesk = JSON.parse(helpDesk); } catch (e) {}
+      }
+      let parsedFloors = existingLibrary.floors;
+      if (typeof floors === "string" && floors.trim().startsWith("[")) {
+        try { parsedFloors = JSON.parse(floors); } catch (e) {}
+      }
+
       const result = await LibraryService.updateLibrary(
         {
           name,
           email,
           phone,
           address,
-          helpDesk,
-          floors,
+          helpDesk: parsedHelpDesk,
+          floors: parsedFloors,
           logo: logoUrl,
         },
         id,
@@ -241,12 +250,25 @@ export class LibraryController {
         const formData = await req.formData();
         const file = formData.get("logo") as File | null;
 
+        let parsedHelpDeskForm = existingLibrary.helpDesk;
+        const helpDeskStr = formData.get("helpDesk") as string;
+        if (typeof helpDeskStr === "string" && helpDeskStr.trim().startsWith("{")) {
+          try { parsedHelpDeskForm = JSON.parse(helpDeskStr); } catch (e) {}
+        }
+        
+        let parsedFloorsForm = existingLibrary.floors;
+        const floorsStr = formData.get("floors") as string;
+        if (typeof floorsStr === "string" && floorsStr.trim().startsWith("[")) {
+          try { parsedFloorsForm = JSON.parse(floorsStr); } catch (e) {}
+        }
+
         updateData = {
           name: formData.get("name") || existingLibrary.name,
           email: formData.get("email") || existingLibrary.email,
           phone: formData.get("phone") || existingLibrary.phone,
           address: formData.get("address") || existingLibrary.address,
-          helpDesk: formData.get("helpDesk") || existingLibrary.helpDesk,
+          helpDesk: parsedHelpDeskForm,
+          floors: parsedFloorsForm,
         };
 
         if (file && file.size > 0) {

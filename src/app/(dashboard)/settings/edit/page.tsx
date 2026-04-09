@@ -19,7 +19,7 @@ interface LibraryProfile {
   email: string;
   phone: string;
   address: string;
-  logo: string;
+  logo: string | File;
   helpDesk: HelpDesk;
   floors?: string[];
 }
@@ -124,10 +124,21 @@ export default function EditProfilePage() {
     setLoading(true);
 
     try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("phone", formData.phone);
+      formDataToSend.append("address", formData.address);
+      formDataToSend.append("helpDesk", JSON.stringify(formData.helpDesk));
+      formDataToSend.append("floors", JSON.stringify(formData.floors || []));
+      
+      if (formData.logo && typeof formData.logo !== "string") {
+        formDataToSend.append("logo", formData.logo);
+      }
+
       const response = await fetch("/api/library/profile", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: formDataToSend,
       });
 
       const data = await response.json();
@@ -213,15 +224,21 @@ export default function EditProfilePage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[13px] font-black text-gray-400 uppercase tracking-widest pl-1">Logo URL</label>
+              <label className="text-[13px] font-black text-gray-400 uppercase tracking-widest pl-1">Library Logo Upload</label>
               <input
-                type="url"
+                type="file"
                 name="logo"
-                value={formData.logo}
-                onChange={handleChange}
-                placeholder="https://..."
-                className="w-full rounded-2xl border border-gray-200 px-5 py-4 text-[14px] font-semibold text-gray-900 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-sans"
+                accept="image/*"
+                onChange={(e) => {
+                   if (e.target.files && e.target.files[0]) {
+                     setFormData((prev) => ({ ...prev, logo: e.target.files![0] }));
+                   }
+                }}
+                className="w-full rounded-2xl border border-gray-200 px-5 py-4 text-[14px] font-semibold text-gray-900 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-sans file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               />
+              {typeof formData.logo === "string" && formData.logo && (
+                <p className="text-xs text-green-600 font-bold pl-1 mt-1">Current logo is fully configured</p>
+              )}
             </div>
 
             <div className="space-y-2 md:col-span-2">
