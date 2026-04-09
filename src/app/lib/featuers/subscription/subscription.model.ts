@@ -24,27 +24,28 @@ const subscriptionSchema = new Schema(
 
     status: {
       type: String,
-      enum: ["active", "expired", "cancelled", "transferred"],
+      enum: ["active", "expired", "cancelled"],
       default: "active",
     },
 
-    // NEW IMPORTANT FIELDS 👇
     cancelledAt: Date,
-    transferredTo: {
-      type: Schema.Types.ObjectId,
-      ref: "Seat",
-    },
 
-    isRenewed: {
-      type: Boolean,
-      default: false,
+    transferHistory: {
+      type: [
+        {
+          fromSeat: { type: Schema.Types.ObjectId, ref: "Seat" },
+          toSeat: { type: Schema.Types.ObjectId, ref: "Seat" },
+          date: Date,
+        },
+      ],
+      default: [],
     },
   },
   { timestamps: true },
 );
 
 subscriptionSchema.index({ seatId: 1, status: 1 });
-subscriptionSchema.index({ endDate: 1 });
+subscriptionSchema.index({ seatId: 1, endDate: 1 });
 
 export const Subscription =
   models.Subscription || model("Subscription", subscriptionSchema);

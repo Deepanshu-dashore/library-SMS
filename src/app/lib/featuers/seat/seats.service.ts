@@ -12,11 +12,11 @@ export class SeatService {
   }
   static async getAllSeatService() {
     await connectDB();
-    return await Seat.find();
+    return await Seat.find().select("-__v");
   }
   static async getSeatByUserIdService(userId: string) {
     await connectDB();
-    return await Seat.findOne({ userId });
+    return await Seat.findOne({ userId }).select("-__v");
   }
   static async getSeatByIdService(id: string) {
     await connectDB();

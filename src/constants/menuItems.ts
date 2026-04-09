@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Database,
   CreditCard,
+  Ticket,
 } from "lucide-react";
 
 export const MENU_ITEMS = [
@@ -17,8 +18,12 @@ export const MENU_ITEMS = [
   },
   {
     title: "Seat Management",
-    path: "/seat-management",
     icon: Database,
+    subItems: [
+      { name: "Manage Seats", path: "/seat-management" },
+      { name: "Add Seat", path: "/seat-management/add" },
+      { name: "Bulk Registration", path: "/seat-management/bulk-add" },
+    ],
   },
   {
     title: "LMS Software",
@@ -26,14 +31,33 @@ export const MENU_ITEMS = [
     icon: Briefcase,
   },
   {
-    title: "Manage Expenses",
-    path: "/expenses",
+    title: "Subscriptions",
+    icon: Ticket,
+    subItems: [
+      { name: "Manage Subscriptions", path: "/subscriptions" },
+      { name: "Add Subscription", path: "/subscriptions/add" },
+    ],
+  },
+  {
+    title: "Payments",
     icon: CreditCard,
+    path: "/payments",
+  },
+  {
+    title: "Manage Expenses",
+    icon: CreditCard,
+    subItems: [
+      { name: "Manage Expenses", path: "/expenses" },
+      { name: "Add Expense", path: "/expenses/add" },
+    ],
   },
   {
     title: "Manage Members",
-    path: "/users",
     icon: Users,
+    subItems: [
+      { name: "Manage Members", path: "/users" },
+      { name: "Add Member", path: "/users/create" },
+    ],
   },
   {
     title: "Reports",

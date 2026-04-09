@@ -18,15 +18,16 @@ const paymentSchema = new Schema(
     },
     paymentMode: {
       type: String,
+      enum: ["cash", "upi", "card"],
       required: true,
     },
     durationDays: {
       type: Number,
       required: true,
     },
-    date: {
-      type: Date,
-      default: Date.now,
+    receiptNumber: {
+      type: String,
+      unique: true,
     },
   },
   { timestamps: true },
