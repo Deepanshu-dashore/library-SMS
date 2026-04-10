@@ -125,6 +125,23 @@ export class SeatController {
       return ApiResponse(500, null, error.message || error);
     }
   }
+  static async softDeleteSeatController(
+    req: NextRequest,
+    params: Promise<{ id: string }>,
+  ) {
+    const library = await verifyJWT();
+    if (!library) {
+      return ApiResponse(401, null, "Unauthorized");
+    }
+    try {
+      const { id } = await params;
+      const seat = await SeatService.softDeleteSeatService(id);
+      return ApiResponse(200, seat, "Seat deleted successfully");
+    } catch (error: any) {
+      return ApiResponse(500, null, error.message || error);
+    }
+  }
+
   static async deleteSeatController(
     req: NextRequest,
     params: Promise<{ id: string }>,
@@ -136,7 +153,37 @@ export class SeatController {
     try {
       const { id } = await params;
       const seat = await SeatService.deleteSeatService(id);
-      return ApiResponse(200, seat, "Seat deleted successfully");
+      return ApiResponse(200, seat, "Seat permanently deleted successfully");
+    } catch (error: any) {
+      return ApiResponse(500, null, error.message || error);
+    }
+  }
+
+  static async restoreSeatController(
+    req: NextRequest,
+    params: Promise<{ id: string }>,
+  ) {
+    const library = await verifyJWT();
+    if (!library) {
+      return ApiResponse(401, null, "Unauthorized");
+    }
+    try {
+      const { id } = await params;
+      const seat = await SeatService.restoreSeatService(id);
+      return ApiResponse(200, seat, "Seat restored successfully");
+    } catch (error: any) {
+      return ApiResponse(500, null, error.message || error);
+    }
+  }
+
+  static async getTrashSeatController(req: NextRequest) {
+    const library = await verifyJWT();
+    if (!library) {
+      return ApiResponse(401, null, "Unauthorized");
+    }
+    try {
+      const seat = await SeatService.getTrashSeatService();
+      return ApiResponse(200, seat, "Trash seats fetched successfully");
     } catch (error: any) {
       return ApiResponse(500, null, error.message || error);
     }

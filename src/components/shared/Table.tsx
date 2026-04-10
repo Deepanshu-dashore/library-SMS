@@ -309,21 +309,53 @@ export default function Table({
                 <tbody>
                   {Data.length < 1 ? (
                     <tr>
-                      <td colSpan={headers.length + 3} className="text-center p-10 text-gray-500">No data available...</td>
+                      <td colSpan={allHeaders.length + 3} className="text-center p-10 text-gray-500 font-bold">No data found...</td>
                     </tr>
                   ) : (
                     currentRows.map((row: any, rowIndex: any) => (
                       <tr key={row._id || rowIndex} className={`${mode === "light" ? "text-gray-500 bg-white hover:bg-gray-50" : "text-gray-200 bg-gray-800 hover:bg-gray-700"} align-middle`}>
-                        {serialNumber && <td className="pl-4 py-2 border-r-[0.8px] border-b-[0.8px] border-dashed">{(rowIndex + 1).toString().padStart(2, '0')}.</td>}
+                        {serialNumber && (
+                           <td className={`pl-4 py-2 border-r-[0.8px] border-b-[0.8px] border-dashed ${mode === "light" ? "border-gray-300" : "border-gray-600"}`}>
+                             {(rowIndex + 1).toString().padStart(2, '0')}.
+                           </td>
+                        )}
                         
                         {visibleKeys.map((key: any, colIndex: any) => (
-                          <td key={colIndex} className="p-4 py-2 text-nowrap border-r-[0.8px] border-b-[0.8px] border-dashed">
+                          <td key={colIndex} className={`p-4 py-2 text-nowrap border-r-[0.8px] border-b-[0.8px] border-dashed ${mode === "light" ? "border-gray-300" : "border-gray-600"}`}>
                              {getNestedValue(row, key)}
                           </td>
                         ))}
-                        <td className="p-4 py-2 flex items-center justify-center gap-2 border-b-[0.8px] border-dashed text-blue-500 cursor-pointer" onClick={() => onEdit(row)}>
-                           Edit
-                        </td>
+                        
+                        {!hiddenActions.includes("Action") && (
+                          <td className={`p-4 py-2 text-nowrap border-b-[0.8px] border-dashed ${mode === "light" ? "border-gray-300" : "border-gray-600"}`}>
+                            <div className="flex items-center gap-4">
+                              {!hiddenActions.includes("view") && onView && (
+                                <button
+                                  onClick={() => onView(row)}
+                                  className="text-blue-500 hover:text-blue-700 font-bold text-[11px] uppercase tracking-tighter cursor-pointer transition-colors"
+                                >
+                                  View
+                                </button>
+                              )}
+                              {!hiddenActions.includes("edit") && onEdit && (
+                                <button
+                                  onClick={() => onEdit(row)}
+                                  className="text-amber-500 hover:text-amber-700 font-bold text-[11px] uppercase tracking-tighter cursor-pointer transition-colors"
+                                >
+                                  Edit
+                                </button>
+                              )}
+                              {!hiddenActions.includes("delete") && onDelete && (
+                                <button
+                                  onClick={() => onDelete(row)}
+                                  className="text-red-500 hover:text-red-700 font-bold text-[11px] uppercase tracking-tighter cursor-pointer transition-colors"
+                                >
+                                  Delete
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     ))
                   )}

@@ -30,7 +30,7 @@ export class ExpenceService {
 
   static async updateExpence(id: string, data: any) {
     await connectDB();
-    return await Expense.findByIdAndUpdate(id, data, { new: true }).lean();
+    return await Expense.findByIdAndUpdate(id, data, { returnDocument: 'after' }).lean();
   }
 
   static async deleteExpence(id: string) {

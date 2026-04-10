@@ -8,6 +8,7 @@ import {
   Database,
   CreditCard,
   Ticket,
+  Trash2,
 } from "lucide-react";
 
 export const MENU_ITEMS = [
@@ -25,11 +26,11 @@ export const MENU_ITEMS = [
       { name: "Bulk Registration", path: "/seat-management/bulk-add" },
     ],
   },
-  {
-    title: "LMS Software",
-    path: "/lms",
-    icon: Briefcase,
-  },
+  // {
+  //   title: "LMS Software",
+  //   path: "/lms",
+  //   icon: Briefcase,
+  // },
   {
     title: "Subscriptions",
     icon: Ticket,
@@ -63,6 +64,11 @@ export const MENU_ITEMS = [
     title: "Reports",
     path: "/reports",
     icon: FileText,
+  },
+  {
+    title: "Recycle Bin",
+    path: "/trash",
+    icon: Trash2,
   },
   {
     title: "Settings",

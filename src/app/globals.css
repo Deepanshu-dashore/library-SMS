@@ -584,3 +584,27 @@ body {
   --rose-800: #ffe4e6;
   --rose-900: #fff1f2;
 }
+
+.bg-gradient-radial-amber {
+  background: radial-gradient(circle at center, 
+    rgba(251, 219, 60, 0.909),  /* orange-400/60 */
+    rgb(255, 249, 224),       /* amber-100 */
+    rgba(251, 241, 60, 0.708)        /* amber-200 */
+  );
+}
+
+.publicFont {
+  font-family: "Public Sans Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+.InterFont {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+.DMSansFont {
+  font-family: "DM Sans Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+.NunitoFont {
+  font-family: "Nunito Sans Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}

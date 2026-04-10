@@ -24,6 +24,10 @@ const seatSchema = new Schema(
       enum: ["available", "occupied", "maintenance"],
       default: "available",
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

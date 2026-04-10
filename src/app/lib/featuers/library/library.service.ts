@@ -12,14 +12,14 @@ export class LibraryService {
   }
   static async updateLibrary(body: any, id: string) {
     await connectDB();
-    return await Library.findByIdAndUpdate(id, body, { new: true });
+    return await Library.findByIdAndUpdate(id, body, { returnDocument: 'after' });
   }
   static async addFloor(floor: string, id: string) {
     await connectDB();
     return await Library.findByIdAndUpdate(
       id,
       { $push: { floors: floor } },
-      { new: true },
+      { returnDocument: 'after' },
     );
   }
   static async getLibraryFloors(id: string) {
@@ -31,7 +31,7 @@ export class LibraryService {
     return await Library.findByIdAndUpdate(
       id,
       { $pull: { floors: floor } },
-      { new: true },
+      { returnDocument: 'after' },
     );
   }
   static async deleteLibrary(id: string) {

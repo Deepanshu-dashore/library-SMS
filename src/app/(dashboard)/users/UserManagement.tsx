@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Link as LinkIcon, Users, UserCheck, UserX, Clock } from "lucide-react";
+import { Plus, Link as LinkIcon, Users, UserCheck, UserX, Clock, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, ColumnDef, TabDef } from "@/components/shared/DataTable";
@@ -59,7 +59,7 @@ export default function UserManagement() {
 
     const loadingToast = toast.loading("Deleting user...");
     try {
-      const res = await fetch(`/api/user/${user._id}`, { method: "DELETE" });
+      const res = await fetch(`/api/user/soft-delete/${user._id}`, { method: "DELETE" });
       const data = await res.json();
       if (data.success) {
         toast.success("User deleted successfully", { id: loadingToast });

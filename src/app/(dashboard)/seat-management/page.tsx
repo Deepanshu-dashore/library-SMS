@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { DataTable, ColumnDef } from "@/components/shared/DataTable";
+import Table from "@/components/shared/Table";
 
 interface Seat {
   _id: string;
@@ -53,7 +53,7 @@ export default function SeatManagement() {
     if (!confirm(`Confirm deletion of ${seat.seatNumber}?`)) return;
     const t = toast.loading("Deleting seat...");
     try {
-      const res = await fetch(`/api/seat/${seat._id}`, { method: "DELETE" });
+      const res = await fetch(`/api/seat/soft-delete/${seat._id}`, { method: "DELETE" });
       const data = await res.json();
       if (data.success) { toast.success("Seat deleted", { id: t }); fetchSeats(); }
       else toast.error(data.message, { id: t });
@@ -73,26 +73,6 @@ export default function SeatManagement() {
     return matchFloor && matchStatus && matchType;
   });
 
-  const columns: ColumnDef<Seat>[] = [
-    {
-      key: "seatNumber", label: "Seat", type: "custom", sortable: true,
-      render: (row) => (
-        <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs ${row.type === "ac" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"}`}>
-            {row.seatNumber.slice(0, 1)}
-          </div>
-          <span className="font-bold text-gray-900">{row.seatNumber}</span>
-        </div>
-      ),
-    },
-    {
-      key: "price", label: "Price / Month", type: "custom", sortable: true,
-      render: (row) => <span className="font-black text-emerald-600">₹{row.price}</span>,
-    },
-    { key: "type",   label: "Category", type: "status", getStatus: (row) => row.type,                   sortable: true },
-    { key: "floor",  label: "Floor",    type: "text",                                                    sortable: true },
-    { key: "status", label: "Status",   type: "status", getStatus: (row) => row.status || "available", sortable: true },
-  ];
 
   // ── filter pill helpers ──────────────────────────────────────────────────────
   function FilterPills({
@@ -119,8 +99,8 @@ export default function SeatManagement() {
   }
 
   return (
-    <div className="bg-gray-50/50 min-h-screen pb-20">
-      <div className="max-w-[1280px] mx-auto p-4 md:p-8">
+    <div className="bg-gray-50/50 min-h-screen">
+      <div className="">
 
         <PageHeader
           title="Seat Management"
@@ -260,12 +240,12 @@ export default function SeatManagement() {
                 ))}
           </div>
         ) : (
-          <DataTable
-            data={filteredSeats}
-            columns={columns}
-            loading={loading}
-            rowKey={(r) => r._id}
-            onEdit={(r) => router.push(`/seat-management/${r._id}/edit`)}
+          <Table
+            headers={["Seat", "Price", "Category", "Floor", "Status"]}
+            dataKeys={["seatNumber", "price", "type", "floor", "status"]}
+            Data={filteredSeats}
+            isLoading={loading}
+            onEdit={(r: any) => router.push(`/seat-management/${r._id}/edit`)}
             onDelete={handleDelete}
             hiddenActions={["view"]}
           />

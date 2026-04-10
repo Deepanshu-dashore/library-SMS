@@ -96,6 +96,9 @@ const themeSlice = createSlice({
       } else if (direction === "nav-close") {
         state.isCollapsed = true;
         state.activeNavStyle = "nav-close";
+      } else if (direction === "nav-top") {
+        state.isCollapsed = false;
+        state.activeNavStyle = "nav-top";
       }
       applyThemeEffects(state);
     },

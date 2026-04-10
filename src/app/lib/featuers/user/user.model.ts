@@ -51,6 +51,10 @@ const userSchema = new Schema(
       enum: ["Active", "Inactive", "Unverify"],
       default: "Unverify",
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
     course: { type: String },
   },
   { timestamps: true },
