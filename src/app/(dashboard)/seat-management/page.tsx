@@ -138,9 +138,9 @@ export default function SeatManagement() {
     {
       status: "maintenance",
       label: "Maintenance",
-      bg: "bg-yellow-100",
-      text: "text-yellow-700",
-      border: "border-yellow-200",
+      bg: "bg-amber-600/30",
+      text: "text-amber-600",
+      border: "border-amber-200",
     },
   ];
 
@@ -220,36 +220,68 @@ export default function SeatManagement() {
             {
               label: "Total Seats",
               value: seats.length,
-              color: "text-gray-900",
+              color: "text-amber-500",
+              bg: "bg-[#fcdc69]",
+              icon: ({className}: {className: string}) => (
+                <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24">
+	<path fill="currentColor" d="M17.179 21H6.82c-.745 0-1.21 0-1.571-.042v1.291a.75.75 0 0 1-1.5 0v-1.865a4 4 0 0 1-1.656-2.494C2 17.45 2 16.92 2 15.857v-4.611C2 10.006 2.943 9 4.105 9c1.163 0 2.106 1.005 2.106 2.246v3.087c0 .943 0 1.415.292 1.707c.293.293.765.293 1.708.293h7.579c.942 0 1.414 0 1.707-.293c.293-.292.293-.764.293-1.707v-3.087c0-1.24.942-2.246 2.105-2.246C21.057 9 22 10.005 22 11.246v4.611c0 1.063 0 1.594-.094 2.033a4 4 0 0 1-1.656 2.494v1.866a.75.75 0 0 1-1.5 0v-1.292c-.36.042-.826.042-1.571.042"></path>
+	<path fill="currentColor" d="M6 8.154V17h12V8.154c0-2.3 0-3.451-.482-4.308A3.65 3.65 0 0 0 16.2 2.495C15.365 2 14.243 2 12 2s-3.365 0-4.2.495a3.65 3.65 0 0 0-1.318 1.351C6 4.703 6 5.853 6 8.154" opacity={0.5}></path>
+</svg>
+              )
             },
             {
               label: "Available",
               value: seats.filter(
                 (s) => (s.status || "available") === "available",
               ).length,
-              color: "text-green-600",
+              color: "text-emerald-700",
+              bg: "bg-[#1bc794]",
+              icon: ({className}: {className: string}) => (
+                <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24">
+	<path fill="currentColor" d="M10.565 2.075c-.394.189-.755.497-1.26.928l-.079.066a2.56 2.56 0 0 1-1.58.655l-.102.008c-.662.053-1.135.09-1.547.236a3.33 3.33 0 0 0-2.03 2.029c-.145.412-.182.885-.235 1.547l-.008.102a2.56 2.56 0 0 1-.655 1.58l-.066.078c-.431.506-.74.867-.928 1.261a3.33 3.33 0 0 0 0 2.87c.189.394.497.755.928 1.26l.066.079c.41.48.604.939.655 1.58l.008.102c.053.662.09 1.135.236 1.547a3.33 3.33 0 0 0 2.029 2.03c.412.145.885.182 1.547.235l.102.008c.629.05 1.09.238 1.58.655l.079.066c.505.431.866.74 1.26.928a3.33 3.33 0 0 0 2.87 0c.394-.189.755-.497 1.26-.928l.079-.066c.48-.41.939-.604 1.58-.655l.102-.008c.662-.053 1.135-.09 1.547-.236a3.33 3.33 0 0 0 2.03-2.029c.145-.412.182-.885.235-1.547l.008-.102c.05-.629.238-1.09.655-1.58l.066-.079c.431-.505.74-.866.928-1.26a3.33 3.33 0 0 0 0-2.87c-.189-.394-.497-.755-.928-1.26l-.066-.079a2.56 2.56 0 0 1-.655-1.58l-.008-.102c-.053-.662-.09-1.135-.236-1.547a3.33 3.33 0 0 0-2.029-2.03c-.412-.145-.885-.182-1.547-.235l-.102-.008a2.56 2.56 0 0 1-1.58-.655l-.079-.066c-.505-.431-.866-.74-1.26-.928a3.33 3.33 0 0 0-2.87 0m5.208 6.617a.75.75 0 0 1 .168 1.047l-3.597 4.981a1.75 1.75 0 0 1-2.736.128l-1.506-1.72a.75.75 0 1 1 1.13-.989l1.505 1.721a.25.25 0 0 0 .39-.018l3.598-4.981a.75.75 0 0 1 1.048-.169"></path>
+</svg>
+              )
             },
             {
               label: "Occupied",
               value: seats.filter((s) => s.status === "occupied").length,
-              color: "text-red-500",
+              color: "text-orange-600",
+              bg: "bg-[#fe885b]",
+              icon: ({className}: {className: string}) => (
+                <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24">
+	<path fill="currentColor" d="M5 12V3H3v9c0 2.76 2.24 5 5 5h6v-2H8c-1.66 0-3-1.34-3-3m15.5 6H19v-7c0-1.1-.9-2-2-2h-5V3H6v8c0 1.65 1.35 3 3 3h7v7h4.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5"></path>
+</svg>
+              )
             },
             {
               label: "AC Seats",
               value: seats.filter((s) => s.type === "ac").length,
-              color: "text-blue-600",
+              color: "text-blue-400",
+              bg: "bg-[#98dffa]",
+              icon: ({className}: {className: string}) => (
+                <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24">
+	<path fill="currentColor" d="M21 11h-3.17l2.54-2.54a.996.996 0 0 0 0-1.41c-.39-.39-1.03-.39-1.42 0L15 11h-2V9l3.95-3.95c.39-.39.39-1.03 0-1.42a.996.996 0 0 0-1.41 0L13 6.17V3c0-.55-.45-1-1-1s-1 .45-1 1v3.17L8.46 3.63a.996.996 0 0 0-1.41 0c-.39.39-.39 1.03 0 1.42L11 9v2H9L5.05 7.05c-.39-.39-1.03-.39-1.42 0a.996.996 0 0 0 0 1.41L6.17 11H3c-.55 0-1 .45-1 1s.45 1 1 1h3.17l-2.54 2.54a.996.996 0 0 0 0 1.41c.39.39 1.03.39 1.42 0L9 13h2v2l-3.95 3.95c-.39.39-.39 1.03 0 1.42s1.02.39 1.41 0L11 17.83V21c0 .55.45 1 1 1s1-.45 1-1v-3.17l2.54 2.54c.39.39 1.02.39 1.41 0s.39-1.03 0-1.42L13 15v-2h2l3.95 3.95c.39.39 1.03.39 1.42 0a.996.996 0 0 0 0-1.41L17.83 13H21c.55 0 1-.45 1-1s-.45-1-1-1"></path>
+</svg>
+              )
             },
           ].map((stat, i) => (
             <div
               key={i}
-              className="bg-white rounded-[24px] p-5 border border-gray-100 shadow-sm"
+              className={` ${stat.bg} flex justify-between items-center rounded-md p-5 shadow-sm ${stat.bg}`}
             >
-              <p className="text-[11px] font-black uppercase tracking-widest text-gray-400">
+              <div>
+              <p className="text-[11px] font-black uppercase tracking-widest text-gray-900">
                 {stat.label}
               </p>
-              <h4 className={`text-3xl font-black mt-1 ${stat.color}`}>
+              <h4 className={`text-3xl font-black mt-1 text-gray-900`}>
                 {stat.value}
               </h4>
+              </div>
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-widest text-gray-900">
+                  <stat.icon className={`w-14 h-14 ${stat.color}`} />
+                </p>
+                </div>
             </div>
           ))}
         </div>
