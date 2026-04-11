@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import { useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
+import { StatusBadge } from "./StatusBadge";
 
 // Helper function to format date in dd/mm/yy format
 const formatDate = (dateString: any) => {
@@ -150,6 +151,8 @@ export default function Table({
     return allHeaders[index];
   });
 
+  const [openActionId, setOpenActionId] = useState<string | null>(null);
+
   const handleRowsChange = (value: any) => {
     setRowsPerPage(value);
     setCurrentPage(1);
@@ -223,7 +226,7 @@ export default function Table({
 
   return (
     <>
-      <div className={`hidden md:block ${mode === "light" ? "bg-white border-gray-200" : "bg-[#1c252e] border-gray-700"} border text-[#1C252E] shadow-md rounded-xl overflow-visble transition-shadow`}>
+      <div className={`w-full ${mode === "light" ? "bg-white border-gray-100" : "bg-[#1c252e] border-gray-800"} border text-[#1C252E] shadow-sm rounded-xl overflow-visible transition-all`}>
         {filters && filters}
         {Search && (
           <div className="w-full px-3 mt-3 pb-4 flex items-center justify-between">
@@ -235,7 +238,7 @@ export default function Table({
                 }}
                 className="relative"
               >
-                <div className={`relative flex items-center ${mode === "light" ? "bg-white border-gray-200" : "bg-gray-800 border-gray-600"} rounded-lg shadow-xs border transition-all duration-200`}>
+                <div className={`relative flex items-center ${mode === "light" ? "bg-white border-gray-100" : "bg-gray-800 border-gray-700"} rounded-lg shadow-xs border transition-all duration-200`}>
                   <div className="flex items-center justify-center pl-4 pr-2">
                     <svg className={`w-5 h-5 ${mode === "light" ? "text-gray-400" : "text-gray-400"}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <circle cx="11" cy="11" r="7" />
@@ -255,7 +258,7 @@ export default function Table({
                       <button
                         type="button"
                         onClick={() => onClear && onClear()}
-                        className={`flex items-center justify-center cursor-pointer w-8 h-8 rounded-lg ${mode === "light" ? "hover:bg-gray-100" : "hover:bg-gray-700"} transition-colors duration-150`}
+                        className={`flex items-center justify-center cursor-pointer w-8 h-8 rounded-lg ${mode === "light" ? "hover:bg-gray-50" : "hover:bg-gray-800"} transition-colors duration-150`}
                       >
                         <svg viewBox="0 0 20 20" fill="currentColor" className={`h-7 w-7 ${mode === "light" ? "text-gray-500" : "text-gray-400"}`}>
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
@@ -277,10 +280,8 @@ export default function Table({
                 </div>
               </form>
             </div>
-            {/* Mobile Expandable Search Bar equivalent goes here - trimmed for brevity */}
             <div className={(children || extraContent || Export || PDFExport) ? "h-22 py-5 px-5 flex gap-3 flex-10/12 items-center flex-wrap w-full" : ""}>
               {children}
-              {/* Additional Action Buttons */}
               {extraContent}
             </div>
           </div>
@@ -295,76 +296,289 @@ export default function Table({
           <div>
             <div className="overflow-x-auto xl:w-full w-[95.5dvw] sm:w-[90dvw] md:w-[89.45dvw] lg:w-full">
               <table className="w-full border-collapse">
-                <thead className={`${mode === "light" ? "bg-gray-100" : "bg-gray-700"}`}>
+                <thead className={`${mode === "light" ? "bg-gray-50" : "bg-gray-800/50"}`}>
                   <tr className={`${mode === "light" ? "text-gray-900" : "text-gray-200"} align-middle mt-2 sm:mt-0`}>
-                    {serialNumber && <th className={`pl-3 pr-2 py-3.5 text-sm text-left font-semibold border-r-[0.8px] border-b-[0.8px] border-dashed ${mode === "light" ? "border-gray-300" : "border-gray-600"}`}>S.No.</th>}
+                    {serialNumber && (
+                      <th className={`pl-3 pr-2 py-3.5 text-sm text-left font-semibold border-r-[0.8px] border-b-[0.8px] border-dashed ${mode === "light" ? "border-gray-200" : "border-gray-700"}`}>
+                        S.No.
+                      </th>
+                    )}
+                    {CheckboxShow && (
+                      <th className={`p-4 py-3.5 w-10 border-r-[0.8px] border-b-[0.8px] border-dashed ${mode === "light" ? "border-gray-200" : "border-gray-700"}`}>
+                        {!isRadio && (
+                          <input
+                            type="checkbox"
+                            className="cursor-pointer h-4 w-4 rounded border-gray-300"
+                            checked={selectAll}
+                            onChange={handleSelectAll}
+                          />
+                        )}
+                      </th>
+                    )}
                     {visibleHeaders.map((header: any, index: any) => (
-                      <th key={index} className={`p-[19px] py-3.5 px-2 capitalize text-nowrap text-sm text-left font-semibold border-r-[0.8px] border-b-[0.8px] border-dashed ${mode === "light" ? "border-gray-300" : "border-gray-600"}`}>
+                      <th key={index} className={`p-[19px] py-3.5 px-2 capitalize text-nowrap text-sm text-left font-semibold border-r-[0.8px] border-b-[0.8px] border-dashed ${mode === "light" ? "border-gray-200" : "border-gray-700"}`}>
                         {header}
                       </th>
                     ))}
-                    {!hiddenActions.includes("Action") && <th className="p-[19px] py-3.5 text-sm border-b-[0.8px] border-dashed">Action</th>}
+                    {hasStatus && typeof hasStatus !== "string" && (
+                         <th className={`p-[19px] py-3.5 px-2 capitalize text-nowrap text-sm text-left font-semibold border-r-[0.8px] border-b-[0.8px] border-dashed ${mode === "light" ? "border-gray-200" : "border-gray-700"}`}>
+                         Status
+                       </th>
+                    )}
+                    {!hiddenActions.includes("Action") && <th className={`p-[19px] py-3.5 text-sm border-var(--gray-200) border-b-[0.8px] border border-dashed font-semibold text-left ${mode === "light" ? "border-gray-200" : "border-gray-700"}`}>Action</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {Data.length < 1 ? (
                     <tr>
-                      <td colSpan={allHeaders.length + 3} className="text-center p-10 text-gray-500 font-bold">No data found...</td>
+                      <td 
+                        colSpan={
+                          visibleHeaders.length + 
+                          (serialNumber ? 1 : 0) + 
+                          (CheckboxShow ? 1 : 0) + 
+                          (hasStatus && typeof hasStatus !== "string" ? 1 : 0) + 
+                          (!hiddenActions.includes("Action") ? 1 : 0)
+                        } 
+                        className="text-center p-10 text-gray-400 font-medium"
+                      >
+                        No data available...
+                      </td>
                     </tr>
                   ) : (
                     currentRows.map((row: any, rowIndex: any) => (
-                      <tr key={row._id || rowIndex} className={`${mode === "light" ? "text-gray-500 bg-white hover:bg-gray-50" : "text-gray-200 bg-gray-800 hover:bg-gray-700"} align-middle`}>
+                      <tr key={row._id || rowIndex} className={`${mode === "light" ? "text-gray-500 bg-white hover:bg-gray-50" : "text-gray-200 bg-gray-800/40 hover:bg-gray-800/60"} transition-colors align-middle`}>
                         {serialNumber && (
-                           <td className={`pl-4 py-2 border-r-[0.8px] border-b-[0.8px] border-dashed ${mode === "light" ? "border-gray-300" : "border-gray-600"}`}>
-                             {(rowIndex + 1).toString().padStart(2, '0')}.
-                           </td>
+                          <td className={`pl-4 py-3 border-r-[0.8px] border-b-[0.8px] border-dashed ${mode === "light" ? "border-gray-200" : "border-gray-700"}`}>
+                            {(rowIndex + 1).toString().padStart(2, '0')}.
+                          </td>
+                        )}
+                        {CheckboxShow && (
+                          <td className={`p-4 py-3 border-r-[0.8px] border-b-[0.8px] border-dashed ${mode === "light" ? "border-gray-200" : "border-gray-700"}`}>
+                            <input
+                              type={isRadio ? "radio" : "checkbox"}
+                              className="cursor-pointer h-4 w-4 rounded border-gray-300"
+                              checked={selectedRows.includes(row._id)}
+                              onChange={() => handleRowSelect(row._id)}
+                            />
+                          </td>
                         )}
                         
                         {visibleKeys.map((key: any, colIndex: any) => (
-                          <td key={colIndex} className={`p-4 py-2 text-nowrap border-r-[0.8px] border-b-[0.8px] border-dashed ${mode === "light" ? "border-gray-300" : "border-gray-600"}`}>
-                             {getNestedValue(row, key)}
+                          <td key={colIndex} className={`p-4 py-3 text-nowrap border-r-[0.8px] border-b-[0.8px] border-dashed ${mode === "light" ? "border-gray-200" : "border-gray-700"}`}>
+                             <div className="flex items-center gap-3">
+                               {colIndex === 0 && ImageContainerShow && ImageKey && (
+                                 <ImageContainer 
+                                   mode={mode}
+                                   imageSrc={getNestedValue(row, ImageKey)}
+                                   name={getNestedValue(row, key)}
+                                   setViewModel={setViewModel}
+                                 />
+                               )}
+                               {key === hasStatus ? (
+                                  <StatusBadge status={row[key]} />
+                               ) : (
+                                 <span 
+                                   onClick={() => fistColumnView && onView && onView(row)}
+                                   className={`${fistColumnView ? "cursor-pointer hover:underline font-medium" : ""}`}
+                                 >
+                                   {getNestedValue(row, key)}
+                                 </span>
+                               )}
+                             </div>
                           </td>
                         ))}
-                        
-                        {!hiddenActions.includes("Action") && (
-                          <td className={`p-4 py-2 text-nowrap border-b-[0.8px] border-dashed ${mode === "light" ? "border-gray-300" : "border-gray-600"}`}>
-                            <div className="flex items-center gap-4">
-                              {!hiddenActions.includes("view") && onView && (
-                                <button
-                                  onClick={() => onView(row)}
-                                  className="text-blue-500 hover:text-blue-700 font-bold text-[11px] uppercase tracking-tighter cursor-pointer transition-colors"
-                                >
-                                  View
-                                </button>
-                              )}
-                              {!hiddenActions.includes("edit") && onEdit && (
-                                <button
-                                  onClick={() => onEdit(row)}
-                                  className="text-amber-500 hover:text-amber-700 font-bold text-[11px] uppercase tracking-tighter cursor-pointer transition-colors"
-                                >
-                                  Edit
-                                </button>
-                              )}
-                              {!hiddenActions.includes("delete") && onDelete && (
-                                <button
-                                  onClick={() => onDelete(row)}
-                                  className="text-red-500 hover:text-red-700 font-bold text-[11px] uppercase tracking-tighter cursor-pointer transition-colors"
-                                >
-                                  Delete
-                                </button>
-                              )}
-                            </div>
+
+                        {hasStatus && typeof hasStatus !== "string" && (
+                          <td className={`p-4 py-3 border-r-[0.8px] border-b-[0.8px] border-dashed capitalize ${mode === "light" ? "border-gray-200" : "border-gray-700"}`}>
+                            <StatusBadge
+                              status={row[hasStatus]}
+                            />
                           </td>
                         )}
+
+                        {!hiddenActions.includes("View") ||
+                        !hiddenActions.includes("Edit") ||
+                        !hiddenActions.includes("Delete") ? (
+                          <td className={`lg:px-4 md:px-2 p-1 md:py-2 text-xs md:text-sm font-medium text-center border-b-[0.8px] border-dashed ${mode === "light" ? "border-gray-100" : "border-gray-800"}`}>
+                            <div className="flex items-center justify-center gap-2">
+                              {/* Custom Actions */}
+                              {customActions &&
+                                customActions.map(
+                                  (action: any, index: number) =>
+                                    action.show &&
+                                    action.show(row) && (
+                                      <button
+                                        key={index}
+                                        onClick={() => action.onClick(row)}
+                                        className={`cursor-pointer px-3 py-1.5 text-xs font-semibold rounded-lg text-white ${action.className ||
+                                          "bg-blue-500 hover:bg-blue-600"
+                                          }`}
+                                      >
+                                        {action.label}
+                                      </button>
+                                    )
+                                )}
+                              <div className="relative inline-block text-left">
+                                <button
+                                  className={`p-2 rounded-md cursor-pointer ${mode === "light" ? "hover:bg-gray-100" : "hover:bg-gray-700"} transition duration-200 flex items-center justify-center`}
+                                  onClick={(e) => {
+                                    setAnchorEl(e.currentTarget);
+                                    setActiveRow(
+                                      isOpen === rowIndex ? null : rowIndex
+                                    );
+                                  }}
+                                >
+                                  <Icon
+                                    icon="mdi:dots-vertical"
+                                    className={`md:w-5 w-4 md:h-5 h-4 ${mode === "light" ? "text-gray-600" : "text-gray-400"}`}
+                                  />
+                                </button>
+
+                                {isOpen === rowIndex && (
+                                  <div
+                                    onMouseLeave={() => setActiveRow(false)}
+                                    style={{
+                                      position: "fixed",
+                                      top:
+                                        (anchorEl?.getBoundingClientRect().top ||
+                                          0) + 40, // spacing below button
+                                      left:
+                                        (anchorEl?.getBoundingClientRect().left ||
+                                          0) - 20, // adjust as per layout
+                                      zIndex: 9999,
+                                    }}
+                                    className={`min-w-max px-1 py-1 space-y-1 ${mode === "light" ? "bg-white border-gray-100" : "bg-gray-800 border-gray-700"} border rounded-lg shadow-lg`}
+                                  >
+                                    {!hiddenActions.includes("View") && (
+                                      <div>
+                                        <button
+                                        onClick={() => {
+                                          onView(row);
+                                          setActiveRow(null);
+                                        }}
+                                          className={`flex cursor-pointer items-center gap-2 w-full px-4 py-1.5 text-left rounded-md ${mode === "light" ? "text-gray-700 hover:bg-gray-100" : "text-gray-300 hover:bg-gray-700"} transition`}
+                                      >
+                                          <Icon
+                                            icon="mage:box-3d-scan-fill"
+                                            className="md:w-5 w-4 md:h-5 h-4 text-[var(--gray-400)]"
+                                          />
+                                        View
+                                        </button>
+                                      </div>
+                                    )}
+                                    {!hiddenActions.includes("Edit") && (
+                                      <div>
+                                        <button
+                                        onClick={() => {
+                                          onEdit(row);
+                                          setActiveRow(null);
+                                        }}
+                                          className={`flex cursor-pointer items-center gap-2 w-full px-4 py-1.5 text-left rounded-md ${mode === "light" ? "text-gray-700 hover:bg-gray-100" : "text-gray-300 hover:bg-gray-700"} transition`}
+                                      >
+                                          <Icon
+                                            icon="mingcute:edit-4-fill"
+                                            className="md:w-5 w-4 md:h-5 h-4 text-[var(--gray-400)]"
+                                          />
+                                        Edit
+                                        </button>
+                                      </div>
+                                    )}
+                                    {!hiddenActions.includes("Delete") && (
+                                      <div className="border-t-[0.8px] pt-0.5 border-[var(--gray-200)]">
+                                        <button
+                                          onClick={() => {
+                                            onDelete(row);
+                                            setActiveRow(null);
+                                          }}
+                                          className={`flex cursor-pointer items-center gap-2 w-full px-4 py-1.5 text-left text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition rounded-md font-bold text-xs`}
+                                        >
+                                          <Icon
+                                            icon="solar:trash-bin-trash-bold"
+                                            className="md:w-5 w-4 md:h-5 h-4 text-red-500"
+                                          />
+                                          Delete
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                        ) : null}
                       </tr>
                     ))
                   )}
                 </tbody>
               </table>
             </div>
-          </div>
-        )}
-      </div>
+            {/* Pagination */}
+            {paginationshow && (
+              <div className={`flex items-center justify-between py-2 pl-3 sm:py-2.5 md:py-4 gap-1 px-3 border-t border-dashed ${mode === "light" ? "border-gray-200" : "border-gray-700"}`}>
+                <p className={`md:text-[12.25px] text-nowrap text-xs ${mode === "light" ? "text-gray-400" : "text-gray-400"}`}>
+                  {currentPage} of {totalPages} Pages
+                </p>
+                <div className="flex items-center gap-4">
+                  <div className="hidden sm:flex items-center gap-2">
+                    <span className="text-[12px] text-gray-400">Rows:</span>
+                    <select
+                      value={rowsPerPage}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        handleRowsChange(val);
+                        onRowsPerPageChange && onRowsPerPageChange(val);
+                      }}
+                      className={`text-[12px] bg-transparent outline-none cursor-pointer border rounded px-1 ${mode === "light" ? "border-gray-200 text-gray-600" : "border-gray-700 text-gray-400"}`}
+                    >
+                      {[5, 10, 25, 50].map((num) => (
+                        <option key={num} value={num} className={mode === "light" ? "text-gray-900" : "text-black"}>
+                          {num}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-center justify-end">
+                  <button
+                    onClick={() => {
+                      if (currentPage > 1) {
+                        const prevPage = currentPage - 1;
+                        setCurrentPage(prevPage);
+                        onPageChange(prevPage);
+                      }
+                    }}
+                    disabled={currentPage === 1}
+                    className={`mx-2 px-2 border-[var(--gray-200)]/70 py-1 rounded-md border flex text-[13px] items-center cursor-pointer ${currentPage === 1
+                      ? (mode === "light" ? "text-gray-300" : "text-gray-600")
+                      : (mode === "light" ? "text-black hover:bg-gray-200" : "text-white hover:bg-gray-700")
+                      }`}
+                  >
+                    <Icon icon="mdi:chevron-left" className="w-5 h-5" />
+                    <span className="hidden md:block">Previous</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (currentPage < totalPages) {
+                        const nextPage = currentPage + 1;
+                        setCurrentPage(nextPage);
+                        onPageChange(nextPage);
+                      }
+                    }}
+                    disabled={currentPage >= totalPages}
+                    className={`px-2 border-[var(--gray-200)]/70 py-1 rounded-md border flex text-[13px] items-center cursor-pointer ${currentPage >= totalPages
+                      ? (mode === "light" ? "text-gray-300" : "text-gray-600")
+                      : (mode === "light" ? "text-black hover:bg-gray-200" : "text-white hover:bg-gray-700")
+                      }`}
+                  >
+                    <span className="hidden md:block">Next</span>
+                    <Icon icon="mdi:chevron-right" className="w-5 h-5" />
+                  </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
     </>
   );
 }

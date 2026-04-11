@@ -244,6 +244,7 @@ export default function SeatManagement() {
             headers={["Seat", "Price", "Category", "Floor", "Status"]}
             dataKeys={["seatNumber", "price", "type", "floor", "status"]}
             Data={filteredSeats}
+            hasStatus="status"
             isLoading={loading}
             onEdit={(r: any) => router.push(`/seat-management/${r._id}/edit`)}
             onDelete={handleDelete}
