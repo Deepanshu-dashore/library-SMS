@@ -23,8 +23,8 @@ export const Sidebar = () => {
 
           return (
             <Link
-              key={item.path}
-              href={item.path}
+              key={item.title}
+              href={item.path || "#"}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                 isActive
                   ? "bg-blue-600/10 text-blue-500 font-medium shadow-[0_0_20px_rgba(37,99,235,0.1)]"

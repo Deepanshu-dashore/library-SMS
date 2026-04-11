@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import ModeToggle from "./shared/ModeToggle";
-import SettingsDrawer from "./shared/SettingsDrawer";
 import { useSelector } from "react-redux";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";

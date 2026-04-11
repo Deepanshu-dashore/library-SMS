@@ -70,7 +70,11 @@ export class SeatController {
       return ApiResponse(401, null, "Unauthorized");
     }
     try {
-      const seat = await SeatService.getAllSeatService();
+      const { searchParams } = new URL(req.url);
+      const floor  = searchParams.get("floor")  || undefined;
+      const status = searchParams.get("status") || undefined;
+      const type   = searchParams.get("type")   || undefined;
+      const seat = await SeatService.getAllSeatService({ floor, status, type });
       return ApiResponse(200, seat, "Seat fetched successfully");
     } catch (error: any) {
       return ApiResponse(500, null, error.message || error);

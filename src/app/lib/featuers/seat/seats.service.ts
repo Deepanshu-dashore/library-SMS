@@ -13,9 +13,21 @@ export class SeatService {
     await connectDB();
     return await Seat.insertMany(data);
   }
-  static async getAllSeatService() {
+  static async getAllSeatService(filters: {
+    floor?: string;
+    status?: string;
+    type?: string;
+  } = {}) {
     await connectDB();
-    return await Seat.find({ isDeleted: { $ne: true } }).select("-__v");
+    const query: Record<string, any> = { isDeleted: { $ne: true } };
+    if (filters.floor)  query.floor  = filters.floor;
+    if (filters.status) query.status = filters.status;
+    if (filters.type)   query.type   = filters.type;
+
+    return await Seat.find(query)
+      .select("-__v")
+      .collation({ locale: "en", numericOrdering: true })
+      .sort({ seatNumber: 1 });
   }
 
   static async getTrashSeatService() {

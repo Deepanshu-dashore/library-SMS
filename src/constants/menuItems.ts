@@ -19,6 +19,7 @@ export const MENU_ITEMS = [
   },
   {
     title: "Seat Management",
+    path: "/seat-management",
     icon: Database,
     subItems: [
       { name: "Manage Seats", path: "/seat-management" },
@@ -33,6 +34,7 @@ export const MENU_ITEMS = [
   // },
   {
     title: "Subscriptions",
+    path: "/subscriptions",
     icon: Ticket,
     subItems: [
       { name: "Manage Subscriptions", path: "/subscriptions" },
@@ -46,6 +48,7 @@ export const MENU_ITEMS = [
   },
   {
     title: "Manage Expenses",
+    path: "/expenses",
     icon: CreditCard,
     subItems: [
       { name: "Manage Expenses", path: "/expenses" },
@@ -54,6 +57,7 @@ export const MENU_ITEMS = [
   },
   {
     title: "Manage Members",
+    path: "/users",
     icon: Users,
     subItems: [
       { name: "Manage Members", path: "/users" },
