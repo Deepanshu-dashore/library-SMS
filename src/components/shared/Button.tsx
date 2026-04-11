@@ -1,9 +1,10 @@
 import React from "react";
 import { Icon } from "@iconify/react";
-import { motion } from "framer-motion";
+import { motion, type HTMLMotionProps } from "framer-motion";
 import { useSelector } from "react-redux";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
+  children?: React.ReactNode;
   variant?: "primary" | "secondary" | "danger" | "view" | "edit" | "delete" | "submit" | "outline" | "ghost";
   size?: "xs" | "sm" | "md" | "lg";
   icon?: string;
@@ -14,7 +15,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean;
 }
 
-export const Button: React.FC<ButtonProps> = ({
+export const Button = ({
   children,
   variant = "primary",
   size = "md",
@@ -28,7 +29,7 @@ export const Button: React.FC<ButtonProps> = ({
   type = "button",
   disabled,
   ...props
-}) => {
+}: ButtonProps) => {
   const { color: themeColor, mode } = useSelector((state: any) => state.theme);
 
   // Size mappings
