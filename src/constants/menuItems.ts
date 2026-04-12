@@ -1,14 +1,13 @@
 import {
-  Home,
+  LayoutDashboard,
   Users,
+  Database,
+  Ticket,
+  CreditCard,
+  FileText,
+  Trash2,
   Settings,
   Briefcase,
-  FileText,
-  LayoutDashboard,
-  Database,
-  CreditCard,
-  Ticket,
-  Trash2,
 } from "lucide-react";
 
 export const MENU_ITEMS = [
@@ -17,6 +16,19 @@ export const MENU_ITEMS = [
     path: "/",
     icon: LayoutDashboard,
   },
+
+  // 1️⃣ USERS FIRST (entry point)
+  {
+    title: "Members",
+    path: "/users",
+    icon: Users,
+    subItems: [
+      { name: "Manage Members", path: "/users" },
+      { name: "Add Member", path: "/users/create" },
+    ],
+  },
+
+  // 2️⃣ RESOURCE
   {
     title: "Seat Management",
     path: "/seat-management",
@@ -27,11 +39,8 @@ export const MENU_ITEMS = [
       { name: "Bulk Registration", path: "/seat-management/bulk-add" },
     ],
   },
-  // {
-  //   title: "LMS Software",
-  //   path: "/lms",
-  //   icon: Briefcase,
-  // },
+
+  // 3️⃣ CORE BUSINESS
   {
     title: "Subscriptions",
     path: "/subscriptions",
@@ -41,39 +50,38 @@ export const MENU_ITEMS = [
       { name: "Add Subscription", path: "/subscriptions/add" },
     ],
   },
+
+  // 4️⃣ MONEY FLOW
   {
     title: "Payments",
     icon: CreditCard,
     path: "/payments",
   },
+
   {
-    title: "Manage Expenses",
+    title: "Expenses",
     path: "/expenses",
-    icon: CreditCard,
+    icon: Briefcase,
     subItems: [
       { name: "Manage Expenses", path: "/expenses" },
       { name: "Add Expense", path: "/expenses/add" },
     ],
   },
-  {
-    title: "Manage Members",
-    path: "/users",
-    icon: Users,
-    subItems: [
-      { name: "Manage Members", path: "/users" },
-      { name: "Add Member", path: "/users/create" },
-    ],
-  },
+
+  // 5️⃣ INSIGHTS
   {
     title: "Reports",
     path: "/reports",
     icon: FileText,
   },
+
+  // 6️⃣ LOW PRIORITY
   {
     title: "Recycle Bin",
     path: "/trash",
     icon: Trash2,
   },
+
   {
     title: "Settings",
     path: "/settings",

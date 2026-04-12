@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useRef, useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { Phone, CreditCard, Upload, X, AlertCircle } from "lucide-react";
+import { Phone, CreditCard, Upload, X, AlertCircle, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
+import axios from "axios";
 import { Button } from "@/components/shared/Button";
 import {
   validateMemberForm,
   validateImageFile,
   type MemberFormErrors,
 } from "@/app/lib/utils/validators";
+import { StatusBadge } from "@/components/shared/StatusBadge";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -130,7 +132,7 @@ function SectionHeader({
   step, title, sub, color,
 }: { step: string; title: string; sub: string; color: string }) {
   return (
-    <div className="flex items-center gap-4 mb-8 bg-gray-100 p-1.5 rounded-xl">
+    <div className="flex items-center gap-4 mb-8 bg-gray-100/80 p-1.5 rounded-xl">
       <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center font-bold text-sm`}>
         {step}
       </div>
@@ -144,9 +146,12 @@ function SectionHeader({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function CreateUserPage() {
+export default function EditUserPage() {
   const router = useRouter();
+  const params = useParams();
+  const id = params.id as string;
 
+  const [initialLoading, setInitialLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     fatherName: "",
@@ -182,13 +187,37 @@ export default function CreateUserPage() {
   const [errors,   setErrors]   = useState<MemberFormErrors>({});
   const [submitted, setSubmitted] = useState(false);
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data } = await axios.get(`/api/user/${id}`);
+        if (data.success) {
+          const user = data.data.user;
+          setFormData({
+            ...user,
+            dob: user.dob ? new Date(user.dob).toISOString().split("T")[0] : "",
+          });
+        } else {
+          toast.error(data.message || "Failed to load member");
+          router.push("/users");
+        }
+      } catch (err) {
+        toast.error("An error occurred while loading member data");
+        router.push("/users");
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+    fetchUser();
+  }, [id, router]);
+
   const set = (key: string, value: string) =>
     setFormData((f) => ({ ...f, [key]: value }));
 
   const touch = (key: string) =>
     setTouched((t) => ({ ...t, [key]: true }));
 
-  // Revalidate on every change — errors surface only after touch or submit
+  // Revalidate on every change
   const revalidate = (
     data = formData,
     pf   = photoFile,
@@ -209,38 +238,34 @@ export default function CreateUserPage() {
       return;
     }
 
-    const loadingToast = toast.loading("Creating new member…");
+    const loadingToast = toast.loading("Updating member profile…");
     try {
-      // Build multipart/form-data so the controller can receive real File objects
       const fd = new FormData();
 
       // Scalar fields
       const { address, photo: _p, signature: _s, ...scalars } = formData;
       for (const [key, value] of Object.entries(scalars)) {
-        fd.append(key, value);
+        if (value !== null && value !== undefined) {
+          fd.append(key, value.toString());
+        }
       }
 
-      // Address fields — flattened with dot-notation for the controller parser
+      // Address fields
       for (const [key, value] of Object.entries(address)) {
         fd.append(`address.${key}`, value);
       }
 
-      // Attach File objects (not base64 strings) for Cloudinary upload
+      // Attach new files if uploaded
       if (photoFile)     fd.append("photo",     photoFile);
       if (signatureFile) fd.append("signature", signatureFile);
 
-      const res = await fetch("/api/user", {
-        method: "POST",
-        // Do NOT set Content-Type — browser sets it with the correct boundary
-        body: fd,
-      });
-      const data = await res.json();
+      const { data } = await axios.patch(`/api/user/${id}`, fd);
 
       if (data.success) {
-        toast.success("Member created successfully!", { id: loadingToast });
-        router.push("/users");
+        toast.success("Member updated successfully!", { id: loadingToast });
+        router.push(`/users/${id}`);
       } else {
-        toast.error(data.message || "Failed to create user", { id: loadingToast });
+        toast.error(data.message || "Failed to update user", { id: loadingToast });
       }
     } catch {
       toast.error("Something went wrong", { id: loadingToast });
@@ -248,35 +273,45 @@ export default function CreateUserPage() {
   };
 
 
-  // Helper: show error only when field is touched OR form was submitted
   const err = (key: keyof MemberFormErrors) =>
     (submitted || touched[key]) ? errors[key] : undefined;
 
-  // ── Input classes helper ──
   const ic = (key: keyof MemberFormErrors) =>
     `${inputBase} ${err(key) ? inputErr : inputOk}`;
 
+  if (initialLoading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+          <p className="text-gray-500 font-medium">Loading details...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-20">
+    <div className="space-y-6 max-w-6xl mx-auto pb-20 px-4">
       <PageHeader
-        title="Create New Member"
-        backLink="/users"
+        title="Edit Member Profile"
+        backLink={`/users/${id}`}
         breadcrumbs={[
           { label: "Dashboard", href: "/" },
           { label: "Members", href: "/users" },
-          { label: "Create" },
+          { label: formData.name, href: `/users/${id}` },
+          { label: "Edit" },
         ]}
       />
 
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
 
         {/* ── 01 Personal Credentials ── */}
-        <div className="bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
+        <div className="bg-white rounded-[32px] p-8 md:p-10 shadow-sm border border-gray-100">
           <SectionHeader
             step="01"
             title="Personal Credentials"
             sub="Identity and basic background information"
-            color="bg-indigo-200/60 text-indigo-600"
+            color="bg-indigo-100 text-indigo-600"
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">
@@ -357,12 +392,12 @@ export default function CreateUserPage() {
         </div>
 
         {/* ── 02 Contact & Security ── */}
-        <div className="bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
+        <div className="bg-white rounded-[32px] p-8 md:p-10 shadow-sm border border-gray-100">
           <SectionHeader
             step="02"
             title="Contact & Security"
             sub="How we can reach and identify the member"
-            color="bg-emerald-200/60 text-emerald-600"
+            color="bg-emerald-100 text-emerald-600"
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">
@@ -380,7 +415,6 @@ export default function CreateUserPage() {
                 />
               </div>
               <FieldError msg={err("number")} />
-              {!err("number") && <Hint>10-digit Indian mobile number.</Hint>}
             </div>
 
             <div>
@@ -403,7 +437,6 @@ export default function CreateUserPage() {
                   className={`${ic("adharNumber")} pl-10`}
                   value={formData.adharNumber}
                   onChange={(e) => {
-                    // auto-format: insert spaces at positions 4 and 9
                     const raw   = e.target.value.replace(/\D/g, "").slice(0, 12);
                     const fmt   = raw.replace(/(\d{4})(\d{4})?(\d{4})?/, (_, a, b, c) =>
                       [a, b, c].filter(Boolean).join(" ")
@@ -415,7 +448,6 @@ export default function CreateUserPage() {
                 />
               </div>
               <FieldError msg={err("adharNumber")} />
-              {!err("adharNumber") && <Hint>12-digit Aadhar number.</Hint>}
             </div>
 
             <div>
@@ -460,12 +492,12 @@ export default function CreateUserPage() {
         </div>
 
         {/* ── 03 Residential Address ── */}
-        <div className="bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
+        <div className="bg-white rounded-[32px] p-8 md:p-10 shadow-sm border border-gray-100">
           <SectionHeader
             step="03"
             title="Residential Address"
-            sub="Where the member stays currently"
-            color="bg-amber-200/40 text-amber-600"
+            color="bg-amber-100 text-amber-600"
+            sub="Current stay details"
           />
 
           <div className="space-y-5">
@@ -514,78 +546,67 @@ export default function CreateUserPage() {
         </div>
 
         {/* ── 04 Media & Verification ── */}
-        <div className="bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
+        <div className="bg-white rounded-[32px] p-8 md:p-10 shadow-sm border border-gray-100">
           <SectionHeader
             step="04"
             title="Media & Verification"
-            sub="Photo, signature and internal notes"
-            color="bg-pink-200/40 text-pink-600"
+            color="bg-pink-100 text-pink-600"
+            sub="Update photo or signature"
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
 
-            {/* Member Photo */}
             <ImageUploadField
               label="Member Photo"
-              hint={
-                <>
-                  Passport-size photo · clear face, light/plain background ·{" "}
-                  <span className="font-semibold text-gray-500">JPG / PNG · max 2 MB</span>
-                </>
-              }
-              preview={formData.photo}
+              hint="Leave blank to keep existing photo"
+              preview={photoFile ? URL.createObjectURL(photoFile) : formData.photo}
               error={err("photo")}
               onFile={(b64, file) => {
-                set("photo", b64);
                 setPhotoFile(file);
                 touch("photo");
                 revalidate(formData, file, signatureFile);
               }}
               onClear={() => {
-                set("photo", "");
                 setPhotoFile(null);
                 revalidate(formData, null, signatureFile);
               }}
             />
 
-            {/* Signature */}
             <ImageUploadField
               label="Signature"
-              hint={
-                <>
-                  Sign on <span className="font-semibold text-gray-500">white / transparent</span> paper,
-                  then scan or photograph · JPG / PNG · max 2 MB
-                </>
-              }
-              preview={formData.signature}
+              hint="Leave blank to keep existing signature"
+              preview={signatureFile ? URL.createObjectURL(signatureFile) : formData.signature}
               error={err("signature")}
               onFile={(b64, file) => {
-                set("signature", b64);
                 setSignatureFile(file);
                 touch("signature");
                 revalidate(formData, photoFile, file);
               }}
               onClear={() => {
-                set("signature", "");
                 setSignatureFile(null);
                 revalidate(formData, photoFile, null);
               }}
             />
 
-            {/* Notes */}
             <div className="col-span-1 md:col-span-2">
               <Label>Internal Notes</Label>
               <textarea
                 rows={3}
-                placeholder="Admin remarks, special instructions…"
+                placeholder="Admin remarks…"
                 className={`${inputBase} ${inputOk} resize-none`}
-                value={formData.notes}
+                value={formData.notes || ""}
                 onChange={(e) => set("notes", e.target.value)}
               />
             </div>
 
+            <div>
+              <Label>Account Status : </Label>
+              <div className="ml-2 inline-block">
+                <StatusBadge size="sm" status={formData.status} />
+              </div>
+            </div>
+
           </div>
-          {/* status = "Active" is sent silently — not shown in UI */}
         </div>
 
         {/* ── Action Bar ── */}
@@ -593,17 +614,17 @@ export default function CreateUserPage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push("/users")}
-            className="px-10 py-3 bg-white border border-gray-200 text-sm text-gray-500 font-medium rounded-xl hover:bg-gray-50"
+            onClick={() => router.push(`/users/${id}`)}
+            className="px-10 py-3 bg-white border border-gray-200 text-sm font-medium rounded-2xl hover:bg-gray-50 transition-all"
           >
             Cancel
           </Button>
           <Button
             type="submit"
             variant="primary"
-            className="w-fit py-3 rounded-xl text-sm font-medium hover:bg-indigo-700 shadow-xl shadow-indigo-100 flex items-center justify-center gap-3 bg-indigo-600 outline-none border-none"
+            className="w-fit py-3 rounded-2xl text-sm font-medium shadow-xl shadow-indigo-100 flex items-center justify-center gap-3 bg-indigo-600 outline-none border-none"
           >
-            Create Member Profile
+            Update Member Profile
           </Button>
         </div>
 

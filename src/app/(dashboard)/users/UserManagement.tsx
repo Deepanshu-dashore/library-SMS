@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Link as LinkIcon, Users, UserCheck, UserX, Clock, Trash2 } from "lucide-react";
+import axios from "axios";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, ColumnDef, TabDef } from "@/components/shared/DataTable";
 import { Button } from "@/components/shared/Button";
+import { FilterChips, FilterBadge } from "@/components/shared/FilterChips";
 
 interface User {
   _id: string;
@@ -27,6 +29,8 @@ export default function UserManagement() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [stats, setStats] = useState({ total: 0, active: 0, inactive: 0, unverify: 0 });
+  const [total, setTotal] = useState(0);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -34,10 +38,13 @@ export default function UserManagement() {
       const searchParam = searchTerm ? `search=${searchTerm}` : "";
       const statusParam = statusFilter !== "All" ? `status=${statusFilter}` : "";
       const query = [searchParam, statusParam].filter(Boolean).join("&");
-      const res = await fetch(`/api/user${query ? `?${query}` : ""}`);
-      const data = await res.json();
+      const { data } = await axios.get(`/api/user${query ? `?${query}` : ""}`);
       if (data.success) {
         setUsers(data.data.users);
+        setTotal(data.data.total);
+        if (data.data.stats) {
+          setStats(data.data.stats);
+        }
       } else {
         toast.error(data.message || "Failed to fetch users");
       }
@@ -49,6 +56,13 @@ export default function UserManagement() {
   };
 
   useEffect(() => {
+    // If it's the initial load (no search/filter), fetch immediately
+    if (!searchTerm && statusFilter === "All") {
+      fetchUsers();
+      return;
+    }
+
+    // Debounce subsequent changes
     const timer = setTimeout(() => {
       fetchUsers();
     }, 400);
@@ -60,8 +74,7 @@ export default function UserManagement() {
 
     const loadingToast = toast.loading("Deleting user...");
     try {
-      const res = await fetch(`/api/user/soft-delete/${user._id}`, { method: "DELETE" });
-      const data = await res.json();
+      const { data } = await axios.delete(`/api/user/soft-delete/${user._id}`);
       if (data.success) {
         toast.success("User deleted successfully", { id: loadingToast });
         fetchUsers();
@@ -80,7 +93,7 @@ export default function UserManagement() {
       type: "user",
       getTitle: (row) => row.name,
       getSubtitle: (row) => row.course || "General Member",
-      getAvatar: (row) => row.name.charAt(0),
+      getAvatar: (row) => row.photo || row.name.charAt(0),
       sortable: true
     },
     {
@@ -110,21 +123,21 @@ export default function UserManagement() {
   ];
 
   const tabs: TabDef[] = [
-    { label: "All Members", value: "All", count: users.length },
-    { label: "Active", value: "Active", count: users.filter(u => u.status === "Active").length, color: "success" },
-    { label: "Inactive", value: "Inactive", count: users.filter(u => u.status === "Inactive").length, color: "error" },
-    { label: "Unverify", value: "Unverify", count: users.filter(u => u.status === "Unverify").length, color: "warning" },
+    { label: "All Members", value: "All", count: stats.total },
+    { label: "Active", value: "Active", count: stats.active, color: "success" },
+    { label: "Inactive", value: "Inactive", count: stats.inactive, color: "error" },
+    { label: "Unverify", value: "Unverify", count: stats.unverify, color: "warning" },
   ];
 
   return (
     <div className="bg-gray-50/50 min-h-screen">
-      <div className="max-w-[1240px] mx-auto p-4 md:p-8">
+      <div className="">
         
         <PageHeader 
-          title="User Management"
+          title="Member Management"
           breadcrumbs={[
             { label: "Dashboard", href: "/" },
-            { label: "User Management" }
+            { label: "Member Management" }
           ]}
           actionNode={
             <div className="flex gap-4">
@@ -135,7 +148,7 @@ export default function UserManagement() {
                     toast.success("Registration link copied!");
                   }}
                   variant="outline"
-                  className="rounded-2xl px-6 py-3"
+                  className="rounded-2xl px-4 py-1"
                >
                   <LinkIcon className="w-4 h-4" />
                   Copy Link
@@ -143,7 +156,7 @@ export default function UserManagement() {
                <Button
                   onClick={() => router.push("/users/create")}
                   variant="primary"
-                  className="bg-indigo-600 hover:bg-indigo-700 rounded-2xl px-6 py-3 shadow-xl shadow-indigo-100"
+                  className="bg-indigo-600 hover:bg-indigo-700 rounded-2xl px-4 py-1 shadow-xl shadow-indigo-100"
                >
                   <Plus className="text-xl" />
                   New Member
@@ -151,26 +164,6 @@ export default function UserManagement() {
             </div>
           }
         />
-
-        {/* Stats Summary Panel */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          {[
-            { label: "Total Members", count: users.length, icon: Users, color: "bg-indigo-600" },
-            { label: "Active", count: users.filter((u) => u.status === "Active").length, icon: UserCheck, color: "bg-green-600" },
-            { label: "Inactive", count: users.filter((u) => u.status === "Inactive").length, icon: UserX, color: "bg-red-600" },
-            { label: "Requires Verification", count: users.filter((u) => u.status === "Unverify").length, icon: Clock, color: "bg-amber-600" },
-          ].map((stat, i) => (
-            <div key={i} className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 flex items-center justify-between group hover:border-indigo-100 transition-all">
-               <div>
-                  <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1">{stat.label}</p>
-                  <h4 className="text-3xl font-black text-gray-900 tracking-tight">{stat.count}</h4>
-               </div>
-               <div className={`w-14 h-14 ${stat.color} text-white rounded-3xl flex items-center justify-center shadow-lg transform rotate-6 group-hover:rotate-0 transition-transform`}>
-                  <stat.icon size={28} />
-               </div>
-            </div>
-          ))}
-        </div>
 
         <DataTable
           data={users}
@@ -182,6 +175,33 @@ export default function UserManagement() {
           tabs={tabs}
           activeTab={statusFilter}
           onTabChange={(val) => setStatusFilter(val)}
+          filterChips={
+            (searchTerm || statusFilter !== "All") && (
+              <FilterChips
+                className="pt-0 border-t-0"
+                filters={[
+                  {
+                    id: "search",
+                    label: "Search",
+                    value: searchTerm,
+                    onRemove: () => setSearchTerm(""),
+                    active: !!searchTerm,
+                  },
+                  {
+                    id: "status",
+                    label: "Status",
+                    value: statusFilter,
+                    onRemove: () => setStatusFilter("All"),
+                    active: statusFilter !== "All",
+                  },
+                ].filter((f) => f.active) as FilterBadge[]}
+                onClearAll={() => {
+                  setSearchTerm("");
+                  setStatusFilter("All");
+                }}
+              />
+            )
+          }
           hiddenActions={[]}
           onView={(user) => router.push(`/users/${user._id}`)}
           onEdit={(user) => router.push(`/users/${user._id}/edit`)}

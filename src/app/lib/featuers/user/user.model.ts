@@ -60,4 +60,10 @@ const userSchema = new Schema(
   { timestamps: true },
 );
 
+// Indexes for performance
+userSchema.index({ status: 1 });
+userSchema.index({ isDeleted: 1 });
+userSchema.index({ createdAt: -1 });
+userSchema.index({ name: "text", email: "text" }); // Optional: text index for better searching
+
 export const User = models.User || model("User", userSchema);

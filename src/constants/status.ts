@@ -54,7 +54,7 @@ export const STATUS_STYLES: Record<string, StatusStyle> = {
   },
   maintenance: {
     label: "Maintenance",
-    color: "bg-emerald-100 text-emerald-700",
+    color: "bg-amber-100 text-amber-700",
   },
   normal: {
     label: "Normal",

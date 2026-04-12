@@ -31,10 +31,19 @@ export default function Header() {
 
   const isTopNav = activeNavStyle === "nav-top";
 
-  // Function to get page title from pathname
   const getPageTitle = (path: string) => {
     const segments = path.split("/").filter(Boolean);
     if (segments.length === 0) return "Dashboard";
+
+    // Standardize "Users" to "Members"
+    if (segments[0] === "users") {
+      if (segments.length === 1) return "Member Management";
+      if (segments.length === 2 && !["create", "trash"].includes(segments[1])) return "Member Details";
+      if (segments[1] === "create") return "Add Member";
+      if (segments[1] === "trash") return "Recycle Bin";
+      if (segments[2] === "edit") return "Edit Member";
+    }
+
     const lastSegment = segments[segments.length - 1];
     return lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1).replace(/-/g, " ");
   };

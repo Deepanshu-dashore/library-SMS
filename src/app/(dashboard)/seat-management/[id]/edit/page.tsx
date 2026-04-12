@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Save, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
+import { Button } from "@/components/shared/Button";
 
 export default function EditSeatPage() {
   const router = useRouter();
@@ -102,129 +103,116 @@ export default function EditSeatPage() {
         ]}
       />
 
-      <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="bg-white rounded-[32px] p-8 md:p-10 shadow-sm border border-gray-100 ring-1 ring-gray-100 space-y-8">
-
-          {/* Seat Number */}
-          <div className="space-y-2">
-            <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Seat Number *</label>
-            <input
-              required
-              type="text"
-              value={form.seatNumber}
-              onChange={e => setForm(f => ({ ...f, seatNumber: e.target.value.toUpperCase() }))}
-              className="w-full bg-gray-50/50 border border-gray-200 rounded-2xl px-5 py-4 text-2xl font-black text-gray-900 outline-none focus:ring-4 focus:ring-gray-900/5 focus:border-gray-900 transition-all tracking-wider"
-            />
-          </div>
-
-          {/* Price */}
-          <div className="space-y-2">
-            <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Monthly Price (₹) *</label>
-            <input
-              required
-              type="number"
-              min={0}
-              value={form.price}
-              onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))}
-              className="w-full bg-gray-50/50 border border-gray-200 rounded-2xl px-5 py-4 text-2xl font-black text-emerald-600 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all"
-            />
-          </div>
-
-          {/* Floor */}
-          <div className="space-y-2">
-            <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Floor *</label>
-            {floors.length > 0 ? (
-              <div className="flex flex-wrap gap-3">
-                {floors.map(fl => (
-                  <button
-                    key={fl}
-                    type="button"
-                    onClick={() => setForm(f => ({ ...f, floor: fl }))}
-                    className={`px-6 py-3 rounded-2xl font-black transition-all ${
-                      form.floor === fl
-                        ? "bg-gray-900 text-white shadow-xl"
-                        : "bg-gray-50 border-2 border-gray-200 text-gray-500 hover:border-gray-400"
-                    }`}
-                  >
-                    {fl}
-                  </button>
-                ))}
+      <form onSubmit={handleSubmit} className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="bg-white rounded-xl p-8 md:p-10 shadow-sm border border-gray-100 ring-1 ring-gray-100 space-y-8">
+      
+                {/* Seat Number */}
+                <div className="space-y-2">
+                  <label className="text-[12px] mb-1.5 inline-block font-bold text-gray-500 uppercase tracking-wider">Seat Number *</label>
+                  <input
+                    required
+                    type="text"
+                    placeholder="e.g. S1, A3, AC12"
+                    value={form.seatNumber}
+                    onChange={e => setForm(f => ({ ...f, seatNumber: e.target.value.toUpperCase() }))}
+                    className="w-full text-sm px-5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 transition-all outline-none"
+                  />
+                </div>
+      
+                {/* Price */}
+                <div className="space-y-2">
+                  <label className="text-[12px] mb-1.5 inline-block font-bold text-gray-500 uppercase tracking-wider">Monthly Price (₹) *</label>
+                  <input
+                    required
+                    type="number"
+                    min={0}
+                    value={form.price}
+                    onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))}
+                    className="w-full text-sm px-5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 transition-all outline-none"
+                  />
+                </div>
+      
+                {/* Floor */}
+                <div className="space-y-2">
+                  <label className="text-[12px] mb-1.5 inline-block font-bold text-gray-500 uppercase tracking-wider">Floor *</label>
+                  {floors.length > 0 ? (
+                    <div className="flex flex-wrap gap-3">
+                      {floors.map(fl => (
+                        <button
+                          key={fl}
+                          type="button"
+                          onClick={() => setForm(f => ({ ...f, floor: fl }))}
+                          className={`px-5 capitalize py-2.5 rounded-lg text-sm font-bold transition-all ${
+                            form.floor === fl
+                              ? "bg-indigo-600 text-white shadow-md border-indigo-600"
+                              : "bg-gray-50 cursor-pointer border border-gray-200 text-gray-500 hover:border-gray-300"
+                          }`}
+                        >
+                          {fl}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <input
+                        required
+                        type="text"
+                        placeholder="e.g. Ground, 1st, 2nd"
+                        value={form.floor}
+                        onChange={e => setForm(f => ({ ...f, floor: e.target.value }))}
+                        className="w-full text-sm px-5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 transition-all outline-none"
+                      />
+                      <p className="text-xs text-amber-600 font-bold pl-2">
+                        ⚠️ No floors configured yet. Go to Settings → Edit Profile to add floors.
+                      </p>
+                    </div>
+                  )}
+                </div>
+      
+                {/* Type */}
+                <div className="space-y-2">
+                  <label className="text-[12px] mb-1.5 inline-block font-bold text-gray-500 uppercase tracking-wider">Seat Category *</label>
+                  <div className="grid grid-cols-2 gap-4">
+                    {(["normal", "ac"] as const).map(type => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, type }))}
+                        className={`py-3 rounded-lg text-sm font-bold transition-all ${
+                          form.type === type
+                            ? "bg-indigo-600 text-white shadow-md border-indigo-600"
+                            : "bg-gray-50 border border-gray-200 text-gray-500 hover:border-gray-300"
+                        }`}
+                      >
+                        {type === "ac" ? "AC Seat" : "Normal Seat"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
-            ) : (
-              <input
-                required
-                type="text"
-                placeholder="e.g. Ground, 1st"
-                value={form.floor}
-                onChange={e => setForm(f => ({ ...f, floor: e.target.value }))}
-                className="w-full bg-gray-50/50 border border-gray-200 rounded-2xl px-5 py-4 text-xl font-black text-gray-900 outline-none focus:ring-4 focus:ring-gray-900/5 focus:border-gray-900 transition-all"
-              />
-            )}
-          </div>
-
-          {/* Type */}
-          <div className="space-y-3">
-            <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Seat Category *</label>
-            <div className="grid grid-cols-2 gap-4">
-              {(["normal", "ac"] as const).map(type => (
-                <button
-                  key={type}
+      
+              <div className="flex justify-end gap-4 pt-4 border-t border-gray-100">
+                <Button
                   type="button"
-                  onClick={() => setForm(f => ({ ...f, type }))}
-                  className={`py-5 rounded-[20px] font-black text-lg transition-all ${
-                    form.type === type
-                      ? "bg-gray-900 text-white shadow-2xl"
-                      : "bg-gray-50 border-2 border-gray-200 text-gray-400 hover:border-gray-400"
-                  }`}
+                  variant="outline"
+                  onClick={() => router.push("/seat-management")}
+                  className="px-8 py-3 rounded-lg text-sm font-bold border-gray-300/70 bg-white"
                 >
-                  {type === "ac" ? "❄️ AC" : "🪑 Normal"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Status */}
-          <div className="space-y-3">
-            <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Seat Status</label>
-            <div className="flex flex-wrap gap-3">
-              {(["available", "occupied", "maintenance"] as const).map(st => (
-                <button
-                  key={st}
-                  type="button"
-                  onClick={() => setForm(f => ({ ...f, status: st }))}
-                  className={`px-6 py-3 rounded-2xl font-black capitalize transition-all ${
-                    form.status === st
-                      ? st === "available"   ? "bg-green-600 text-white shadow-xl shadow-green-100"
-                        : st === "occupied"  ? "bg-red-500 text-white shadow-xl shadow-red-100"
-                        : "bg-amber-500 text-white shadow-xl shadow-amber-100"
-                      : "bg-gray-50 border-2 border-gray-200 text-gray-400 hover:border-gray-400"
-                  }`}
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  isLoading={submitting}
+                  icon="solar:armchair-bold"
+                  iconPosition="right"
+                  className="px-8 py-3 rounded-lg text-sm font-bold bg-gray-800 hover:bg-indigo-700 text-white shadow-md"
+                  color="#1e2939"
+                  hoverColor="#101828"
                 >
-                  {st}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex gap-4">
-          <button
-            type="button"
-            onClick={() => router.push("/seat-management")}
-            className="px-10 py-5 bg-white border border-gray-200 text-gray-500 font-bold rounded-[24px] hover:bg-gray-50 transition-all"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-[28px] font-black text-xl flex items-center justify-center gap-3 transition-all shadow-2xl shadow-blue-100 active:scale-95 disabled:opacity-50"
-          >
-            {submitting ? <Loader2 className="animate-spin" size={22} /> : <Save size={22} />}
-            {submitting ? "Saving..." : "Save Changes"}
-          </button>
-        </div>
-      </form>
+                  {submitting ? "Adding..." : "Add Seat"}
+                </Button>
+              </div>
+            </form>
     </div>
   );
 }

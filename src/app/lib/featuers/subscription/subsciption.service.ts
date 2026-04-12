@@ -24,6 +24,18 @@ export class SubscriptionService {
         throw new Error("Seat not found");
       }
       const amount = Math.round((seat.price / 30) * durationDays);
+
+      // Check if user already has an active subscription
+      const userConflict = await Subscription.findOne({
+        userId,
+        status: "active",
+        endDate: { $gte: new Date() },
+      }).session(session);
+
+      if (userConflict) {
+        throw new Error(`Member already has an active subscription until ${userConflict.endDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`);
+      }
+
       const conflict = await Subscription.findOne({
         seatId,
         status: "active",

@@ -46,7 +46,10 @@ export class CloudinaryService {
     }
   }
 
-  static async delete(fileId: string, resource_type = "raw"): Promise<{ success: boolean } | null> {
+  static async delete(
+    fileId: string,
+    resource_type = "raw",
+  ): Promise<{ success: boolean } | null> {
     try {
       let publicId: string | null = null;
       const fileName = fileId.split("/");
@@ -56,7 +59,7 @@ export class CloudinaryService {
         publicId = fileName.slice(1).join("/");
       }
       if (!publicId) return null;
-      
+
       const result = await cloudinary.uploader.destroy(publicId, {
         resource_type,
       });
@@ -72,4 +75,3 @@ export class CloudinaryService {
     }
   }
 }
-

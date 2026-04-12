@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import "@/app/lib/models"; // registers all Mongoose schemas at connection time
 
 type ConnectionObject = {
   isConnected?: number;

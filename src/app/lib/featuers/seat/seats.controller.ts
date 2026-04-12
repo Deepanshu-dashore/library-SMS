@@ -195,4 +195,34 @@ export class SeatController {
       return ApiResponse(500, null, error.message || error);
     }
   }
+
+  static async maintanceController(
+    req: NextRequest,
+    params: Promise<{ id: string }>,
+  ) {
+    const library = await verifyJWT();
+    if (!library) return ApiResponse(401, null, "Unauthorized");
+    try {
+      const { id } = await params;
+      const seat = await SeatService.maintance(id);
+      return ApiResponse(200, seat, "Seat marked as under maintenance");
+    } catch (error: any) {
+      return ApiResponse(400, null, error.message || "Failed to update maintenance status");
+    }
+  }
+
+  static async completeMaintanceController(
+    req: NextRequest,
+    params: Promise<{ id: string }>,
+  ) {
+    const library = await verifyJWT();
+    if (!library) return ApiResponse(401, null, "Unauthorized");
+    try {
+      const { id } = await params;
+      const seat = await SeatService.completeMaintance(id);
+      return ApiResponse(200, seat, "Seat maintenance completed — now available");
+    } catch (error: any) {
+      return ApiResponse(400, null, error.message || "Failed to complete maintenance");
+    }
+  }
 }

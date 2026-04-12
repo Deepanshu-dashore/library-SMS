@@ -3,6 +3,7 @@ import { User } from "./user.model";
 
 import { Subscription } from "../subscription/subscription.model";
 import { Seat } from "../seat/seats.model";
+import { Payment } from "../payment/payment.model";
 
 export class UserService {
   static async createUserService(data: any) {
@@ -41,23 +42,50 @@ export class UserService {
   static async getAllUserService(page: number, limit: number, filter: any) {
     await connectDB();
     const finalFilter = { ...filter, isDeleted: { $ne: true } };
-    const users = await User.find(finalFilter)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
-    const total = await User.countDocuments(finalFilter);
-    return { users, total };
+
+    // Perform queries in parallel for better performance
+    // Individual countDocuments on indexed fields is often faster than aggregation for simple totals
+    const [users, total, activeCount, inactiveCount, unverifyCount] =
+      await Promise.all([
+        User.find(finalFilter)
+          .select("name email number category status course photo createdAt")
+          .sort({ createdAt: -1 })
+          .skip((page - 1) * limit)
+          .limit(limit)
+          .lean(),
+        User.countDocuments(finalFilter),
+        User.countDocuments({ status: "Active", isDeleted: { $ne: true } }),
+        User.countDocuments({ status: "Inactive", isDeleted: { $ne: true } }),
+        User.countDocuments({ status: "Unverify", isDeleted: { $ne: true } }),
+      ]);
+
+    return {
+      users,
+      total,
+      stats: {
+        total: activeCount + inactiveCount + unverifyCount,
+        active: activeCount,
+        inactive: inactiveCount,
+        unverify: unverifyCount,
+      },
+    };
   }
 
   static async getUserByIdService(id: string) {
     await connectDB();
-    const user = await User.findById(id);
-    return user;
+    const subscription = await Subscription.findOne({ userId: id })
+      .populate("seatId", "seatNumber floor type")
+      .lean();
+    const payment = await Payment.findOne({ userId: id }).lean();
+    const user = await User.findById(id).select("-password -__v").lean();
+    return { user, subscription, payment };
   }
 
   static async updateUserService(id: string, data: any) {
     await connectDB();
-    const user = await User.findByIdAndUpdate(id, data, { returnDocument: 'after' });
+    const user = await User.findByIdAndUpdate(id, data, {
+      returnDocument: "after",
+    });
     return user;
   }
 

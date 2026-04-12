@@ -13,6 +13,7 @@ import {
   TrashIcon
 } from "@heroicons/react/24/outline";
 import { StatusBadge } from "./StatusBadge";
+import { motion, AnimatePresence } from "framer-motion";
 
 export type ColumnType = 'text' | 'user' | 'date' | 'status' | 'custom';
 export type StatusColor = 'success' | 'warning' | 'error' | 'info' | 'default';
@@ -80,7 +81,8 @@ export interface DataTableProps<T> {
   additionalActions?: ActionDef<T>[];
   rowKey: (row: T) => string;
   
-  // State Overrides (if fully controlled, though we can do uncontrolled fallback)
+  // Custom Filter Chips
+  filterChips?: React.ReactNode;
 }
 
 function DropdownMenu<T>({ 
@@ -176,6 +178,7 @@ export function DataTable<T>({
   additionalActions = [],
   rowKey,
   showCheckBox = false,
+  filterChips,
 }: DataTableProps<T>) {
   
   const [searchInput, setSearchInput] = useState("");
@@ -243,33 +246,50 @@ export function DataTable<T>({
   };
 
   return (
-    <div className="w-full bg-white rounded-2xl shadow-sm border border-gray-200 font-sans text-sm flex flex-col">
+    <div className="w-full bg-white rounded-2xl shadow-xs border border-gray-100 font-sans text-sm flex flex-col">
       
       {/* 1. Tabs Overlay */}
       {tabs && tabs.length > 0 && (
-        <div className="flex px-2 pt-2 border-b border-gray-100 overflow-x-auto hide-scrollbar">
+        <div className="flex gap-10 px-6 pt-1 border-b border-gray-100 overflow-x-auto hide-scrollbar">
           {tabs.map((tab) => {
-             const isActive = activeTab === tab.value;
-             return (
-               <button
-                 key={tab.value}
-                 onClick={() => onTabChange?.(tab.value)}
-                 className={`flex items-center gap-2 px-6 py-4 border-b-2 font-bold transition-all whitespace-nowrap ${
-                   isActive 
-                     ? 'border-gray-900 text-gray-900' 
-                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                 }`}
-               >
-                 {tab.label}
-                 {tab.count !== undefined && (
-                   <span className={`px-2 py-0.5 rounded-full text-xs ${
-                      isActive ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600'
-                   }`}>
-                     {tab.count}
-                   </span>
-                 )}
-               </button>
-             );
+            const isActive = activeTab === tab.value;
+            // Map status color to pill styles with active/hover variants
+            const pillStyles = {
+              success: isActive ? "bg-emerald-600 text-white" : "bg-emerald-100/80 cursor-pointer text-emerald-700 group-hover:bg-emerald-100",
+              warning: isActive ? "bg-amber-600 text-white"   : "bg-amber-100/80 cursor-pointer text-amber-700 group-hover:bg-amber-100",
+              error:   isActive ? "bg-red-600 text-white"     : "bg-red-100/80 cursor-pointer text-red-700 group-hover:bg-red-100",
+              info:    isActive ? "bg-indigo-600 text-white"  : "bg-indigo-100/80 cursor-pointer text-indigo-700 group-hover:bg-indigo-100",
+              default: isActive ? "bg-gray-900 text-white"    : "bg-gray-200/80 cursor-pointer text-gray-700 group-hover:bg-gray-200",
+            }[tab.color || 'default'];
+
+            return (
+              <button
+                key={tab.value}
+                onClick={() => onTabChange?.(tab.value)}
+                className={`group relative flex items-center gap-2.5 py-2.5 transition-all whitespace-nowrap outline-none`}
+              >
+                <span className={`text-xs my-auto font-semibold tracking-tight transition-colors ${
+                  isActive ? "text-gray-900 cursor-pointer" : "text-gray-400 group-hover:text-gray-600 cursor-pointer"
+                }`}>
+                  {tab.label}
+                </span>
+
+                {tab.count !== undefined && (
+                  <span className={`px-2 py-0.5 flex items-center justify-center min-w-6.5 h-6.5 rounded-md text-xs font-black tracking-tighter transition-all duration-300 ${pillStyles}`}>
+                    {tab.count}
+                  </span>
+                )}
+
+                {/* Animated Active Underline */}
+                {isActive && (
+                  <motion.div 
+                    layoutId="activeTabUnderline"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900 rounded-full z-10"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+              </button>
+            );
           })}
         </div>
       )}
@@ -304,11 +324,17 @@ export function DataTable<T>({
         {/* Placeholder for Add/Export buttons if needed from parent */}
       </div>
 
+      {filterChips && (
+        <div className="px-4 pb-2">
+          {filterChips}
+        </div>
+      )}
+
       {/* 3. Main Data Table */}
       <div className="w-full overflow-x-auto relative min-h-[300px]">
         <table className="w-full text-left border-collapse whitespace-nowrap">
           <thead>
-            <tr className="bg-gray-50/50 border-y border-dashed border-gray-200">
+            <tr className="bg-gray-50 border-y border-dashed border-gray-200">
                {/* Checkbox column */}
                {showCheckBox && (
                  <th className="px-6 py-4 w-12">

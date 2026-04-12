@@ -56,8 +56,8 @@ export class SubscriptionController {
         subscription,
         "Subscription created successfully",
       );
-    } catch (error) {
-      return ApiResponse(500, null, "Failed to create subscription");
+    } catch (error: any) {
+      return ApiResponse(400, null, error.message || "Failed to create subscription");
     }
   }
   static async transferSubscription(req: Request) {

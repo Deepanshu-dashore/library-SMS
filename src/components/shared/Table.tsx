@@ -398,26 +398,10 @@ export default function Table({
 
                         {!hiddenActions.includes("View") ||
                         !hiddenActions.includes("Edit") ||
-                        !hiddenActions.includes("Delete") ? (
+                        !hiddenActions.includes("Delete") ||
+                        (customActions && customActions.some((a: any) => a.show && a.show(row))) ? (
                           <td className={`lg:px-4 md:px-2 p-1 md:py-2 text-xs md:text-sm font-medium text-center border-b-[0.8px] border-dashed ${mode === "light" ? "border-gray-100" : "border-gray-800"}`}>
                             <div className="flex items-center justify-center gap-2">
-                              {/* Custom Actions */}
-                              {customActions &&
-                                customActions.map(
-                                  (action: any, index: number) =>
-                                    action.show &&
-                                    action.show(row) && (
-                                      <button
-                                        key={index}
-                                        onClick={() => action.onClick(row)}
-                                        className={`cursor-pointer px-3 py-1.5 text-xs font-semibold rounded-lg text-white ${action.className ||
-                                          "bg-blue-500 hover:bg-blue-600"
-                                          }`}
-                                      >
-                                        {action.label}
-                                      </button>
-                                    )
-                                )}
                               <div className="relative inline-block text-left">
                                 <button
                                   className={`p-2 rounded-md cursor-pointer ${mode === "light" ? "hover:bg-gray-100" : "hover:bg-gray-700"} transition duration-200 flex items-center justify-center`}
@@ -449,6 +433,33 @@ export default function Table({
                                     }}
                                     className={`min-w-max px-1 py-1 space-y-1 ${mode === "light" ? "bg-white border-gray-100" : "bg-gray-800 border-gray-700"} border rounded-lg shadow-lg`}
                                   >
+                                    {/* Handle Custom Actions First (if any) */}
+                                    {customActions && customActions.map((action: any, i: number) => (
+                                      action.show && action.show(row) && (
+                                        <div key={`custom-${i}`}>
+                                          <button
+                                            onClick={() => {
+                                              action.onClick(row);
+                                              setActiveRow(null);
+                                            }}
+                                            className={`flex cursor-pointer items-center gap-2 w-full px-4 py-1.5 text-left rounded-md ${mode === "light" ? "text-gray-700 hover:bg-gray-100" : "text-gray-300 hover:bg-gray-700"} transition`}
+                                          >
+                                            {action.icon ? (
+                                              <Icon icon={action.icon} className="md:w-5 w-4 md:h-5 h-4 text-[var(--gray-400)] shrink-0" />
+                                            ) : (
+                                              <Icon icon="mdi:lightning-bolt" className="md:w-5 w-4 md:h-5 h-4 text-[var(--gray-400)] shrink-0" />
+                                            )}
+                                            {action.label}
+                                          </button>
+                                        </div>
+                                      )
+                                    ))}
+
+                                    {/* Add Divider if custom actions exist and builtin actions are also shown */}
+                                    {customActions && customActions.some((a: any) => a.show && a.show(row)) && (
+                                      <div className="h-[1px] bg-var(--gray-100) my-1 mx-1" />
+                                    )}
+
                                     {!hiddenActions.includes("View") && (
                                       <div>
                                         <button

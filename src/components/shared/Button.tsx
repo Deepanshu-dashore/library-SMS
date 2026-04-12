@@ -8,6 +8,7 @@ interface ButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
   variant?: "primary" | "secondary" | "danger" | "view" | "edit" | "delete" | "submit" | "outline" | "ghost";
   size?: "xs" | "sm" | "md" | "lg";
   icon?: string;
+  hideIcon?: boolean;
   iconPosition?: "left" | "right";
   isLoading?: boolean;
   color?: string; // Custom color override
@@ -20,6 +21,7 @@ export const Button = ({
   variant = "primary",
   size = "md",
   icon,
+  hideIcon=false,
   iconPosition = "left",
   isLoading = false,
   color: customColor,
@@ -63,7 +65,7 @@ export const Button = ({
       case "view":
         return "bg-indigo-500 text-white hover:bg-indigo-600 shadow-sm shadow-indigo-200";
       case "edit":
-        return "bg-blue-500 text-white hover:bg-blue-600 shadow-sm shadow-blue-200";
+        return "bg-gray-800 text-white hover:bg-gray-900 shadow-sm shadow-gray-200";
       case "submit":
         return "text-white shadow-lg hover:shadow-xl";
       case "outline":
@@ -96,9 +98,9 @@ export const Button = ({
   };
 
   const buttonIcon = () => {
-    if (isLoading) return <Icon icon="mdi:loading" className="animate-spin w-[1.2em] h-[1.2em]" />;
-    const iconToUse = icon || (variant === "view" ? "mage:box-3d-scan-fill" : variant === "edit" ? "mingcute:edit-4-fill" : variant === "delete" ? "solar:trash-bin-trash-bold" : null);
-    if (iconToUse) return <Icon icon={iconToUse} className="w-[1.2em] h-[1.2em]" />;
+    if (isLoading) return <Icon icon="mdi:loading" className="animate-spin w-[1.3em] h-[1.3em]" />;
+    const iconToUse = icon || (variant === "view" ? "mage:box-3d-scan-fill" : variant === "edit" ? "lets-icons:edit-fill" : variant === "delete" ? "solar:trash-bin-minimalistic-bold" : null);
+    if (iconToUse) return <Icon icon={iconToUse} className="w-[1.3em] h-[1.3em]" />;
     return null;
   };
 
@@ -118,9 +120,9 @@ export const Button = ({
       style={getBackgroundStyle()}
       {...props}
     >
-      {iconPosition === "left" && buttonIcon()}
+      {!hideIcon && iconPosition === "left" && buttonIcon()}
       {children}
-      {iconPosition === "right" && buttonIcon()}
+      {!hideIcon && iconPosition === "right" && buttonIcon()}
     </motion.button>
   );
 };

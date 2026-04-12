@@ -44,6 +44,7 @@ const subscriptionSchema = new Schema(
   { timestamps: true },
 );
 
+subscriptionSchema.index({ userId: 1, status: 1 });
 subscriptionSchema.index({ seatId: 1, status: 1 });
 subscriptionSchema.index({ seatId: 1, endDate: 1 });
 

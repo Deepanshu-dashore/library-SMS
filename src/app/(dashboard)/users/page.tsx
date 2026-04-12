@@ -1,7 +1,7 @@
 import UserManagement from "./UserManagement";
 
 export const metadata = {
-  title: "User Management | Library SMS",
+  title: "Member Management | Library SMS",
   description: "Manage library users, members and staff.",
 };
 

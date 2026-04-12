@@ -13,18 +13,20 @@ export class SeatService {
     await connectDB();
     return await Seat.insertMany(data);
   }
-  static async getAllSeatService(filters: {
-    floor?: string;
-    status?: string;
-    type?: string;
-    page?: number;
-    limit?: number;
-  } = {}) {
+  static async getAllSeatService(
+    filters: {
+      floor?: string;
+      status?: string;
+      type?: string;
+      page?: number;
+      limit?: number;
+    } = {},
+  ) {
     await connectDB();
     const query: Record<string, any> = { isDeleted: { $ne: true } };
-    if (filters.floor)  query.floor  = filters.floor;
+    if (filters.floor) query.floor = filters.floor;
     if (filters.status) query.status = filters.status;
-    if (filters.type)   query.type   = filters.type;
+    if (filters.type) query.type = filters.type;
 
     let seatsQuery = Seat.find(query)
       .select("-__v")
@@ -36,11 +38,23 @@ export class SeatService {
       seatsQuery = seatsQuery.skip(skip).limit(filters.limit);
     }
 
-    const [seats, totalCount, totalSeats, available, occupied, maintenance, acSeats, floors] = await Promise.all([
+    const [
+      seats,
+      totalCount,
+      totalSeats,
+      available,
+      occupied,
+      maintenance,
+      acSeats,
+      floors,
+    ] = await Promise.all([
       seatsQuery,
       Seat.countDocuments(query),
       Seat.countDocuments({ isDeleted: { $ne: true } }),
-      Seat.countDocuments({ isDeleted: { $ne: true }, status: { $in: ["available", null, ""] } }),
+      Seat.countDocuments({
+        isDeleted: { $ne: true },
+        status: { $in: ["available", null, ""] },
+      }),
       Seat.countDocuments({ isDeleted: { $ne: true }, status: "occupied" }),
       Seat.countDocuments({ isDeleted: { $ne: true }, status: "maintenance" }),
       Seat.countDocuments({ isDeleted: { $ne: true }, type: "ac" }),
@@ -88,6 +102,53 @@ export class SeatService {
       "-__v",
     );
   }
+
+  static async maintance(seatId: string) {
+    await connectDB();
+    const seat = await Seat.findById(seatId);
+    if (!seat) throw new Error("Seat not found");
+
+    if (seat.status === "maintenance") {
+      throw new Error("Seat is already in maintenance mode");
+    }
+    if (seat.status === "occupied") {
+      // Find who's occupying it for a helpful message
+      const activeSub = await Subscription.findOne({
+        seatId,
+        status: "active",
+        endDate: { $gte: new Date() },
+      }).populate("userId");
+      const user = activeSub?.userId as any;
+      throw new Error(
+        `Cannot mark as maintenance. Member ${user?.name || "Unknown"} has an active subscription until ${new Date(activeSub!.endDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}.`,
+      );
+    }
+
+    return await Seat.findByIdAndUpdate(
+      seatId,
+      { status: "maintenance" },
+      { new: true },
+    );
+  }
+  static async completeMaintance(seatId: string) {
+    await connectDB();
+    const seat = await Seat.findById(seatId);
+    if (!seat) {
+      throw new Error("Seat not found");
+    }
+    if (seat.status !== "maintenance") {
+      throw new Error("Seat is not in maintenance");
+    }
+    if (seat.status === "occupied") {
+      throw new Error("Seat is occupied can't complete maintenance");
+    }
+    return await Seat.findByIdAndUpdate(
+      seatId,
+      { status: "available" },
+      { returnDocument: "after" },
+    );
+  }
+
   static async getSeatByIdService(id: string) {
     await connectDB();
     return await Seat.findById(id);
