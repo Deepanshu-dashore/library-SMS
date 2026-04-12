@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { Loader2, Save, X, Phone, Mail, MapPin, Clock, Calendar, Layers, Plus } from "lucide-react";
 import { Button } from "@/components/shared/Button";
+import { useDispatch } from "react-redux";
+import { setUserSuccess } from "@/store/userSlice";
 
 interface HelpDesk {
   number: string;
@@ -27,6 +29,7 @@ interface LibraryProfile {
 
 export default function EditProfilePage() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [formData, setFormData] = useState<LibraryProfile>({
@@ -145,6 +148,7 @@ export default function EditProfilePage() {
       const data = await response.json();
 
       if (response.ok && data.success) {
+        dispatch(setUserSuccess(data.data));
         toast.success("Profile updated successfully");
         router.push("/settings");
       } else {

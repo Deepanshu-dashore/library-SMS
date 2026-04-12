@@ -2,15 +2,19 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import ModeToggle from "./shared/ModeToggle";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "@iconify/react";
 import { MENU_ITEMS } from "@/constants/menuItems";
 import toast from "react-hot-toast";
+import { setMode } from "@/store/themeSlice";
+import { logoutUser } from "@/store/userSlice";
 
 export default function Header() {
+  const dispatch = useDispatch();
   const { mode, activeNavStyle, color } = useSelector((state: any) => state.theme);
+  const { currentUser } = useSelector((state: any) => state.user);
   const pathname = usePathname();
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -19,6 +23,7 @@ export default function Header() {
     try {
       const res = await fetch("/api/auth/logout", { method: "POST" });
       if (res.ok) {
+        dispatch(logoutUser());
         toast.success("Logged out successfully");
         router.push("/login");
       } else {
@@ -28,8 +33,22 @@ export default function Header() {
       toast.error("An error occurred during logout");
     }
   };
-
+  
   const isTopNav = activeNavStyle === "nav-top";
+
+  const MenuItem = ({ icon, label, href, onClick, className = "", rightElement }: any) => (
+    <Link
+      href={href}
+      onClick={onClick}
+      className={`flex items-center justify-between w-full px-5 py-2.5 transition-all hover:bg-gray-500/5 group ${className}`}
+    >
+      <div className="flex items-center gap-4">
+        <Icon icon={icon} className="w-5 h-5 text-[var(--gray-500)] group-hover:text-[var(--text)] transition-colors" />
+        <span className="text-sm font-medium text-[var(--gray-800)]">{label}</span>
+      </div>
+      {rightElement}
+    </Link>
+  );
 
   const getPageTitle = (path: string) => {
     const segments = path.split("/").filter(Boolean);
@@ -128,78 +147,97 @@ export default function Header() {
             <div className="relative">
               <button 
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 pl-2 group cursor-pointer"
+                className="flex items-center gap-3 px-4 py-2 cursor-pointer rounded-2xl border border-[var(--border)] bg-[var(--bg)] hover:border-[var(--gray-200)] transition-all duration-200 group active:scale-95 shadow-xs"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold border-2 border-transparent group-hover:border-blue-500/50 transition-all">
-                  AD
+                <div className="w-6 h-6 rounded-full overflow-hidden shadow-sm">
+                  <img 
+                    src={currentUser?.logo || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.name || "User"}`} 
+                    alt="User" 
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <div className="hidden sm:block text-left">
-                  <p className="text-xs font-semibold leading-none">Admin</p>
-                  <p className="text-[10px] text-[var(--gray-500)]">Super Admin</p>
+                <div className="hidden sm:flex items-center gap-2">
+                  <span className="text-sm font-semibold text-[var(--text)]">{currentUser?.name || "User"}</span>
                 </div>
                 <Icon 
                   icon="lucide:chevron-down" 
-                  className={`w-4 h-4 text-[var(--gray-400)] transition-transform duration-200 ${showUserMenu ? "rotate-180" : ""}`} 
+                  className={`w-4 h-4 text-[var(--gray-500)] transition-transform duration-300 ${showUserMenu ? "rotate-180" : ""}`} 
                 />
               </button>
 
               <AnimatePresence>
                 {showUserMenu && (
                   <>
-                    {/* Invisible Click-away Layer */}
-                    <div 
-                      className="fixed inset-0 z-0" 
-                      onClick={() => setShowUserMenu(false)}
-                    />
+                    <div className="fixed inset-0 z-0" onClick={() => setShowUserMenu(false)} />
                     
                     <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      initial={{ opacity: 0, y: 10, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      transition={{ duration: 0.2, ease: "easeOut" }}
-                      className="absolute right-0 mt-5 w-56 rounded-2xl shadow-2xl border border-[var(--border)] overflow-hidden z-10 backdrop-blur-xl"
+                      exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                      transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+                      className="absolute right-0 mt-3 w-64 rounded-xl shadow-2xl border border-[var(--border)] overflow-hidden z-100"
                       style={{ 
-                        backgroundColor: mode === "light" ? "rgba(255, 255, 255, 0.9)" : "rgba(28, 37, 46, 0.9)",
+                        backgroundColor: mode === "light" ? "#ffffff" : "#1C1C1E",
                       }}
                     >
-                      <div className="p-4 border-b border-[var(--border)]">
-                        <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Signed in as</p>
-                        <p className="text-sm font-bold text-[var(--text)] truncate">admin@library.com</p>
+                      {/* Dropdown Header */}
+                      <div className="px-5 py-2.5 flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+                          <img 
+                            src={currentUser?.logo || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.name || "User"}`} 
+                            alt="Avatar" 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-0.5">
+                            <h3 className="text-base font-medium text-[var(--text)]">{currentUser?.name || "User"}</h3>
+                          </div>
+                          <p className="text-sm text-gray-500 font-medium">{currentUser?.email || "user@email.com"}</p>
+                        </div>
                       </div>
 
-                      <div className="p-2">
-                        <Link
+                      <div className="h-px bg-[var(--border)]" />
+
+                      <div className="p-0">
+                        <MenuItem 
+                          icon="lucide:settings-2" 
+                          label="Profile Settings" 
                           href="/settings"
                           onClick={() => setShowUserMenu(false)}
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all hover:bg-gray-100 dark:hover:bg-gray-800 text-[var(--text)]"
-                        >
-                          <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
-                            <Icon icon="lucide:user" className="w-4 h-4" />
-                          </div>
-                          View Profile
-                        </Link>
+                        />
+                        <MenuItem 
+                          icon="lucide:help-circle" 
+                          label="Help Center" 
+                          href="/help-center"
+                          onClick={() => setShowUserMenu(false)}
+                        />
                         
-                        <Link
-                          href="/settings"
-                          onClick={() => setShowUserMenu(false)}
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all hover:bg-gray-100 dark:hover:bg-gray-800 text-[var(--text)]"
+                        {/* <button
+                          onClick={() => dispatch(setMode(mode === "light" ? "dark" : "light"))}
+                          className="flex items-center justify-between w-full px-5 py-3.5 transition-all hover:bg-gray-500/5 group"
                         >
-                          <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-900/30 text-purple-600 flex items-center justify-center">
-                            <Icon icon="lucide:settings" className="w-4 h-4" />
+                          <div className="flex items-center gap-4">
+                            <Icon 
+                              icon={mode === "light" ? "lucide:moon" : "lucide:sun"} 
+                              className="w-5 h-5 text-[var(--gray-500)] group-hover:text-[var(--text)] transition-colors" 
+                            />
+                            <span className="text-sm font-medium text-[var(--text)]">
+                              {mode === "light" ? "Dark Mode" : "Light Mode"}
+                            </span>
                           </div>
-                          Account Settings
-                        </Link>
-                      </div>
+                        </button> */}
+                        
+                        <div className="h-px bg-[var(--border)] my-2" />
 
-                      <div className="p-2 border-t border-[var(--border)]">
                         <button
                           onClick={handleLogout}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600"
+                          className="flex items-center justify-center gap-4 w-full cursor-pointer p-2 pt-0 transition-all hover:bg-gray-500/5 group"
                         >
-                          <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-600 flex items-center justify-center">
-                            <Icon icon="lucide:log-out" className="w-4 h-4" />
+                          <div className="flex items-center gap-4 w-full group-hover:bg-red-50 border border-transparent group-hover:border-red-100/90 p-2 px-5 rounded-md">
+                            <Icon icon="lucide:log-out" className="w-5 h-5 text-[var(--gray-500)] group-hover:text-red-500 transition-colors" />
+                            <span className="text-sm font-medium text-[var(--text)] group-hover:text-red-500">Sign Out</span>
                           </div>
-                          Logout
                         </button>
                       </div>
                     </motion.div>

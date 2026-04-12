@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MENU_ITEMS } from "@/constants/menuItems";
 import { LogOut, ChevronRight } from "lucide-react";
+import Image from "next/image";
 
 export const Sidebar = () => {
   const pathname = usePathname();
@@ -12,8 +13,8 @@ export const Sidebar = () => {
   return (
     <div className="flex flex-col h-screen w-64 bg-[#0a0a0a] text-[#ededed] border-r border-[#262626] transition-all duration-300 ease-in-out">
       <div className="p-6 flex items-center gap-3">
-        <div className="w-8 h-8 bg-linear-to-tr from-blue-600 to-purple-600 rounded-lg" />
-        <h1 className="text-xl font-bold tracking-tight">Library SMS</h1>
+        <Image height="100" width="100" alt="Library Management software" src="/LogoWithoutBg.png" className="w-8 h-8 rounded-lg" />
+        <h1 className="text-xl font-bold tracking-tight">Library Management software</h1>
       </div>
 
       <nav className="flex-1 px-4 py-4 space-y-1">

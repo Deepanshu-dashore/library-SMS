@@ -7,6 +7,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setIsCollapsed, handleNavDirection } from "../store/themeSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import { MENU_ITEMS } from "@/constants/menuItems";
+import Image from "next/image";
 
 export const Sidebar = () => {
   const [openMenu, setOpenMenu] = useState<number | null>(null);
@@ -61,9 +62,9 @@ export const Sidebar = () => {
       </button>
 
       {/* Logo */}
-      <div className="p-2.5 border-b" style={{ borderColor: "var(--border)" }}>
+      <div className="p-2.5 pt-4 border-b" style={{ borderColor: "var(--border)" }}>
         <div className="flex items-center gap-3 overflow-visible px-2">
-          <div className="w-8 h-8 rounded-lg overflow-hidden bg-gradient-to-tr from-blue-600 to-purple-600 flex-shrink-0" />
+          <Image height="100" width="100" alt="Library Management software" src="/LogoWithoutBg.png" className={`rounded-lg ${isCollapsed ? "w-8 h-8" : "w-12 h-12"}`} />
           <AnimatePresence>
             {!isCollapsed && (
               <motion.div
@@ -72,7 +73,7 @@ export const Sidebar = () => {
                 exit={{ opacity: 0, x: -10 }}
                 transition={{ duration: 0.3 }}
               >
-                <h1 className="text-lg font-extrabold" style={{ color: "var(--text)" }}>
+                <h1 className="text-lg font-bold tracking-wide" style={{ color: "var(--text)" }}>
                   Library SMS
                 </h1>
                 <p className="text-[9px]" style={{ color: "var(--gray-500)" }}>

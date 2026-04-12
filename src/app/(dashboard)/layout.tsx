@@ -27,7 +27,7 @@ export default function DashboardLayout({
         <div className="flex-1 flex flex-col overflow-hidden">
           <Header />
           <main className="flex-1 overflow-y-auto bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.05))] via-transparent to-transparent">
-            <div className="px-10 py-10 max-w-[1200px] mx-auto">
+            <div className="px-10 py-10 max-w-[1200px] mx-auto relative z-0">
                 {children}
             </div>
           </main>

@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { setUserSuccess } from "@/store/userSlice";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -21,6 +24,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           }
         } else {
            // Auth successful, allow access
+           dispatch(setUserSuccess(data.data));
         }
       } catch (error) {
         if (pathname !== "/login") {
@@ -32,7 +36,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     };
 
     checkAuth();
-  }, [pathname, router]);
+  }, [pathname, router, dispatch]);
 
   if (loading) {
      return (
