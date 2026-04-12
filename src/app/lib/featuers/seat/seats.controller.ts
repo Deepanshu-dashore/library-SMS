@@ -74,7 +74,10 @@ export class SeatController {
       const floor  = searchParams.get("floor")  || undefined;
       const status = searchParams.get("status") || undefined;
       const type   = searchParams.get("type")   || undefined;
-      const seat = await SeatService.getAllSeatService({ floor, status, type });
+      const page   = parseInt(searchParams.get("page") || "1");
+      const limit  = parseInt(searchParams.get("limit") || "10");
+      
+      const seat = await SeatService.getAllSeatService({ floor, status, type, page, limit });
       return ApiResponse(200, seat, "Seat fetched successfully");
     } catch (error: any) {
       return ApiResponse(500, null, error.message || error);

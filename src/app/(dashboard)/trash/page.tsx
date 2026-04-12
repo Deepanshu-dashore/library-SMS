@@ -5,6 +5,7 @@ import { Trash2, RotateCcw, Users, Square } from "lucide-react";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, ColumnDef, TabDef } from "@/components/shared/DataTable";
+import { Button } from "@/components/shared/Button";
 
 export default function TrashPage() {
   const [activeTab, setActiveTab] = useState("members");
@@ -124,8 +125,9 @@ export default function TrashPage() {
 
         <div className="mb-6 flex gap-2">
             {tabs.map(tab => (
-                <button
+                <Button
                     key={tab.value}
+                    variant={activeTab === tab.value ? "primary" : "secondary"}
                     onClick={() => setActiveTab(tab.value)}
                     className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black transition-all shadow-sm ${
                         activeTab === tab.value 
@@ -135,7 +137,7 @@ export default function TrashPage() {
                 >
                     {tab.icon}
                     {tab.label}
-                </button>
+                </Button>
             ))}
         </div>
 

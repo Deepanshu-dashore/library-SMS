@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { Loader2, Save, X, Phone, Mail, MapPin, Clock, Calendar, Layers, Plus } from "lucide-react";
+import { Button } from "@/components/shared/Button";
 
 interface HelpDesk {
   number: string;
@@ -273,13 +274,14 @@ export default function EditProfilePage() {
                  </button>
                </div>
              ))}
-             <button
+             <Button
                type="button"
+               variant="outline"
                onClick={handleAddFloor}
                className="flex items-center gap-2 bg-white border-2 border-dashed border-gray-200 text-gray-500 hover:border-purple-400 hover:text-purple-600 px-5 py-2.5 rounded-xl font-bold transition-all"
              >
                <Plus size={16} strokeWidth={3} /> Add Floor
-             </button>
+             </Button>
           </div>
         </div>
 
@@ -365,20 +367,22 @@ export default function EditProfilePage() {
 
         {/* Form Actions */}
         <div className="flex justify-end gap-4 pt-6">
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={() => router.push("/settings")}
-            className="px-10 py-5 rounded-[24px] border border-gray-200 text-sm font-bold text-gray-500 hover:bg-gray-50 transition-all active:scale-95"
+            className="px-10 py-5 rounded-[24px] border border-gray-200 text-sm font-bold text-gray-500 hover:bg-gray-50"
           >
             Discard Changes
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
+            variant="primary"
             disabled={loading}
-            className="px-12 py-5 bg-blue-600 text-white rounded-[24px] font-black text-lg hover:bg-blue-700 transition-all shadow-2xl shadow-blue-500/20 active:scale-95 flex items-center gap-3"
+            className="px-12 py-5 bg-blue-600 text-white rounded-[24px] font-black text-lg hover:bg-blue-700 shadow-2xl shadow-blue-500/20 flex items-center gap-3"
           >
             {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <><Save size={22} /> Save Profile</>}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

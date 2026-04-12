@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { Button } from "@/components/shared/Button";
 
 interface SubscriptionDetails {
   subscription: {
@@ -50,7 +51,7 @@ export default function TransferSubscriptionPage() {
         const seatsResult = await seatsRes.json();
         
         if (subResult.success) setData(subResult.data);
-        if (seatsResult.success) setAvailableSeats(seatsResult.data);
+        if (seatsResult.success) setAvailableSeats(seatsResult.data?.seats || seatsResult.data);
       } catch (error) {
         toast.error("Failed to load data");
       } finally {
@@ -194,14 +195,15 @@ export default function TransferSubscriptionPage() {
                  </p>
               </div>
 
-              <button
+              <Button
                 type="submit"
+                variant="primary"
                 disabled={loading || !targetSeatId}
-                className="w-full py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-3xl font-black text-lg transition-all shadow-xl shadow-indigo-100 active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50"
+                className="w-full py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-3xl font-black text-lg transition-all shadow-xl shadow-indigo-100 flex items-center justify-center gap-3"
               >
                 <CheckCircle2 size={24} />
                 Transfer Now
-              </button>
+              </Button>
             </form>
           </div>
         </div>

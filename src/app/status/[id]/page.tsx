@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { Button } from "@/components/shared/Button";
 
 export default function StatusCheckPage() {
   const params = useParams();
@@ -103,12 +104,13 @@ export default function StatusCheckPage() {
           <Link href="/" className="flex items-center gap-2 text-gray-500 hover:text-indigo-600 transition-colors font-bold group">
             <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" /> Back
           </Link>
-          <button 
+          <Button 
+            variant="outline"
             onClick={copyStatusLink}
-            className="flex items-center gap-2 text-indigo-600 border border-indigo-100 bg-indigo-50/50 hover:bg-indigo-50 px-4 py-2 rounded-xl transition-all"
+            className="flex items-center gap-2 text-indigo-600 border border-indigo-100 bg-indigo-50/50 hover:bg-indigo-50 px-4 py-2 rounded-xl"
           >
             <Copy size={16} /> Share Link
-          </button>
+          </Button>
         </div>
 
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-700">

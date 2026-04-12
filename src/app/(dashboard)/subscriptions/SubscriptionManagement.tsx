@@ -15,6 +15,7 @@ import {
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, ColumnDef, TabDef, ActionDef } from "@/components/shared/DataTable";
+import { Button } from "@/components/shared/Button";
 
 interface Subscription {
   _id: string;
@@ -215,13 +216,14 @@ export default function SubscriptionManagement() {
             { label: "Subscriptions" }
           ]}
           actionNode={
-            <button
+            <Button
                onClick={() => router.push("/subscriptions/add")}
-               className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-black transition-all shadow-xl shadow-indigo-100 active:scale-95"
+               variant="primary"
+               className="bg-indigo-600 hover:bg-indigo-700 rounded-2xl px-6 py-3 shadow-xl shadow-indigo-100"
             >
                <Plus className="text-xl" />
                Add Subscription
-            </button>
+            </Button>
           }
         />
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { User, Phone, MapPin, CheckCircle2, Save, X, Building, Mail, CreditCard, FileText } from "lucide-react";
 import toast from "react-hot-toast";
+import { Button } from "@/components/shared/Button";
 
 export default function CreateUserPage() {
   const router = useRouter();
@@ -347,10 +348,11 @@ export default function CreateUserPage() {
                  <label className="text-[13px] font-bold text-gray-500 uppercase tracking-wider">Membership Status</label>
                  <div className="flex flex-wrap gap-4">
                     {["Active", "Inactive", "Unverify"].map((status) => (
-                      <button
+                      <Button
                         key={status}
                         type="button"
                         onClick={() => setFormData({ ...formData, status })}
+                        variant={formData.status === status ? "primary" : "secondary"}
                         className={`px-8 py-3 rounded-2xl text-[14px] font-black transition-all ${
                           formData.status === status
                             ? "bg-indigo-600 text-white shadow-xl shadow-indigo-100"
@@ -358,7 +360,7 @@ export default function CreateUserPage() {
                         }`}
                       >
                         {status}
-                      </button>
+                      </Button>
                     ))}
                  </div>
               </div>
@@ -367,19 +369,21 @@ export default function CreateUserPage() {
 
         {/* Action Bar */}
         <div className="flex items-center gap-4 pt-10">
-           <button 
+           <Button 
              type="submit"
-             className="flex-1 bg-indigo-600 text-white py-5 rounded-[24px] font-black text-lg hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-100 flex items-center justify-center gap-3"
+             variant="primary"
+             className="flex-1 py-5 rounded-[24px] text-lg font-black hover:bg-indigo-700 shadow-2xl shadow-indigo-100 flex items-center justify-center gap-3 bg-indigo-600 outline-none border-none"
            >
              <Save size={24} /> Create Member Profile
-           </button>
-           <button 
+           </Button>
+           <Button 
              type="button"
+             variant="outline"
              onClick={() => router.push("/users")}
-             className="px-10 py-5 bg-white border border-gray-200 text-gray-500 font-bold rounded-[24px] hover:bg-gray-50 transition-all"
+             className="px-10 py-5 bg-white border border-gray-200 text-gray-500 font-bold rounded-[24px] hover:bg-gray-50"
            >
              Cancel
-           </button>
+           </Button>
         </div>
       </form>
     </div>

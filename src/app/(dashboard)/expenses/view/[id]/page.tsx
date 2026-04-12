@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { Loader2, ArrowLeft, Calendar, Tag, CreditCard, FileText, StickyNote } from "lucide-react";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { Button } from "@/components/shared/Button";
 
 interface ViewExpenseProps {
   params: Promise<{ id: string }>;
@@ -150,18 +151,20 @@ export default function ViewExpensePage({ params }: ViewExpenseProps) {
 
            {/* Actions */}
            <div className="flex justify-end gap-4 pt-10 mt-10 border-t border-gray-50">
-              <button
+              <Button
                  onClick={() => router.push(`/expenses/edit/${id}`)}
-                 className="px-8 py-3.5 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-all shadow-lg active:scale-95"
+                 variant="primary"
+                 className="px-8 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 shadow-lg"
               >
                  Edit Details
-              </button>
-              <button
+              </Button>
+              <Button
                  onClick={() => router.push("/expenses")}
-                 className="px-8 py-3.5 border border-gray-200 text-gray-600 rounded-xl font-bold text-sm hover:bg-gray-50 transition-all active:scale-95"
+                 variant="outline"
+                 className="px-8 border border-gray-200 text-gray-600 rounded-xl font-bold hover:bg-gray-50"
               >
                  Close
-              </button>
+              </Button>
            </div>
         </div>
       </div>

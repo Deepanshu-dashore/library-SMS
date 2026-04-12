@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { Button } from "@/components/shared/Button";
 
 interface SubscriptionDetails {
   subscription: {
@@ -173,14 +174,15 @@ export default function RenewSubscriptionPage() {
                   </div>
                 </div>
 
-                <button
+                <Button
                   type="submit"
+                  variant="primary"
                   disabled={loading}
-                  className="w-full py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-3xl font-black text-lg transition-all shadow-xl shadow-indigo-100 active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50"
+                  className="w-full py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-3xl font-black text-lg transition-all shadow-xl shadow-indigo-100 flex items-center justify-center gap-3"
                 >
                   <RefreshCcw size={24} className={loading ? "animate-spin" : ""} />
                   Confirm Renewal
-                </button>
+                </Button>
               </form>
             </div>
           </div>

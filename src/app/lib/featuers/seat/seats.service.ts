@@ -17,6 +17,8 @@ export class SeatService {
     floor?: string;
     status?: string;
     type?: string;
+    page?: number;
+    limit?: number;
   } = {}) {
     await connectDB();
     const query: Record<string, any> = { isDeleted: { $ne: true } };
@@ -24,10 +26,33 @@ export class SeatService {
     if (filters.status) query.status = filters.status;
     if (filters.type)   query.type   = filters.type;
 
-    return await Seat.find(query)
+    let seatsQuery = Seat.find(query)
       .select("-__v")
       .collation({ locale: "en", numericOrdering: true })
       .sort({ seatNumber: 1 });
+
+    if (filters.page && filters.limit) {
+      const skip = (filters.page - 1) * filters.limit;
+      seatsQuery = seatsQuery.skip(skip).limit(filters.limit);
+    }
+
+    const [seats, totalCount, totalSeats, available, occupied, maintenance, acSeats, floors] = await Promise.all([
+      seatsQuery,
+      Seat.countDocuments(query),
+      Seat.countDocuments({ isDeleted: { $ne: true } }),
+      Seat.countDocuments({ isDeleted: { $ne: true }, status: { $in: ["available", null, ""] } }),
+      Seat.countDocuments({ isDeleted: { $ne: true }, status: "occupied" }),
+      Seat.countDocuments({ isDeleted: { $ne: true }, status: "maintenance" }),
+      Seat.countDocuments({ isDeleted: { $ne: true }, type: "ac" }),
+      Seat.distinct("floor", { isDeleted: { $ne: true } }),
+    ]);
+
+    return {
+      seats,
+      totalCount,
+      stats: { totalSeats, available, occupied, maintenance, acSeats },
+      floors: floors.filter(Boolean).sort(),
+    };
   }
 
   static async getTrashSeatService() {

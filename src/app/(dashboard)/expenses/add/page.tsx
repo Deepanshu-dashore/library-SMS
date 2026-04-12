@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { Loader2, ArrowLeft, Upload } from "lucide-react";
+import { Button } from "@/components/shared/Button";
 
 export default function AddExpensePage() {
   const router = useRouter();
@@ -180,20 +181,22 @@ export default function AddExpensePage() {
 
           {/* Submit Button */}
           <div className="flex justify-end gap-4 pt-4 mt-8 border-t border-gray-50">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => router.push("/expenses")}
               className="px-8 py-3.5 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-95"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
+              variant="primary"
               disabled={loading}
               className="px-10 py-3.5 bg-[#4f46e5] text-white rounded-xl font-bold text-sm hover:bg-[#4338ca] transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex items-center gap-2"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Expense"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

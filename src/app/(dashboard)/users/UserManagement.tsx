@@ -6,6 +6,7 @@ import { Plus, Link as LinkIcon, Users, UserCheck, UserX, Clock, Trash2 } from "
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, ColumnDef, TabDef } from "@/components/shared/DataTable";
+import { Button } from "@/components/shared/Button";
 
 interface User {
   _id: string;
@@ -127,24 +128,26 @@ export default function UserManagement() {
           ]}
           actionNode={
             <div className="flex gap-4">
-               <button
+               <Button
                   onClick={() => {
                     const url = `${window.location.origin}/register`;
                     navigator.clipboard.writeText(url);
                     toast.success("Registration link copied!");
                   }}
-                  className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-2xl font-black hover:bg-gray-50 transition-all active:scale-95 shadow-sm"
+                  variant="outline"
+                  className="rounded-2xl px-6 py-3"
                >
                   <LinkIcon className="w-4 h-4" />
                   Copy Link
-               </button>
-               <button
+               </Button>
+               <Button
                   onClick={() => router.push("/users/create")}
-                  className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-black transition-all shadow-xl shadow-indigo-100 active:scale-95"
+                  variant="primary"
+                  className="bg-indigo-600 hover:bg-indigo-700 rounded-2xl px-6 py-3 shadow-xl shadow-indigo-100"
                >
                   <Plus className="text-xl" />
                   New Member
-               </button>
+               </Button>
             </div>
           }
         />

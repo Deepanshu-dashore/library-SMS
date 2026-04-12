@@ -33,12 +33,21 @@ const TYPE_ALL = "All";
 
 export default function SeatManagement() {
   const router = useRouter();
-  // allSeats = unfiltered, used for stats + unique floor list
-  const [allSeats, setAllSeats] = useState<Seat[]>([]);
-  // filteredSeats = result from backend with active filters applied
   const [filteredSeats, setFilteredSeats] = useState<Seat[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [floors, setFloors] = useState<string[]>([FLOOR_ALL]);
+
+  const [stats, setStats] = useState({
+    totalSeats: 0,
+    available: 0,
+    occupied: 0,
+    maintenance: 0,
+    acSeats: 0
+  });
+
   const [loading, setLoading] = useState(true);
-  const [filterLoading, setFilterLoading] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
 
   // Filters
@@ -46,16 +55,26 @@ export default function SeatManagement() {
   const [statusFilter, setStatusFilter] = useState(STATUS_ALL);
   const [typeFilter, setTypeFilter] = useState(TYPE_ALL);
 
-  // Fetch all seats (no filters) — for stats row + floor pill options
-  const fetchAllSeats = async () => {
+  const fetchSeats = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/seat");
+      const params = new URLSearchParams();
+      if (floorFilter !== FLOOR_ALL) params.set("floor", floorFilter);
+      if (statusFilter !== STATUS_ALL) params.set("status", statusFilter);
+      if (typeFilter !== TYPE_ALL) params.set("type", typeFilter);
+      params.set("page", currentPage.toString());
+      params.set("limit", rowsPerPage.toString());
+
+      const res = await fetch(`/api/seat?${params.toString()}`);
       const data = await res.json();
       if (data.success) {
-        setAllSeats(data.data);
-        setFilteredSeats(data.data); // initialise display with full list
-      } else toast.error("Failed to load seats.");
+        setFilteredSeats(data.data.seats);
+        setTotalItems(data.data.totalCount);
+        setStats(data.data.stats);
+        setFloors([FLOOR_ALL, ...data.data.floors]);
+      } else {
+        toast.error("Failed to load seats.");
+      }
     } catch {
       toast.error("Internal Server Error");
     } finally {
@@ -63,33 +82,9 @@ export default function SeatManagement() {
     }
   };
 
-  // Re-fetch from backend with query params whenever filters change
-  const fetchFiltered = async (floor: string, status: string, type: string) => {
-    setFilterLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (floor !== FLOOR_ALL) params.set("floor", floor);
-      if (status !== STATUS_ALL) params.set("status", status);
-      if (type !== TYPE_ALL) params.set("type", type);
-      const res = await fetch(`/api/seat?${params.toString()}`);
-      const data = await res.json();
-      if (data.success) setFilteredSeats(data.data);
-      else toast.error("Failed to filter seats.");
-    } catch {
-      toast.error("Internal Server Error");
-    } finally {
-      setFilterLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchAllSeats();
-  }, []);
-
-  // Re-fetch filtered list whenever a filter changes
-  useEffect(() => {
-    fetchFiltered(floorFilter, statusFilter, typeFilter);
-  }, [floorFilter, statusFilter, typeFilter]); // eslint-disable-line react-hooks/exhaustive-deps
+    fetchSeats();
+  }, [floorFilter, statusFilter, typeFilter, currentPage, rowsPerPage]);
 
   const handleDelete = async (seat: Seat) => {
     if (!confirm(`Confirm deletion of ${seat.seatNumber}?`)) return;
@@ -101,22 +96,12 @@ export default function SeatManagement() {
       const data = await res.json();
       if (data.success) {
         toast.success("Seat deleted", { id: t });
-        fetchAllSeats();
-        fetchFiltered(floorFilter, statusFilter, typeFilter);
+        fetchSeats();
       } else toast.error(data.message, { id: t });
     } catch {
       toast.error("An error occurred", { id: t });
     }
   };
-
-  // Unique floor options come from the full unfiltered set
-  const floors = [
-    FLOOR_ALL,
-    ...Array.from(new Set(allSeats.map((s) => s.floor).filter(Boolean))).sort(),
-  ];
-
-  // Alias for stats row
-  const seats = allSeats;
 
 
 
@@ -185,7 +170,7 @@ export default function SeatManagement() {
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  toast.promise(fetchAllSeats(), {
+                  toast.promise(fetchSeats(), {
                     loading: "Refreshing...",
                     success: "Synced",
                     error: "Error",
@@ -215,11 +200,11 @@ export default function SeatManagement() {
         />
 
         {/* Stats Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
           {[
             {
               label: "Total Seats",
-              value: seats.length,
+              value: stats.totalSeats,
               color: "text-amber-500",
               bg: "bg-[#fcdc69]",
               icon: ({className}: {className: string}) => (
@@ -231,9 +216,7 @@ export default function SeatManagement() {
             },
             {
               label: "Available",
-              value: seats.filter(
-                (s) => (s.status || "available") === "available",
-              ).length,
+              value: stats.available,
               color: "text-emerald-700",
               bg: "bg-[#1bc794]",
               icon: ({className}: {className: string}) => (
@@ -244,9 +227,9 @@ export default function SeatManagement() {
             },
             {
               label: "Occupied",
-              value: seats.filter((s) => s.status === "occupied").length,
-              color: "text-orange-600",
-              bg: "bg-[#fe885b]",
+              value: stats.occupied,
+              color: "text-red-600",
+              bg: "bg-red-400",
               icon: ({className}: {className: string}) => (
                 <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24">
 	<path fill="currentColor" d="M5 12V3H3v9c0 2.76 2.24 5 5 5h6v-2H8c-1.66 0-3-1.34-3-3m15.5 6H19v-7c0-1.1-.9-2-2-2h-5V3H6v8c0 1.65 1.35 3 3 3h7v7h4.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5"></path>
@@ -254,8 +237,19 @@ export default function SeatManagement() {
               )
             },
             {
+    label: "Maintenance",
+    value: stats.maintenance,
+    color: "text-orange-700",
+    bg: "bg-[#fe885b]",
+    icon: ({ className }: {className: string}) => (
+      <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 -1.5 24 24">
+	<path fill="currentColor" d="M2.131 5.668a1.5 1.5 0 0 1 .294-1.708l1.414-1.414a1.5 1.5 0 0 1 1.707-.293L7.021.778a2 2 0 0 1 2.828 0l2.829 2.829a2 2 0 0 1 0 2.828l-1.415 1.414l-.05-.05l-3.535 3.536l.05.05l-1.414 1.414a2 2 0 0 1-2.829 0L.657 9.971a2 2 0 0 1 0-2.829zm6.96 7.08l3.536-3.535l3.586 3.586l-3.535 3.536l-3.586-3.586zm5 5l3.536-3.535l1.768 1.768a2.5 2.5 0 0 1-3.535 3.536l-1.768-1.768zm2.83-15.556l4.242 4.243l-3.839 3.839c-.613.613-1.744.478-2.525-.303l-1.414-1.415c-.781-.78-.917-1.911-.303-2.525zM18.334.778l.303-.303c.613-.614 1.744-.478 2.525.303l1.414 1.414c.781.781.917 1.912.303 2.526l-.303.303L18.335.778zM5.607 16.335l2.12-2.122a1 1 0 1 1 1.415 1.414L7.021 17.75a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 0 1-1.415 0l-1.414-1.414a1 1 0 0 1 0-1.414l1.414-1.414a1 1 0 0 1 1.415 0z"></path>
+</svg>
+    ),
+  },
+            {
               label: "AC Seats",
-              value: seats.filter((s) => s.type === "ac").length,
+              value: stats.acSeats,
               color: "text-blue-400",
               bg: "bg-[#98dffa]",
               icon: ({className}: {className: string}) => (
@@ -267,20 +261,22 @@ export default function SeatManagement() {
           ].map((stat, i) => (
             <div
               key={i}
-              className={` ${stat.bg} flex justify-between items-center rounded-md p-5 shadow-sm ${stat.bg}`}
+              className={` ${stat.bg} overflow-hidden relative flex justify-between items-center rounded-md p-5 shadow-sm ${stat.bg}`}
             >
               <div>
-              <p className="text-[11px] font-black uppercase tracking-widest text-gray-900">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-gray-900/60">
                 {stat.label}
               </p>
-              <h4 className={`text-3xl font-black mt-1 text-gray-900`}>
+              <h4 className={`text-3xl font-black mt-1 text-gray-800/90`}>
                 {stat.value}
               </h4>
               </div>
               <div>
+                <div className="h-32 w-32 rounded-2xl flex items-end p-3 rotate-45 bg-white/20 absolute -top-2 -right-1/2 -translate-x-1/4">
                 <p className="text-[11px] font-black uppercase tracking-widest text-gray-900">
-                  <stat.icon className={`w-14 h-14 ${stat.color}`} />
+                  <stat.icon className={`w-10 h-10 -rotate-45 ${stat.color}`} />
                 </p>
+                </div>
                 </div>
             </div>
           ))}
@@ -391,19 +387,20 @@ export default function SeatManagement() {
 
         {/* Grid / Table */}
         {viewMode === "grid" ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 animate-in fade-in duration-500">
-            {loading || filterLoading ? (
-              Array.from({ length: 12 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="aspect-square bg-white rounded-[28px] border-2 border-dashed border-gray-100 animate-pulse"
-                />
-              ))
-            ) : filteredSeats.length === 0 ? (
-              <div className="col-span-full py-20 text-center text-gray-400 font-bold italic">
-                No seats match the selected filters.
-              </div>
-            ) : (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 animate-in fade-in duration-500 mb-6">
+              {loading ? (
+                Array.from({ length: 12 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="aspect-square bg-white rounded-[28px] border-2 border-dashed border-gray-100 animate-pulse"
+                  />
+                ))
+              ) : filteredSeats.length === 0 ? (
+                <div className="col-span-full py-20 text-center text-gray-400 font-bold italic">
+                  No seats match the selected filters.
+                </div>
+              ) : (
               filteredSeats.map((seat) => (
                 <div
                   key={seat._id}
@@ -520,7 +517,51 @@ export default function SeatManagement() {
                 </div>
               ))
             )}
-          </div>
+            </div>
+            {viewMode === "grid" && totalItems > 0 && (
+              <div className="flex items-center justify-between border-t border-dashed border-gray-200 py-4 px-2">
+                <div className="text-sm text-gray-500 font-medium">
+                  Showing <span className="font-bold text-gray-900">{(currentPage - 1) * rowsPerPage + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * rowsPerPage, totalItems)}</span> of <span className="font-bold text-gray-900">{totalItems}</span> seats
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="hidden sm:flex items-center gap-2 mr-4">
+                    <span className="text-[12px] text-gray-400">Rows:</span>
+                    <select
+                      value={rowsPerPage}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        setRowsPerPage(val);
+                        setCurrentPage(1);
+                      }}
+                      className={`text-[12px] bg-transparent outline-none cursor-pointer border rounded px-1 border-gray-200 text-gray-600`}
+                    >
+                      {[5, 10, 25, 50].map((num) => (
+                        <option key={num} value={num} className="text-black">
+                          {num}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    disabled={currentPage >= Math.ceil(totalItems / rowsPerPage)}
+                    onClick={() => setCurrentPage(p => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
         ) : (
           <Table
             headers={["Seat", "Price", "Category", "Floor", "Status"]}
@@ -531,6 +572,13 @@ export default function SeatManagement() {
             onEdit={(r: any) => router.push(`/seat-management/${r._id}/edit`)}
             onDelete={handleDelete}
             hiddenActions={["view"]}
+            paginationshow={true}
+            page={currentPage}
+            rowPage={rowsPerPage}
+            totalItems={totalItems}
+            totalPages={Math.ceil(totalItems / rowsPerPage) || 1}
+            onPageChange={(page: number) => setCurrentPage(page)}
+            onRowsPerPageChange={(rows: number) => { setRowsPerPage(rows); setCurrentPage(1); }}
           />
         )}
       </div>
