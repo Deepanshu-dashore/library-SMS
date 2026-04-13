@@ -2,16 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { 
-  ArrowRightLeft, 
-  Armchair, 
-  User, 
-  CheckCircle2,
-  AlertTriangle
-} from "lucide-react";
+import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/shared/Button";
+import { useSelector } from "react-redux";
 
 interface SubscriptionDetails {
   subscription: {
@@ -25,12 +20,14 @@ interface SubscriptionDetails {
 interface Seat {
   _id: string;
   seatNumber: string;
+  type: string;
 }
 
 export default function TransferSubscriptionPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
+  const { color, darkColor } = useSelector((state: any) => state.theme);
   
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -101,7 +98,7 @@ export default function TransferSubscriptionPage() {
 
   return (
     <div className="bg-gray-50/50 min-h-screen">
-      <div className="max-w-[900px] mx-auto p-4 md:p-8">
+      <div className="max-w-4xl mx-auto p-4 md:p-8">
         <PageHeader 
           title="Transfer Subscription"
           breadcrumbs={[
@@ -114,40 +111,40 @@ export default function TransferSubscriptionPage() {
 
         <div className="grid grid-cols-1 gap-8">
           {/* Transfer Visualization */}
-          <div className="bg-white rounded-[40px] p-10 shadow-sm border border-gray-100 relative overflow-hidden">
+          <div className="bg-white rounded-xl p-10 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.12)] border border-gray-100/80 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50/50 rounded-full -mr-32 -mt-32 blur-3xl" />
             
             <div className="relative flex flex-col md:flex-row items-center justify-between gap-12">
                {/* From Seat */}
                <div className="flex flex-col items-center gap-4 text-center">
-                  <div className="w-24 h-24 rounded-[32px] bg-gray-50 border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-400 shadow-inner">
-                     <Armchair size={48} />
+                  <div className="w-24 h-24 rounded-2xl bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-400">
+                     <Icon icon="solar:armchair-bold-duotone" width={48} height={48} />
                   </div>
                   <div>
-                    <h4 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1">Current Seat</h4>
-                    <p className="text-2xl font-black text-gray-900">Seat {subscription.seatId.seatNumber}</p>
-                    <p className="text-sm font-bold text-gray-500">{subscription.userId.name}</p>
+                    <h4 className="text-[11px] font-public-sans font-bold text-gray-400 uppercase tracking-widest mb-1">Current Seat</h4>
+                    <p className="text-2xl font-barlow font-bold text-gray-900">Seat {subscription.seatId.seatNumber}</p>
+                    <p className="text-[15px] font-public-sans font-bold text-gray-500">{subscription.userId.name}</p>
                   </div>
                </div>
 
                {/* Arrow */}
                <div className="flex flex-col items-center gap-2">
-                  <div className="w-16 h-16 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-xl shadow-indigo-100 animate-pulse">
-                     <ArrowRightLeft size={32} />
+                  <div className="w-16 h-16 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-100">
+                     <Icon icon="solar:arrow-right-linear" width={32} height={32} />
                   </div>
-                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">Moving To</span>
+                  <span className="text-[10px] font-public-sans font-bold text-indigo-400 uppercase tracking-[0.2em]">Moving To</span>
                </div>
 
                {/* To Seat Selection */}
                <div className="flex flex-col items-center gap-4 text-center">
-                  <div className={`w-24 h-24 rounded-[32px] transition-all flex items-center justify-center shadow-lg ${
-                    targetSeatId ? "bg-indigo-600 text-white rotate-6 scale-110" : "bg-indigo-50 text-indigo-200"
+                  <div className={`w-24 h-24 rounded-2xl transition-all flex items-center justify-center shadow-sm border ${
+                    targetSeatId ? "bg-indigo-600 text-white border-indigo-600 scale-105" : "bg-indigo-50 border-indigo-100/50 text-indigo-200"
                   }`}>
-                     <Armchair size={48} />
+                     <Icon icon="solar:armchair-bold-duotone" width={48} height={48} />
                   </div>
                   <div>
-                    <h4 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1">New Seat</h4>
-                    <p className={`text-2xl font-black ${targetSeatId ? "text-indigo-600" : "text-gray-300"}`}>
+                    <h4 className="text-[11px] font-public-sans font-bold text-gray-400 uppercase tracking-widest mb-1">New Seat</h4>
+                    <p className={`text-2xl font-barlow font-bold ${targetSeatId ? "text-indigo-600" : "text-gray-300"}`}>
                       {targetSeatId ? `Seat ${availableSeats.find(s => s._id === targetSeatId)?.seatNumber}` : "Select Below"}
                     </p>
                   </div>
@@ -155,41 +152,58 @@ export default function TransferSubscriptionPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-[32px] p-8 shadow-sm border border-gray-100">
+          <div className="bg-white rounded-xl p-8 md:p-10 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.12)] border border-gray-100/80">
             <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 mb-2">
-                   <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                     <Armchair size={20} />
-                   </div>
-                   <h3 className="text-lg font-black text-gray-900">Select Available Seat</h3>
+              
+              {/* Form Header */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pb-6 border-b border-gray-100">
+                <div style={{color,backgroundColor:darkColor+"15"}} className="w-12 h-12 rounded-xl border border-gray-100 flex items-center justify-center text-gray-700 shrink-0">
+                  <Icon icon="solar:transfer-horizontal-bold-duotone" width={24} height={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 leading-tight">Transfer Subscription</h3>
+                  <p className="text-sm font-public-sans text-gray-500">Pick an available seat to transfer to</p>
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <div>
+                  <label className="block text-[15px] font-public-sans font-bold text-gray-900">Choose Seat</label>
+                  <p className="text-[13px] font-public-sans text-gray-500 mt-0.5 mb-2">Pick an available seat from the library layout.</p>
                 </div>
                 
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 pt-1">
                   {availableSeats.length === 0 ? (
-                    <p className="col-span-full text-gray-500 text-sm font-medium">No other seats available.</p>
+                    <p className="col-span-full text-gray-500 text-[13px] font-public-sans font-semibold">No other seats available.</p>
                   ) : (
                     availableSeats.map((seat) => (
                       <button
                         key={seat._id}
                         type="button"
                         onClick={() => setTargetSeatId(seat._id)}
-                        className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
+                        className={`group relative p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
                           targetSeatId === seat._id
-                            ? "bg-indigo-600 border-indigo-600 text-white shadow-lg"
-                            : "bg-white border-gray-100 hover:border-indigo-200"
+                            ? "bg-indigo-600 border-indigo-600 shadow-lg shadow-indigo-100 scale-105"
+                            : "bg-white cursor-pointer border-gray-100 hover:border-indigo-200 hover:bg-gray-50"
                         }`}
                       >
-                        <span className="text-[13px] font-black">{seat.seatNumber}</span>
+                         <Icon icon={seat.type === "ac" ? "solar:armchair-bold-duotone" : "solar:chair-bold-duotone"} width={26} height={26}
+                           className={`transition-colors ${
+                             targetSeatId === seat._id ? "text-white" : "text-gray-400 group-hover:text-indigo-400"
+                           }`} 
+                         />
+                        <span className={`text-[13px] font-public-sans font-bold ${
+                          targetSeatId === seat._id ? "text-white" : "text-gray-900"
+                        }`}>{seat.seatNumber}</span>
                       </button>
                     ))
                   )}
                 </div>
               </div>
 
-              <div className="p-6 bg-indigo-50 rounded-3xl border border-indigo-100 flex gap-4 items-start">
-                 <AlertTriangle className="text-indigo-600 shrink-0" size={24} />
-                 <p className="text-sm font-semibold text-indigo-900 leading-relaxed">
+              <div className="p-4 bg-indigo-50/80 rounded-xl border border-indigo-100 flex gap-4 items-center">
+                 <Icon icon="solar:danger-triangle-bold-duotone" className="text-indigo-600 shrink-0" width={24} height={24} />
+                 <p className="text-[13px] font-public-sans font-bold text-indigo-900 leading-relaxed">
                    Transferring a subscription will move the member to the new seat immediately. 
                    The old seat (Seat {subscription.seatId.seatNumber}) will become available for others.
                  </p>
@@ -199,9 +213,9 @@ export default function TransferSubscriptionPage() {
                 type="submit"
                 variant="primary"
                 disabled={loading || !targetSeatId}
-                className="w-full py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-3xl font-black text-lg transition-all shadow-xl shadow-indigo-100 flex items-center justify-center gap-3"
+                className="w-full py-4 bg-[#6366f1] hover:bg-[#4f46e5] text-white rounded-xl font-public-sans font-bold text-[16px] transition-all flex items-center justify-center gap-2"
               >
-                <CheckCircle2 size={24} />
+                <Icon icon="solar:check-circle-bold" width={20} height={20} />
                 Transfer Now
               </Button>
             </form>

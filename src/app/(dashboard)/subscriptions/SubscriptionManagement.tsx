@@ -212,7 +212,7 @@ export default function SubscriptionManagement() {
             <Button
                onClick={() => router.push("/subscriptions/add")}
                variant="primary"
-               className="bg-indigo-600 hover:bg-indigo-700 rounded-2xl px-6 py-3 shadow-xl shadow-indigo-100"
+               className="bg-indigo-600 hover:bg-indigo-700 font-medium rounded-2xl px-6 py-3 shadow-xl shadow-indigo-100"
             >
                <Plus className="text-xl" />
                Add Subscription
@@ -225,30 +225,26 @@ export default function SubscriptionManagement() {
           <StatsCard 
             title="Total Subscriptions" 
             value={stats.totalSub} 
-            trend={{ value: "+2.6%", isUp: true }}
-            chartData={[{value: 400}, {value: 300}, {value: 500}, {value: 450}, {value: 700}, {value: 680}, {value: 900}, {value: 400}]}
-            chartColor="#10b981"
+            icon={"solar:layers-bold-duotone"}
+            accentColor="#6366f1"
           />
           <StatsCard 
-            title="Active" 
+            title="Active Subscriptions" 
             value={stats.totalActive} 
-            trend={{ value: "-0.1%", isUp: false }}
-            chartData={[{value: 800}, {value: 700}, {value: 600}, {value: 750}, {value: 900}, {value: 500}, {value: 400}, {value: 700}]}
-            chartColor="#f59e0b"
+            icon={"solar:bill-check-bold"}
+            accentColor="#10b981"
           />
           <StatsCard 
-            title="Expired" 
+            title="Expired Subscriptions" 
             value={stats.totalExpired} 
-            trend={{ value: "+0.6%", isUp: true }}
-            chartData={[{value: 500}, {value: 700}, {value: 750}, {value: 600}, {value: 550}, {value: 400}, {value: 300}, {value: 600}]}
-            chartColor="#f43f5e"
+            icon={"duo-icons:clock"}
+            accentColor="#dc8a00"
           />
           <StatsCard 
-            title="Cancelled" 
+            title="Cancelled Subscriptions" 
             value={stats.totalCancelled} 
-            trend={{ value: "+0.2%", isUp: true }}
-            chartData={[{value: 200}, {value: 300}, {value: 250}, {value: 400}, {value: 350}, {value: 500}, {value: 450}, {value: 600}]}
-            chartColor="#6366f1"
+            icon={"solar:bill-cross-bold-duotone"}
+            accentColor="#f43f5e"
           />
         </div>
 

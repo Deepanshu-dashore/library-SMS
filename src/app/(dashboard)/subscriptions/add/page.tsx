@@ -2,18 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  User, 
-  Armchair, 
-  Calendar, 
-  Clock, 
-  CreditCard, 
-  CheckCircle2,
-  ChevronLeft
-} from "lucide-react";
+import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/shared/Button";
+import { useSelector } from "react-redux";
 
 interface Member {
   _id: string;
@@ -26,11 +19,13 @@ interface Seat {
   _id: string;
   seatNumber: string;
   status: string;
+  type: string;
   price: number;
 }
 
 export default function AddSubscriptionPage() {
   const router = useRouter();
+  const {color,darkColor} = useSelector((state: any) => state.theme);
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<Member[]>([]);
   const [seats, setSeats] = useState<Seat[]>([]);
@@ -97,7 +92,7 @@ export default function AddSubscriptionPage() {
 
   return (
     <div className="bg-gray-50/50 min-h-screen">
-      <div className="max-w-[1000px] mx-auto p-4 md:p-8">
+      <div className="max-w-6xl">
         <PageHeader 
           title="Add New Subscription"
           breadcrumbs={[
@@ -111,41 +106,53 @@ export default function AddSubscriptionPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Form */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-[32px] p-8 shadow-sm border border-gray-100">
+            <div className="bg-white rounded-xl p-8 md:p-10 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.12)] border border-gray-100/80">
               <form onSubmit={handleSubmit} className="space-y-8">
                 
-                {/* Section 1: Member Selection */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                      <User size={20} />
-                    </div>
-                    <h3 className="text-lg font-black text-gray-900">Select Member</h3>
+                {/* Form Header */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pb-6 border-b border-gray-100">
+                  <div style={{color,backgroundColor:darkColor+"15"}} className="w-12 h-12 rounded-xl border border-gray-100 flex items-center justify-center text-gray-700 shrink-0">
+                    <Icon icon="solar:bill-list-bold-duotone" width={24} height={24} />
                   </div>
-                  <select
-                    required
-                    value={formData.userId}
-                    onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
-                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-[15px] font-semibold text-gray-800 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/30 transition-all appearance-none"
-                  >
-                    <option value="">Choose a member...</option>
-                    {users.map((user) => (
-                      <option key={user._id} value={user._id}>
-                        {user.name} ({user.number})
-                      </option>
-                    ))}
-                  </select>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 leading-tight">Configure Subscription</h3>
+                    <p className="text-sm font-public-sans text-gray-500">Select a member, seat, and duration to proceed</p>
+                  </div>
+                </div>
+
+                {/* Section 1: Member Selection */}
+                <div className="space-y-2">
+                  <div>
+                    <label className="block text-[15px] font-public-sans font-bold text-gray-900">Member</label>
+                    <p className="text-[13px] font-public-sans text-gray-500 mt-0.5 mb-2">Search and select an active member account.</p>
+                  </div>
+                  <div className="relative">
+                    <select
+                      required
+                      value={formData.userId}
+                      onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
+                      className="w-full px-4 py-4 bg-white border border-gray-300/60 rounded-xl text-[15px] font-public-sans text-gray-900 outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 hover:border-gray-400 transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="">Choose a member...</option>
+                      {users.map((user) => (
+                        <option key={user._id} value={user._id}>
+                          {user.name} ({user.number})
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                      <Icon icon="solar:alt-arrow-down-linear" width={20} height={20} />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Section 2: Seat Selection */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                      <Armchair size={20} />
-                    </div>
-                    <h3 className="text-lg font-black text-gray-900">Choose Seat</h3>
+                <div className="space-y-2 pt-2">
+                  <div>
+                    <label className="block text-[15px] font-public-sans font-bold text-gray-900">Choose Seat</label>
+                    <p className="text-[13px] font-public-sans text-gray-500 mt-0.5 mb-2">Pick an available seat from the library layout.</p>
                   </div>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 pt-1">
                     {seats.length === 0 ? (
                       <p className="col-span-full text-gray-500 text-sm font-medium">No seats available at the moment.</p>
                     ) : (
@@ -157,15 +164,15 @@ export default function AddSubscriptionPage() {
                           className={`group relative p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
                             formData.seatId === seat._id
                               ? "bg-indigo-600 border-indigo-600 shadow-lg shadow-indigo-100 scale-105"
-                              : "bg-white border-gray-100 hover:border-indigo-200 hover:bg-gray-50"
+                              : "bg-white cursor-pointer border-gray-100 hover:border-indigo-200 hover:bg-gray-50"
                           }`}
                         >
-                          <Armchair 
-                            className={`w-6 h-6 transition-colors ${
+                          <Icon icon={seat.type === "ac" ? "solar:armchair-bold-duotone" : "solar:chair-bold-duotone"} width={26} height={26}
+                            className={`transition-colors ${
                               formData.seatId === seat._id ? "text-white" : "text-gray-400 group-hover:text-indigo-400"
                             }`} 
                           />
-                          <span className={`text-[13px] font-black ${
+                          <span className={`text-[13px] font-public-sans font-bold ${
                             formData.seatId === seat._id ? "text-white" : "text-gray-900"
                           }`}>
                             {seat.seatNumber}
@@ -176,69 +183,64 @@ export default function AddSubscriptionPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                   {/* Section 3: Duration */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 mb-2">
-                       <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                         <Clock size={20} />
-                       </div>
-                       <h3 className="text-lg font-black text-gray-900">Duration</h3>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="block text-[15px] font-public-sans font-bold text-gray-900">Duration</label>
+                      <p className="text-[13px] font-public-sans text-gray-500 mt-0.5 mb-2">Number of days to subscribe.</p>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-stretch rounded-xl border border-gray-300/60 focus-within:ring-1 focus-within:ring-indigo-600 focus-within:border-indigo-600 hover:border-gray-400 transition-all overflow-hidden bg-white">
                       <input
                         type="number"
                         min="1"
                         required
                         value={formData.durationDays}
                         onChange={(e) => setFormData({ ...formData, durationDays: parseInt(e.target.value) })}
-                        className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-[15px] font-semibold text-gray-800 outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-mono"
+                        className="flex-1 w-full px-4 py-4 bg-transparent outline-none text-[15px] font-public-sans text-gray-900 font-mono"
                       />
-                      <span className="text-[14px] font-black text-gray-500 uppercase tracking-widest">Days</span>
+                      <div className="bg-gray-50/80 border-l border-gray-300/80 px-4 flex items-center justify-center text-[13px] font-public-sans font-bold text-gray-500 uppercase tracking-widest shrink-0">
+                        Days
+                      </div>
                     </div>
                   </div>
 
                   {/* Section 4: Start Date */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 mb-2">
-                       <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                         <Calendar size={20} />
-                       </div>
-                       <h3 className="text-lg font-black text-gray-900">Start Date</h3>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="block text-[15px] font-public-sans font-bold text-gray-900">Start Date</label>
+                      <p className="text-[13px] font-public-sans text-gray-500 mt-0.5 mb-2">When does this cycle begin?</p>
                     </div>
                     <input
                       type="date"
                       required
                       value={formData.startDate}
                       onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                      className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-[15px] font-semibold text-gray-800 outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer"
+                      className="w-full px-4 py-4 bg-white border border-gray-300/60 rounded-xl text-[15px] font-public-sans text-gray-900 outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 hover:border-gray-400 transition-all cursor-pointer"
                     />
                   </div>
                 </div>
 
                 {/* Section 5: Payment Mode */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                      <CreditCard size={20} />
-                    </div>
-                    <h3 className="text-lg font-black text-gray-900">Payment Mode</h3>
+                <div className="space-y-2 pt-2">
+                  <div>
+                    <label className="block text-[15px] font-public-sans font-bold text-gray-900">Payment Mode</label>
+                    <p className="text-[13px] font-public-sans text-gray-500 mt-0.5 mb-2">Select how the user paid for this subscription.</p>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    {["cash", "upi", "card"].map((mode) => (
-                      <button
-                        key={mode}
-                        type="button"
-                        onClick={() => setFormData({ ...formData, paymentMode: mode })}
-                        className={`py-4 rounded-2xl border-2 transition-all font-black uppercase tracking-widest text-[12px] ${
-                          formData.paymentMode === mode
-                            ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100"
-                            : "bg-white border-gray-100 text-gray-600 hover:bg-gray-50 hover:border-gray-200"
-                        }`}
-                      >
-                        {mode}
-                      </button>
-                    ))}
+                  <div className="relative">
+                    <select
+                      required
+                      value={formData.paymentMode}
+                      onChange={(e) => setFormData({ ...formData, paymentMode: e.target.value })}
+                      className="w-full px-4 py-4 bg-white border border-gray-300/60 rounded-xl text-[15px] font-public-sans text-gray-900 outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 hover:border-gray-400 transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="cash">Cash</option>
+                      <option value="upi">UPI</option>
+                      <option value="card">Card</option>
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                      <Icon icon="solar:alt-arrow-down-linear" width={20} height={20} />
+                    </div>
                   </div>
                 </div>
 
@@ -246,10 +248,10 @@ export default function AddSubscriptionPage() {
                   type="submit"
                   variant="primary"
                   disabled={loading}
-                  className="w-full py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-3xl font-black text-lg transition-all shadow-xl shadow-indigo-100 flex items-center justify-center gap-3"
+                  className="w-full py-4 bg-[#6366f1] hover:bg-[#4f46e5] text-white rounded-xl font-public-sans font-bold text-[16px] transition-all flex items-center justify-center gap-2"
                 >
-                  <CheckCircle2 size={24} />
-                  Complete Subscription
+                  <Icon icon="solar:check-circle-bold" width={20} height={20} />
+                  Continue
                 </Button>
               </form>
             </div>
@@ -257,34 +259,34 @@ export default function AddSubscriptionPage() {
 
           {/* Right Sidebar: Summary */}
           <div className="space-y-6">
-            <div className="bg-white rounded-[32px] p-8 shadow-sm border border-gray-100 sticky top-8">
-              <h3 className="text-xl font-black text-gray-900 mb-6">Summary</h3>
+            <div className="bg-white rounded-xl p-8 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.12)] border border-gray-100/80 sticky top-8">
+              <h3 className="text-2xl font-barlow font-bold text-gray-900 mb-6">Summary</h3>
               
               <div className="space-y-6">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500 font-bold uppercase tracking-wider">Seat Price</span>
-                  <span className="text-gray-900 font-black">₹{selectedSeat?.price || 0}/mo</span>
+                <div className="flex justify-between items-center font-public-sans text-sm">
+                  <span className="text-gray-500 font-semibold tracking-wide">Seat Price</span>
+                  <span className="text-gray-900 font-bold">₹{selectedSeat?.price || 0}/mo</span>
                 </div>
                 
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500 font-bold uppercase tracking-wider">Duration</span>
-                  <span className="text-gray-900 font-black">{formData.durationDays} Days</span>
+                <div className="flex justify-between items-center font-public-sans text-sm">
+                  <span className="text-gray-500 font-semibold tracking-wide">Duration</span>
+                  <span className="text-gray-900 font-bold">{formData.durationDays} Days</span>
                 </div>
 
-                <div className="pt-6 border-t border-dashed border-gray-100">
-                  <div className="flex justify-between items-end">
-                    <span className="text-gray-500 font-bold uppercase tracking-widest text-[11px]">Total Amount</span>
-                    <span className="text-4xl font-black text-indigo-600">₹{estimatedAmount}</span>
+                <div className="pt-6 border-t border-dashed border-gray-200">
+                  <div className="flex justify-between items-end font-public-sans">
+                    <span className="text-gray-500 font-semibold tracking-wide text-xs">Total Amount</span>
+                    <span className="text-lg font-barlow font-bold text-indigo-600">₹{estimatedAmount}</span>
                   </div>
                 </div>
 
-                <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex gap-4">
-                   <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
-                      <Clock size={16} />
+                <div className="p-2 bg-amber-50/80 rounded-xl border border-amber-100/50 flex gap-4 items-center">
+                   <div className="w-10 h-10 rounded-xl bg-amber-100/90 text-amber-600 flex items-center justify-center shrink-0">
+                      <Icon icon="duo-icons:clock" width={20} height={20} />
                    </div>
-                   <div className="space-y-1">
-                      <p className="text-[12px] font-black text-amber-900 uppercase tracking-tight">Ends On</p>
-                      <p className="text-sm font-semibold text-amber-800">
+                   <div className="space-y-0.5">
+                      <p className="text-[11px] font-public-sans font-bold text-amber-900/60 tracking-wider uppercase">Ends On</p>
+                      <p className="text-[15px] font-public-sans font-bold text-amber-900">
                          {(() => {
                             const date = new Date(formData.startDate);
                             date.setDate(date.getDate() + formData.durationDays);
