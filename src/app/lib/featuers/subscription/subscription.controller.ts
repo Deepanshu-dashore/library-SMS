@@ -3,13 +3,15 @@ import { SubscriptionService } from "./subsciption.service";
 import { verifyJWT } from "../../middlewares/verifyJWT";
 
 export class SubscriptionController {
-  static async getAllSubscription() {
+  static async getAllSubscription(req: Request) {
     const library = await verifyJWT();
     if (!library) {
       return ApiResponse(401, null, "Unauthorized");
     }
     try {
-      const subscriptions = await SubscriptionService.getAllSubscription();
+      const { searchParams } = new URL(req.url);
+      const status = searchParams.get("status");
+      const subscriptions = await SubscriptionService.getAllSubscription({ status });
       return ApiResponse(
         200,
         subscriptions,

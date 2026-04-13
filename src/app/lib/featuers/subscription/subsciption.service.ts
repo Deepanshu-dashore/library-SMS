@@ -282,22 +282,42 @@ export class SubscriptionService {
     return { subscription, payment };
   }
 
-  static async getAllSubscription(filter?: any) {
+  static async getAllSubscription(filterQuery?: any) {
     await connectDB();
-    const totalActive = await Subscription.countDocuments({ status: "active" });
+    const today = new Date();
+    
+    // Base stats calculation
+    const totalActive = await Subscription.countDocuments({ 
+      status: "active", 
+      endDate: { $gte: today } 
+    });
     const totalExpired = await Subscription.countDocuments({
       status: "active",
-      endDate: { $gte: new Date() },
+      endDate: { $lt: today },
     });
     const totalCancelled = await Subscription.countDocuments({
       status: "cancelled",
     });
     const totalSub = await Subscription.countDocuments();
-    const subscriptions = await Subscription.find(filter)
+
+    // Prepare filter for find
+    let mongoFilter = {};
+    if (filterQuery?.status) {
+      if (filterQuery.status === "active") {
+        mongoFilter = { status: "active", endDate: { $gte: today } };
+      } else if (filterQuery.status === "expired") {
+        mongoFilter = { status: "active", endDate: { $lt: today } };
+      } else if (filterQuery.status === "cancelled") {
+        mongoFilter = { status: "cancelled" };
+      }
+    }
+
+    const subscriptions = await Subscription.find(mongoFilter)
       .populate("userId", "name email")
       .populate("seatId", "seatNumber")
       .select("-__v -transferHistory")
       .sort({ createdAt: -1 });
+
     return {
       subscriptions,
       totalActive,

@@ -148,7 +148,7 @@ export default function UserManagement() {
                     toast.success("Registration link copied!");
                   }}
                   variant="outline"
-                  className="rounded-2xl px-4 py-1"
+                  className="rounded-2xl px-4 py-1 font-medium"
                >
                   <LinkIcon className="w-4 h-4" />
                   Copy Link
@@ -156,7 +156,7 @@ export default function UserManagement() {
                <Button
                   onClick={() => router.push("/users/create")}
                   variant="primary"
-                  className="bg-indigo-600 hover:bg-indigo-700 rounded-2xl px-4 py-1 shadow-xl shadow-indigo-100"
+                  className="bg-indigo-600 font-medium hover:bg-indigo-700 rounded-2xl px-4 py-1 shadow-xl shadow-indigo-100"
                >
                   <Plus className="text-xl" />
                   New Member

@@ -36,6 +36,9 @@ const librarySchema = new Schema(
     logo: {
       type: String,
     },
+    signature: {
+      type: String,
+    },
   },
   { timestamps: true },
 );

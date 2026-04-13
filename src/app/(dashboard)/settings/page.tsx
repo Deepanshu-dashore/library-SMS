@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Loader2, Building, Mail, Phone, MapPin, Edit3, Clock, Calendar, HelpCircle, Palette, User } from "lucide-react";
+import { Loader2, Building, Mail, Phone, MapPin, Edit3, Clock, Calendar, HelpCircle, Palette, User, Eye, EyeOff, PenTool } from "lucide-react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { setColor, setDarkColor, setBgColor } from "@/store/themeSlice";
@@ -59,6 +59,7 @@ interface LibraryProfile {
   phone?: string;
   address?: string;
   logo?: string;
+  signature?: string;
   helpDesk?: HelpDesk;
 }
 
@@ -70,6 +71,7 @@ export default function SettingsProfilePage() {
   const [profile, setProfile] = useState<LibraryProfile | null>(null);
   const [fetching, setFetching] = useState(true);
   const [activeTab, setActiveTab] = useState<"profile" | "appearance">("profile");
+  const [showSignature, setShowSignature] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -125,9 +127,9 @@ export default function SettingsProfilePage() {
           activeTab === "profile" && (
             <Link
               href="/settings/edit"
-              className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm hover:bg-blue-700 transition-all shadow-xl active:scale-95 shadow-blue-500/20"
+              className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-700 transition-all shadow-xl active:scale-95 shadow-blue-500/10"
             >
-              <Edit3 className="w-5 h-5 stroke-[2.5px]" />
+              <Edit3 className="w-4 h-4 stroke-[2.5px]" />
               Edit Profile
             </Link>
           )
@@ -156,24 +158,24 @@ export default function SettingsProfilePage() {
         {activeTab === "profile" ? (
           <>
             {/* Profile Hero Card */}
-            <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 overflow-hidden relative group">
+            <div className="bg-white rounded-xl shadow-xs border border-gray-100 ring-1 ring-gray-100 overflow-hidden relative group">
               <div className="absolute inset-x-0 top-0 h-32 bg-linear-to-br from-blue-600/5 to-purple-600/5 border-b border-gray-100" />
               
               <div className="p-10 pt-16 relative">
                 <div className="flex flex-col md:flex-row items-center md:items-end gap-8">
-                  <div className="w-40 h-40 rounded-[32px] bg-white shadow-2xl shadow-gray-200/50 flex items-center justify-center border-4 border-white overflow-hidden shrink-0 z-10 p-2">
+                  <div className="w-40 h-40 rounded-xl bg-white shadow-xl shadow-gray-200/50 flex items-center justify-center border-4 border-white overflow-hidden shrink-0 z-10 p-2">
                     {profile.logo ? (
-                      <img src={profile.logo} alt="Logo" className="w-full h-full object-contain rounded-2xl" />
+                      <img src={profile.logo} alt="Logo" className="w-full h-full object-contain rounded-lg" />
                     ) : (
                       <Building className="w-20 h-20 text-blue-200" />
                     )}
                   </div>
                   <div className="text-center md:text-left mb-4">
                     <h2 className="text-4xl font-black text-gray-900 tracking-tight">{profile.name}</h2>
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-3 text-gray-500 font-bold text-sm tracking-wide">
-                      <span className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full ring-1 ring-blue-100 shadow-sm uppercase tracking-widest text-[10px]">Administrator</span>
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-3 text-gray-400 font-bold text-[11px] tracking-widest uppercase">
+                      <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg ring-1 ring-blue-100">Administrator</span>
                       <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                      <span className="bg-gray-50 px-4 py-1.5 rounded-full ring-1 ring-gray-100 uppercase tracking-widest text-[10px]">Official Account</span>
+                      <span className="bg-gray-50 text-gray-500 px-3 py-1 rounded-lg ring-1 ring-gray-100">Official Account</span>
                     </div>
                   </div>
                 </div>
@@ -184,8 +186,8 @@ export default function SettingsProfilePage() {
               {/* Main Info Column */}
               <div className="lg:col-span-3 space-y-8">
                 {/* Global Contact Info */}
-                <div className="bg-white rounded-[32px] p-10 shadow-sm border border-gray-100">
-                  <h3 className="text-[12px] font-black uppercase tracking-widest text-gray-400 mb-10 flex items-center gap-2">
+                <div className="bg-white rounded-xl p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
+                  <h3 className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-10 flex items-center gap-2">
                     <Building size={16} strokeWidth={3} /> Global Contact Identity
                   </h3>
                   
@@ -219,13 +221,45 @@ export default function SettingsProfilePage() {
                         <p className="text-lg font-bold text-gray-900 leading-snug max-w-lg">{profile.address || "Address not provided"}</p>
                       </div>
                     </div>
+
+                    {profile.signature && (
+                      <div className="flex items-start gap-6 border-t border-gray-50 pt-10">
+                        <div className="w-14 h-14 bg-purple-50/50 text-purple-600 rounded-[20px] flex items-center justify-center shrink-0 shadow-sm">
+                          <PenTool size={22} strokeWidth={2.5} />
+                        </div>
+                        <div className="space-y-4 w-full">
+                          <div className="flex items-center justify-between">
+                            <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">Official Signature</p>
+                            <button 
+                              onClick={() => setShowSignature(!showSignature)}
+                              className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-blue-600 flex items-center gap-2 text-xs font-bold"
+                            >
+                              {showSignature ? <EyeOff size={16} /> : <Eye size={16} />}
+                              {showSignature ? "Hide" : "Show"}
+                            </button>
+                          </div>
+                          <div className="bg-gray-50/50 rounded-2xl p-6 border border-gray-100 flex items-center justify-center relative overflow-hidden group">
+                            <img 
+                              src={profile.signature} 
+                              alt="Signature" 
+                              className={`max-h-24 object-contain transition-all duration-500 mix-blend-multiply ${!showSignature ? "blur-md opacity-20 scale-95" : "blur-0 opacity-100 scale-100"}`}
+                            />
+                            {!showSignature && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="bg-blue-600/10 text-blue-600 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-sm border border-blue-600/20">Hidden for Privacy</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
 
               {/* Help Desk Dashboard Column */}
               <div className="lg:col-span-2 space-y-8">
-                <div className="bg-gray-900 rounded-[32px] p-8 shadow-2xl shadow-gray-200 text-white overflow-hidden relative group h-full">
+                <div className="bg-gray-900 rounded-xl p-8 shadow-xs text-white overflow-hidden relative group h-full">
                   <div className="absolute top-0 right-0 p-8 transform group-hover:scale-110 transition-transform duration-500 opacity-20">
                     <HelpCircle size={120} />
                   </div>
@@ -279,7 +313,7 @@ export default function SettingsProfilePage() {
           </>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-white rounded-[32px] p-10 shadow-sm border border-gray-100">
+            <div className="bg-white rounded-xl p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
               <div className="flex items-center justify-between mb-8">
                 <h3 className="text-[12px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
                   <Palette size={16} strokeWidth={3} /> Color Preset
@@ -350,8 +384,8 @@ export default function SettingsProfilePage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-[32px] p-10 shadow-sm border border-gray-100 flex flex-col justify-center items-center text-center">
-               <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-[24px] flex items-center justify-center mb-6">
+            <div className="bg-white rounded-xl p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100 flex flex-col justify-center items-center text-center">
+               <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-6 ring-1 ring-blue-100">
                   <Palette size={32} />
                </div>
                <h3 className="text-xl font-black text-gray-900 mb-2">Dark Mode & Layout</h3>

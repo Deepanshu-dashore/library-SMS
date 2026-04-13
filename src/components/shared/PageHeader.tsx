@@ -22,13 +22,13 @@ export function PageHeader({ title, breadcrumbs, actionNode, backLink }: PageHea
       {/* Main Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-col gap-2.5">
-          <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">{title}</h1>
+          <h1 className="text-2xl font-semibold text-gray-900 tracking-tight capitalize">{title}</h1>
           
           <nav className="flex items-center gap-5 text-[14px] font-normal">
             {breadcrumbs.map((crumb, idx) => {
               const isLast = idx === breadcrumbs.length - 1;
               return (
-                <div key={idx} className="flex items-center gap-2.5">
+                <div key={idx} className="flex capitalize items-center gap-2.5">
                   {crumb.href && !isLast ? (
                     <Link 
                       href={crumb.href} 

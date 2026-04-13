@@ -291,7 +291,7 @@ export default function EditUserPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-20 px-4">
+    <div className="space-y-6 max-w-6xl mx-auto">
       <PageHeader
         title="Edit Member Profile"
         backLink={`/users/${id}`}
@@ -306,7 +306,7 @@ export default function EditUserPage() {
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
 
         {/* ── 01 Personal Credentials ── */}
-        <div className="bg-white rounded-[32px] p-8 md:p-10 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
           <SectionHeader
             step="01"
             title="Personal Credentials"
@@ -392,7 +392,7 @@ export default function EditUserPage() {
         </div>
 
         {/* ── 02 Contact & Security ── */}
-        <div className="bg-white rounded-[32px] p-8 md:p-10 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
           <SectionHeader
             step="02"
             title="Contact & Security"
@@ -492,7 +492,7 @@ export default function EditUserPage() {
         </div>
 
         {/* ── 03 Residential Address ── */}
-        <div className="bg-white rounded-[32px] p-8 md:p-10 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
           <SectionHeader
             step="03"
             title="Residential Address"
@@ -546,7 +546,7 @@ export default function EditUserPage() {
         </div>
 
         {/* ── 04 Media & Verification ── */}
-        <div className="bg-white rounded-[32px] p-8 md:p-10 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
           <SectionHeader
             step="04"
             title="Media & Verification"

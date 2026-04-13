@@ -130,7 +130,7 @@ function SectionHeader({
   step, title, sub, color,
 }: { step: string; title: string; sub: string; color: string }) {
   return (
-    <div className="flex items-center gap-4 mb-8 bg-gray-100 p-1.5 rounded-xl">
+    <div className="flex items-center gap-4 mb-8 bg-gray-100/70 p-1.5 rounded-xl">
       <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center font-bold text-sm`}>
         {step}
       </div>
@@ -276,7 +276,7 @@ export default function CreateUserPage() {
             step="01"
             title="Personal Credentials"
             sub="Identity and basic background information"
-            color="bg-indigo-200/60 text-indigo-600"
+            color="bg-indigo-100 text-indigo-600"
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">
@@ -362,7 +362,7 @@ export default function CreateUserPage() {
             step="02"
             title="Contact & Security"
             sub="How we can reach and identify the member"
-            color="bg-emerald-200/60 text-emerald-600"
+            color="bg-emerald-100 text-emerald-600"
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">

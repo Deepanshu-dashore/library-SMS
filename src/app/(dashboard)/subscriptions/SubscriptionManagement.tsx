@@ -10,12 +10,15 @@ import {
   Ticket, 
   CheckCircle, 
   Clock, 
-  AlertCircle 
+  AlertCircle,
+  TrendingUp,
+  TrendingDown
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, ColumnDef, TabDef, ActionDef } from "@/components/shared/DataTable";
 import { Button } from "@/components/shared/Button";
+import { StatsCard } from "@/components/shared/StatsCard";
 
 interface Subscription {
   _id: string;
@@ -54,10 +57,11 @@ export default function SubscriptionManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
-  const fetchSubscriptions = async () => {
+  const fetchSubscriptions = async (status?: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/subscription`);
+      const url = status && status !== "All" ? `/api/subscription?status=${status}` : `/api/subscription`;
+      const res = await fetch(url);
       const data = await res.json();
       if (data.success) {
         setSubscriptions(data.data.subscriptions);
@@ -78,8 +82,8 @@ export default function SubscriptionManagement() {
   };
 
   useEffect(() => {
-    fetchSubscriptions();
-  }, []);
+    fetchSubscriptions(statusFilter);
+  }, [statusFilter]);
 
   const handleCancel = async (sub: Subscription) => {
     if (!confirm(`Are you sure you want to cancel the subscription for ${sub.userId.name}?`)) return;
@@ -192,22 +196,11 @@ export default function SubscriptionManagement() {
     { label: "Cancelled", value: "cancelled", count: stats.totalCancelled, color: "error" },
   ];
 
-  const filteredData = subscriptions.filter(sub => {
-    if (statusFilter === "All") return true;
-    
-    const today = new Date();
-    const end = new Date(sub.endDate);
-    
-    if (statusFilter === "active") return sub.status === "active" && end >= today;
-    if (statusFilter === "expired") return (sub.status === "active" && end < today);
-    if (statusFilter === "cancelled") return sub.status === "cancelled";
-    
-    return true;
-  });
+  const filteredData = subscriptions;
 
   return (
     <div className="bg-gray-50/50 min-h-screen">
-      <div className="max-w-[1240px] mx-auto p-4 md:p-8">
+      <div className="max-w-6xl">
         
         <PageHeader 
           title="Subscription Management"
@@ -228,23 +221,35 @@ export default function SubscriptionManagement() {
         />
 
         {/* Stats Summary Panel */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          {[
-            { label: "Total Subscriptions", count: stats.totalSub, icon: Ticket, color: "bg-indigo-600" },
-            { label: "Active", count: stats.totalActive, icon: CheckCircle, color: "bg-green-600" },
-            { label: "Expired", count: stats.totalExpired, icon: Clock, color: "bg-amber-600" },
-            { label: "Cancelled", count: stats.totalCancelled, icon: XCircle, color: "bg-red-600" },
-          ].map((stat, i) => (
-            <div key={i} className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 flex items-center justify-between group hover:border-indigo-100 transition-all">
-               <div>
-                  <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1">{stat.label}</p>
-                  <h4 className="text-3xl font-black text-gray-900 tracking-tight">{stat.count}</h4>
-               </div>
-               <div className={`w-14 h-14 ${stat.color} text-white rounded-3xl flex items-center justify-center shadow-lg transform rotate-6 group-hover:rotate-0 transition-transform`}>
-                  <stat.icon size={28} />
-               </div>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 overflow-visible">
+          <StatsCard 
+            title="Total Subscriptions" 
+            value={stats.totalSub} 
+            trend={{ value: "+2.6%", isUp: true }}
+            chartData={[{value: 400}, {value: 300}, {value: 500}, {value: 450}, {value: 700}, {value: 680}, {value: 900}, {value: 400}]}
+            chartColor="#10b981"
+          />
+          <StatsCard 
+            title="Active" 
+            value={stats.totalActive} 
+            trend={{ value: "-0.1%", isUp: false }}
+            chartData={[{value: 800}, {value: 700}, {value: 600}, {value: 750}, {value: 900}, {value: 500}, {value: 400}, {value: 700}]}
+            chartColor="#f59e0b"
+          />
+          <StatsCard 
+            title="Expired" 
+            value={stats.totalExpired} 
+            trend={{ value: "+0.6%", isUp: true }}
+            chartData={[{value: 500}, {value: 700}, {value: 750}, {value: 600}, {value: 550}, {value: 400}, {value: 300}, {value: 600}]}
+            chartColor="#f43f5e"
+          />
+          <StatsCard 
+            title="Cancelled" 
+            value={stats.totalCancelled} 
+            trend={{ value: "+0.2%", isUp: true }}
+            chartData={[{value: 200}, {value: 300}, {value: 250}, {value: 400}, {value: 350}, {value: 500}, {value: 450}, {value: 600}]}
+            chartColor="#6366f1"
+          />
         </div>
 
         <DataTable

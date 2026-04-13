@@ -145,6 +145,9 @@ export class LibraryController {
       if (result && result.logo) {
         result.logo = getUrls.getUrl(result.logo);
       }
+      if (result && result.signature) {
+        result.signature = getUrls.getUrl(result.signature);
+      }
       return ApiResponse(200, result, "Library updated successfully");
     } catch (error: any) {
       return ApiResponse(500, null, error);
@@ -191,6 +194,9 @@ export class LibraryController {
       }
       const buildUrl = getUrls.getUrl(result.logo);
       result.logo = buildUrl;
+      if (result.signature) {
+        result.signature = getUrls.getUrl(result.signature);
+      }
       return ApiResponse(200, result, "Library fetched successfully");
     } catch (error: any) {
       return ApiResponse(500, null, error);
@@ -206,6 +212,9 @@ export class LibraryController {
       const result = await LibraryService.getAllLibraries();
       const libraries = result.map((library: any) => {
         library.logo = getUrls.getUrl(library.logo);
+        if (library.signature) {
+          library.signature = getUrls.getUrl(library.signature);
+        }
         return library;
       });
       return ApiResponse(200, libraries, "Libraries fetched successfully");
@@ -223,6 +232,9 @@ export class LibraryController {
       const result = await LibraryService.getLibrary(payload.id);
       if (result && result.logo) {
         result.logo = getUrls.getUrl(result.logo);
+      }
+      if (result && result.signature) {
+        result.signature = getUrls.getUrl(result.signature);
       }
       return ApiResponse(200, result, "Library fetched successfully");
     } catch (error: any) {
@@ -245,21 +257,27 @@ export class LibraryController {
       const contentType = req.headers.get("content-type") || "";
       let updateData: any = {};
       let logoUrl = existingLibrary.logo;
+      let signatureUrl = existingLibrary.signature;
 
       if (contentType.includes("multipart/form-data")) {
         const formData = await req.formData();
         const file = formData.get("logo") as File | null;
+        const signatureFile = formData.get("signature") as File | null;
 
         let parsedHelpDeskForm = existingLibrary.helpDesk;
         const helpDeskStr = formData.get("helpDesk") as string;
         if (typeof helpDeskStr === "string" && helpDeskStr.trim().startsWith("{")) {
-          try { parsedHelpDeskForm = JSON.parse(helpDeskStr); } catch (e) {}
+          try {
+            parsedHelpDeskForm = JSON.parse(helpDeskStr);
+          } catch (e) {}
         }
-        
+
         let parsedFloorsForm = existingLibrary.floors;
         const floorsStr = formData.get("floors") as string;
         if (typeof floorsStr === "string" && floorsStr.trim().startsWith("[")) {
-          try { parsedFloorsForm = JSON.parse(floorsStr); } catch (e) {}
+          try {
+            parsedFloorsForm = JSON.parse(floorsStr);
+          } catch (e) {}
         }
 
         updateData = {
@@ -276,17 +294,33 @@ export class LibraryController {
             await CloudinaryService.delete(existingLibrary.logo);
           }
           logoUrl =
-            (await CloudinaryService.upload(file, "library", "image"))?.url || "";
+            (await CloudinaryService.upload(file, "library", "image"))?.url ||
+            "";
+        }
+
+        if (signatureFile && signatureFile.size > 0) {
+          if (existingLibrary.signature) {
+            await CloudinaryService.delete(existingLibrary.signature);
+          }
+          signatureUrl =
+            (await CloudinaryService.upload(signatureFile, "library", "image"))
+              ?.url || "";
         }
       } else {
         updateData = await req.json();
+        logoUrl = updateData.logo || existingLibrary.logo;
+        signatureUrl = updateData.signature || existingLibrary.signature;
       }
 
       updateData.logo = logoUrl;
+      updateData.signature = signatureUrl;
 
       const result = await LibraryService.updateLibrary(updateData, payload.id);
       if (result && result.logo) {
         result.logo = getUrls.getUrl(result.logo);
+      }
+      if (result && result.signature) {
+        result.signature = getUrls.getUrl(result.signature);
       }
       return ApiResponse(200, result, "Library profile updated successfully");
     } catch (error: any) {
