@@ -111,7 +111,7 @@ export default function Header() {
                   color: isActiveRoute(item.path) ? color : "var(--gray-500)",
                 }}
               >
-                <item.icon className="w-4 h-4" />
+                <Icon icon={item.icon} className="w-4 h-4" />
                 <span>{item.title}</span>
               </Link>
             ))}
@@ -147,7 +147,7 @@ export default function Header() {
             <div className="relative">
               <button 
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-3 px-4 py-2 cursor-pointer rounded-2xl border border-[var(--border)] bg-[var(--bg)] hover:border-[var(--gray-200)] transition-all duration-200 group active:scale-95 shadow-xs"
+                className="flex items-center gap-3 px-4 py-2 cursor-pointer rounded-xl border border-[var(--border)] bg-[var(--bg)] hover:border-[var(--gray-200)] transition-all duration-200 group active:scale-95 shadow-xs"
               >
                 <div className="w-6 h-6 rounded-full overflow-hidden shadow-sm">
                   <img 
@@ -171,6 +171,8 @@ export default function Header() {
                     <div className="fixed inset-0 z-0" onClick={() => setShowUserMenu(false)} />
                     
                     <motion.div
+                    onMouseDown={() => setShowUserMenu(false)}
+                    onMouseLeave={()=>setShowUserMenu(false)}
                       initial={{ opacity: 0, y: 10, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.98 }}

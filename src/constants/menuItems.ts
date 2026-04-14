@@ -1,38 +1,26 @@
-import {
-  LayoutDashboard,
-  Users,
-  Database,
-  Ticket,
-  CreditCard,
-  FileText,
-  Trash2,
-  Settings,
-  Briefcase,
-} from "lucide-react";
-
 export const MENU_ITEMS = [
   {
     title: "Dashboard",
     path: "/",
-    icon: LayoutDashboard,
+    icon: "solar:widget-bold-duotone",
   },
 
-  // 1️⃣ USERS FIRST (entry point)
+  // USERS FIRST (entry point)
   {
     title: "Members",
     path: "/users",
-    icon: Users,
+    icon: "solar:users-group-rounded-bold-duotone",
     subItems: [
       { name: "Manage Members", path: "/users" },
       { name: "Add Member", path: "/users/create" },
     ],
   },
 
-  // 2️⃣ RESOURCE
+  // RESOURCE
   {
     title: "Seat Management",
     path: "/seat-management",
-    icon: Database,
+    icon: "solar:chair-bold-duotone",
     subItems: [
       { name: "Manage Seats", path: "/seat-management" },
       { name: "Add Seat", path: "/seat-management/add" },
@@ -40,51 +28,51 @@ export const MENU_ITEMS = [
     ],
   },
 
-  // 3️⃣ CORE BUSINESS
+  // CORE BUSINESS
   {
     title: "Subscriptions",
     path: "/subscriptions",
-    icon: Ticket,
+    icon: "solar:ticket-bold-duotone",
     subItems: [
       { name: "Manage Subscriptions", path: "/subscriptions" },
       { name: "Add Subscription", path: "/subscriptions/add" },
     ],
   },
 
-  // 4️⃣ MONEY FLOW
+  // MONEY FLOW
   {
     title: "Payments",
-    icon: CreditCard,
+    icon: "solar:card-bold-duotone",
     path: "/payments",
   },
 
   {
     title: "Expenses",
     path: "/expenses",
-    icon: Briefcase,
+    icon: "solar:wallet-bold-duotone",
     subItems: [
       { name: "Manage Expenses", path: "/expenses" },
       { name: "Add Expense", path: "/expenses/add" },
     ],
   },
 
-  // 5️⃣ INSIGHTS
+  // INSIGHTS
   {
     title: "Reports",
     path: "/reports",
-    icon: FileText,
+    icon: "solar:document-text-bold-duotone",
   },
 
-  // 6️⃣ LOW PRIORITY
+  // LOW PRIORITY
   {
     title: "Recycle Bin",
     path: "/trash",
-    icon: Trash2,
+    icon: "solar:trash-bin-trash-bold-duotone",
   },
 
   {
     title: "Settings",
     path: "/settings",
-    icon: Settings,
+    icon: "solar:settings-bold-duotone",
   },
 ];

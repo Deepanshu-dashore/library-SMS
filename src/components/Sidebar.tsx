@@ -73,7 +73,7 @@ export const Sidebar = () => {
                 exit={{ opacity: 0, x: -10 }}
                 transition={{ duration: 0.3 }}
               >
-                <h1 className="text-lg font-bold tracking-wide" style={{ color: "var(--text)" }}>
+                <h1 className="text-lg font-bold" style={{ color: "var(--text)" }}>
                   Library SMS
                 </h1>
                 <p className="text-[9px]" style={{ color: "var(--gray-500)" }}>
@@ -86,7 +86,7 @@ export const Sidebar = () => {
       </div>
 
       {/* Sidebar Menu */}
-      <div className="p-2 space-y-1 overflow-y-auto h-[calc(100vh-80px)] scrollbar-hide">
+      <div className="p-2 space-y-2 overflow-y-auto h-[calc(100vh-80px)] scrollbar-hide">
         {MENU_ITEMS.map((item: any, index: number) => (
           <motion.div
             key={index}
@@ -128,7 +128,7 @@ export const Sidebar = () => {
                         : "var(--gray-400)",
                   }}
                 >
-                  <item.icon className="w-5 h-5"/>
+                  <Icon icon={item.icon} className="w-5 h-5"/>
                 </div>
                 {!isCollapsed && (
                   <span className="text-[13.5px] font-medium">{item.title}</span>

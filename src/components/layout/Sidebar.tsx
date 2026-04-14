@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MENU_ITEMS } from "@/constants/menuItems";
-import { LogOut, ChevronRight } from "lucide-react";
+import { Icon } from "@iconify/react";
 import Image from "next/image";
 
 export const Sidebar = () => {
@@ -20,7 +20,7 @@ export const Sidebar = () => {
       <nav className="flex-1 px-4 py-4 space-y-1">
         {MENU_ITEMS.map((item) => {
           const isActive = pathname === item.path;
-          const Icon = item.icon;
+          const iconName = item.icon;
 
           return (
             <Link
@@ -32,7 +32,7 @@ export const Sidebar = () => {
                   : "text-[#a3a3a3] hover:bg-[#171717] hover:text-white"
               }`}
             >
-              <Icon size={20} className={isActive ? "text-blue-500" : "group-hover:text-white"} />
+              <Icon icon={iconName} className={`w-5 h-5 ${isActive ? "text-blue-500" : "group-hover:text-white"}`} />
               <span className="flex-1">{item.title}</span>
               {isActive && <div className="w-1.5 h-1.5 rounded-full bg-blue-500 ml-auto" />}
             </Link>
@@ -42,7 +42,7 @@ export const Sidebar = () => {
 
       <div className="p-4 border-t border-[#262626]">
         <button className="flex items-center gap-3 w-full px-4 py-3 text-[#a3a3a3] hover:bg-red-500/10 hover:text-red-500 rounded-xl transition-all duration-200 group">
-          <LogOut size={20} />
+          <Icon icon="solar:logout-2-bold-duotone" className="w-5 h-5" />
           <span className="font-medium">Logout</span>
         </button>
       </div>
