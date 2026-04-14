@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { useSelector } from "react-redux";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { motion } from "framer-motion";
+import { Button } from "@/components/shared/Button";
 
 interface SubscriptionDetails {
   subscription: {
@@ -112,7 +113,7 @@ export default function ViewSubscriptionPage() {
             {/* Member Details */}
             <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
               <div className="px-6 py-4 flex items-center gap-3 border-b border-gray-100">
-                <h3 className="text-[15px] font-bold text-gray-900">Member Details</h3>
+                <h3 className="text-base font-bold text-gray-900">Member Details</h3>
                 <StatusBadge status={statusKey} size="xs" />
               </div>
               <div className="divide-y divide-gray-50">
@@ -132,10 +133,10 @@ export default function ViewSubscriptionPage() {
             {/* Transaction History */}
             <div className="bg-white border border-gray-100 rounded-xl  overflow-hidden">
               <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100">
-                <h3 className="text-[15px] font-barlow font-bold text-gray-900">Transaction History</h3>
+                <h3 className="text-base font-barlow font-bold text-gray-900">Transaction History</h3>
                 <Link
                   href="/payments"
-                  className="inline-flex items-center gap-1 text-gray-600 text-sm font-semibold hover:underline"
+                  className="inline-flex items-center gap-1 text-gray-600 text-xs font-semibold hover:underline"
                 >
                   View All
                   <Icon icon="mingcute:right-line" className="w-4 h-4" />
@@ -156,17 +157,17 @@ export default function ViewSubscriptionPage() {
                     {payment.length > 0 ? (
                       payment.map((pay, i) => (
                         <tr key={i} className="hover:bg-gray-50/60 transition-colors">
-                          <td className="px-6 py-4 font-bold text-gray-600 uppercase">{pay.receiptNumber}</td>
-                          <td className="px-6 py-4 font-medium text-gray-600">
+                          <td className="px-6 font-barlow py-4 font-bold text-gray-600 uppercase">{pay.receiptNumber}</td>
+                          <td className="px-6 font-barlow py-4 font-medium text-gray-600">
                             {new Date(pay.createdAt).toLocaleDateString("en-GB", {
                               day: "numeric",
                               month: "short",
                               year: "numeric",
                             })}
                           </td>
-                          <td className="px-6 py-4 font-medium text-gray-600">₹{pay.amount.toLocaleString()}</td>
+                          <td className="px-6 font-barlow py-4 font-medium text-gray-600">₹{pay.amount.toLocaleString()}</td>
                           <td className="px-6 py-4 text-right">
-                            <Link href={`/payments/${pay._id}`} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 border border-blue-200/70 rounded-lg bg-blue-50 hover:bg-blue-100 transition-all">
+                            <Link href={`/payments/${pay._id}`} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 border border-blue-100 rounded-lg bg-blue-50 hover:bg-blue-100 transition-all">
                               <Icon icon="mdi:invoice-text" className="w-4 h-4" />
                               Receipt
                             </Link>
@@ -187,51 +188,48 @@ export default function ViewSubscriptionPage() {
 
             {/* Subscription Progress */}
             <div className="bg-white border border-gray-100 rounded-xl p-6">
-              <div className="py-4 flex items-center justify-between border-b border-gray-100">
-                <h3 className="text-[15px] font-barlow font-bold text-gray-900">Subscription Progress</h3>
-              </div>
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-sm font-bold text-gray-800">Subscription Progress</p>
-                  <p className="text-xs font-medium text-gray-400 mt-0.5">{daysRemaining} Days Remaining</p>
-                </div>
-                <span
-                  className="text-sm font-black tabular-nums"
-                  style={{ color: themeColor }}
-                >
-                  {progressPercent}%
-                </span>
+              <div className="pb-4 flex items-center justify-between border-b border-gray-100">
+                <h3 className="text-base font-barlow font-bold text-gray-900">Subscription Progress</h3>
+                <p className="text-xs font-barlow font-bold text-gray-700 tracking-tight whitespace-nowrap">
+                  {daysRemaining} Days Remaining
+                </p>
               </div>
 
               {/* Segmented bar */}
-              <div className="flex gap-1">
-                {Array.from({ length: 30 }).map((_, i) => {
-                  const filled = i < Math.round((progressPercent / 100) * 20);
-                  return (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, scaleY: 0.5 }}
-                      animate={{ opacity: 1, scaleY: 1 }}
-                      transition={{ duration: 0.4, delay: i * 0.03, ease: "easeOut" }}
-                      className="flex-1 h-3 rounded-xs"
-                      style={{
-                        backgroundColor: filled ? themeColor : "#e5e7eb",
-                        boxShadow: filled ? `0 0 4px ${themeColor}55` : "none",
-                      }}
-                    />
-                  );
-                })}
+              <div className="mt-4">
+                <div className="flex items-start gap-4">
+                  <div className="flex-1 w-full pt-1">
+                    <div className="flex w-full gap-[3px]">
+                      {Array.from({ length: 30 }).map((_, i) => {
+                        const filled = i < Math.round((progressPercent / 100) * 30);
+                        return (
+                          <motion.div
+                            key={i}
+                            initial={{ opacity: 0, scaleY: 0.5 }}
+                            animate={{ opacity: 1, scaleY: 1 }}
+                            transition={{ duration: 0.4, delay: i * 0.03, ease: "easeOut" }}
+                            className="flex-1 h-[8px] rounded-[1px]"
+                            style={{
+                              backgroundColor: filled ? themeColor : "#e2e8f0",
+                              boxShadow: filled ? `0 0 4px ${themeColor}40` : "none",
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+                    {/* Start / End labels */}
+                    <div className="flex font-barlow items-center justify-between mt-3">
+                      <span className="text-[11px] font-semibold text-gray-400">
+                        {startDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                      </span>
+                      <span className="text-[11px] font-semibold text-gray-400">
+                        {endDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Start / End labels */}
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-[11px] font-semibold text-gray-400">
-                  {startDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                </span>
-                <span className="text-[11px] font-semibold text-gray-400">
-                  {endDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                </span>
-              </div>
             </div>
           </div>
 
@@ -239,85 +237,111 @@ export default function ViewSubscriptionPage() {
           <div className="lg:col-span-5 space-y-5">
 
             {/* Seat & Duration */}
-            <div className="bg-white border border-gray-100 rounded-xl  p-6 space-y-5">
-              {/* Seat */}
-              <div className="flex items-center gap-4">
-                <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shrink-0">
-                  <Icon icon="solar:chair-bold-duotone" width={24} height={24} />
-                </div>
-                <div>
-                  <p className="text-base font-black text-gray-900">Seat {subscription.seatId.seatNumber}</p>
-                  <p className="text-xs font-bold text-blue-500">{subscription.seatId.floor}</p>
-                </div>
+            <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+              <div className="px-6 py-4 flex items-center gap-3 border-b border-gray-100">
+                <h3 className="text-base font-bold text-gray-900">Subscription Info</h3>
               </div>
-
-              <div className="border-t border-dashed border-gray-100" />
-
-              {/* Duration */}
-              <div className="flex items-start gap-4">
-                <div className="w-9 h-9 rounded-lg bg-gray-50 border border-gray-100 text-gray-500 flex items-center justify-center shrink-0 mt-0.5">
-                  <Icon icon="solar:calendar-date-bold-duotone" width={18} height={18} />
+              <div className="p-6 space-y-5">
+                {/* Seat */}
+                <div className="flex items-center gap-4">
+                  <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                    <Icon icon="solar:chair-bold-duotone" width={24} height={24} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-400">Seat Number</p>
+                    <p className="text-base font-black text-gray-900 leading-tight">{subscription.seatId.seatNumber}</p>
+                  </div>
+                  <div className="ml-auto text-right">
+                    <p className="text-xs font-semibold text-gray-400">Floor</p>
+                    <p className="text-sm font-bold text-blue-600">{subscription.seatId.floor || "1st Floor"}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[13px] font-bold text-gray-900">
-                    {startDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                    {" – "}
-                    {endDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                  </p>
-                  <p className="text-xs font-semibold text-gray-400 mt-0.5">1 Month Duration</p>
-                </div>
-              </div>
 
-              {/* Created On */}
-              <div className="flex items-start gap-4">
-                <div className="w-9 h-9 rounded-lg bg-gray-50 border border-gray-100 text-gray-500 flex items-center justify-center shrink-0 mt-0.5">
-                  <Icon icon="solar:clock-circle-bold-duotone" width={18} height={18} />
+                <div className="border-t border-dashed border-gray-100" />
+
+                {/* Duration */}
+                <div className="flex items-start gap-4">
+                  <div className="w-11 h-11 rounded-lg bg-gray-50 border border-gray-100 text-gray-500 flex items-center justify-center shrink-0 mt-0.5">
+                    <Icon icon="mdi:invoice-schedule" width={20} height={20} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-400">Subscription Duration</p>
+                    <p className="text-[13px] font-bold text-gray-900 mt-0.5 font-barlow">
+                      {startDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                      {" – "}
+                      {endDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-400">Created On</p>
-                  <p className="text-[13px] font-bold text-gray-900 mt-0.5">
-                    {new Date(subscription.createdAt).toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </p>
+
+                {/* Created On */}
+                <div className="flex items-start gap-4">
+                  <div className="w-11 h-11 rounded-lg bg-gray-50 border border-gray-100 text-gray-500 flex items-center justify-center shrink-0 mt-0.5">
+                    <Icon icon="solar:alarm-bold-duotone" width={20} height={20} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-400">Subscription Date</p>
+                    <p className="text-[13px] font-barlow font-bold text-gray-900 mt-0.5">
+                      {new Date(subscription.createdAt).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Plan & Price */}
-            <div className="bg-white border border-gray-100 rounded-xl  p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <p className="text-sm font-bold text-gray-900">Standard Plan</p>
-                <StatusBadge status={statusKey} size="xs" />
+            <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+              <div className="px-6 py-4 flex items-center gap-3 border-b border-gray-100">
+                <h3 className="text-base font-bold text-gray-900">Standard Plan</h3>
+                  <StatusBadge status={statusKey} size="xs" />
               </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-[28px] font-black text-gray-900 tracking-tight leading-none">
-                  ₹{subscription.seatId.price.toLocaleString()}
-                </span>
-                <span className="text-sm font-semibold text-gray-400 ml-1">/ per month</span>
+              <div className="p-6">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-barlow font-bold text-gray-900 tracking-tight leading-none">
+                    ₹{subscription.seatId.price.toLocaleString()}
+                  </span>
+                  <span className="text-sm font-public-sans font-semibold text-gray-400 ml-1">/ per month</span>
+                </div>
               </div>
             </div>
 
             {/* Actions */}
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <button
+                <Button
+                  variant="edit"
+                  size="md"
+                  // icon="solar:pen-new-square-linear"
+                  className="font-medium"
                   onClick={() => router.push(`/subscriptions/${id}/edit`)}
-                  className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-all shadow-sm"
+                  fullWidth
                 >
-                  <Icon icon="solar:pen-new-square-linear" className="w-4 h-4" />
-                  Edit Details
-                </button>
-                <button className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold text-red-500 bg-white border border-red-100 hover:bg-red-50 transition-all shadow-sm">
-                  <Icon icon="solar:close-circle-linear" className="w-4 h-4" />
-                  Cancel Subscription
-                </button>
+                  Edit
+                </Button>
+                <Button
+                  variant="outline"
+                  size="md"
+                  hideIcon={true}
+                  icon="line-md:file-document-cancel-filled"
+                  className="!text-red-600 font-medium border !bg-red-50/50 !border-red-100 hover:!bg-red-50 hover:!border-red-200"
+                  fullWidth
+                >
+                  Cancel
+                </Button>
               </div>
-              <button className="w-full py-3.5 rounded-xl bg-blue-600 text-white text-sm font-bold tracking-wide hover:bg-blue-700 active:scale-[0.98] transition-all shadow-md">
+              <Button
+                variant="primary"
+                size="md"
+                icon="wpf:renew-subscription"
+                fullWidth
+                className="shadow-[0_4px_12px_rgba(37,99,235,0.25)] capitalize font-medium py-3 text-sm"
+              >
                 Renew Subscription
-              </button>
+              </Button>
             </div>
           </div>
         </div>
