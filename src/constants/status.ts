@@ -64,6 +64,10 @@ export const STATUS_STYLES: Record<string, StatusStyle> = {
     label: "AC",
     color: "bg-blue-100 text-blue-700",
   },
+  card: {
+    label: "Card",
+    color: "bg-amber-100 text-amber-700",
+  },
   available: {
     label: "Available",
     color: "bg-green-100 text-green-700",
@@ -71,6 +75,14 @@ export const STATUS_STYLES: Record<string, StatusStyle> = {
   occupied: {
     label: "Occupied",
     color: "bg-red-100 text-red-700",
+  },
+  cash: {
+    label: "Cash",
+    color: "bg-emerald-100/80 text-emerald-700",
+  },
+  upi: {
+    label: "UPI",
+    color: "bg-indigo-100/80 text-indigo-700",
   },
 };
 

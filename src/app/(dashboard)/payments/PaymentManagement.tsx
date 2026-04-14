@@ -34,14 +34,21 @@ export default function PaymentManagement() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [stats, setStats] = useState<any>(null);
 
   const fetchPayments = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/payment");
+      const searchParam = searchTerm ? `search=${searchTerm}` : "";
+      const modeParam = activeTab !== "All" ? `mode=${activeTab}` : "";
+      const query = [searchParam, modeParam].filter(Boolean).join("&");
+      
+      const res = await fetch(`/api/payment${query ? `?${query}` : ""}`);
       const data = await res.json();
       if (data.success) {
-        setPayments(data.data);
+        setPayments(data.data.payments);
+        setStats(data.data.stats);
       } else {
         toast.error(data.message || "Failed to fetch payments");
       }
@@ -53,8 +60,11 @@ export default function PaymentManagement() {
   };
 
   useEffect(() => {
-    fetchPayments();
-  }, []);
+    const timer = setTimeout(() => {
+        fetchPayments();
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [activeTab, searchTerm]);
 
   const columns: ColumnDef<Payment>[] = [
     {
@@ -71,7 +81,7 @@ export default function PaymentManagement() {
       label: "Amount",
       type: "custom",
       render: (row) => (
-        <span className="font-extrabold text-gray-900">₹{row.amount}</span>
+        <span className="font-semibold font-barlow">₹{row.amount.toLocaleString()}</span>
       ),
       sortable: true
     },
@@ -85,7 +95,8 @@ export default function PaymentManagement() {
     {
       key: "receiptNumber",
       label: "Receipt No.",
-      type: "text"
+      type: "text",
+      className: "font-barlow"
     },
     {
       key: "createdAt",
@@ -97,21 +108,17 @@ export default function PaymentManagement() {
   ];
 
   const tabs: TabDef[] = [
-    { label: "All Payments", value: "All", count: payments.length },
-    { label: "Cash", value: "cash", count: payments.filter(p => p.paymentMode === "cash").length },
-    { label: "UPI", value: "upi", count: payments.filter(p => p.paymentMode === "upi").length },
-    { label: "Card", value: "card", count: payments.filter(p => p.paymentMode === "card").length },
+    { label: "All Payments", value: "All", count: stats?.count || 0, color: "default" },
+    { label: "Cash", value: "cash", count: stats?.cash?.count || 0, color: "success" },
+    { label: "UPI", value: "upi", count: stats?.upi?.count || 0, color: "info" },
+    { label: "Card", value: "card", count: stats?.card?.count || 0, color: "warning" },
   ];
 
-  const filteredData = activeTab === "All" 
-    ? payments 
-    : payments.filter(p => p.paymentMode === activeTab);
-
-  const totalRevenue = payments.reduce((acc, curr) => acc + curr.amount, 0);
+  const filteredData = payments;
 
   return (
     <div className="bg-gray-50/50 min-h-screen">
-      <div className="max-w-[1240px] mx-auto p-4 md:p-8">
+      <div className="max-w-6xl">
         
         <PageHeader 
           title="Payment Records"
@@ -122,39 +129,84 @@ export default function PaymentManagement() {
         />
 
         {/* Financial Summary */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-           <div className="bg-indigo-600 p-8 rounded-[40px] shadow-xl shadow-indigo-100 flex items-center justify-between text-white group overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-125" />
-              <div className="relative z-10">
-                 <p className="text-indigo-100 text-[11px] font-black uppercase tracking-widest mb-1">Total Collections</p>
-                 <h4 className="text-4xl font-black tracking-tight">₹{totalRevenue.toLocaleString()}</h4>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm mb-10 overflow-hidden">
+          <div className="flex flex-col md:flex-row items-center divide-y md:divide-y-0 md:divide-x divide-gray-100 divide-dashed">
+            
+            {/* Total */}
+            <div className="flex-1 w-full p-6 flex items-center gap-4 group hover:bg-gray-50/50 transition-colors">
+              <div className="w-14 h-14 rounded-full border-2 border-cyan-100 flex items-center justify-center bg-cyan-50/30 text-cyan-600 transition-transform group-hover:scale-110">
+                <Receipt size={24} />
               </div>
-              <div className="w-16 h-16 bg-white/20 rounded-[24px] flex items-center justify-center relative z-10">
-                 <Wallet size={32} />
+              <div className="flex flex-col">
+                <p className="text-sm font-bold text-gray-900 leading-none">Total</p>
+                <p className="text-xs font-semibold text-gray-400 mt-1">{stats?.count || 0} Payments</p>
+                <p className="text-lg font-black text-gray-900 mt-1 font-barlow">₹{stats?.total?.toLocaleString() || 0}</p>
               </div>
-           </div>
+            </div>
 
-           <div className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100 flex items-center justify-between group">
-              <div>
-                 <p className="text-gray-400 text-[11px] font-black uppercase tracking-widest mb-1">Total Receipts</p>
-                 <h4 className="text-4xl font-black text-gray-900 tracking-tight">{payments.length}</h4>
+            {/* Cash */}
+            <div className="flex-1 w-full p-6 flex items-center gap-4 group hover:bg-gray-50/50 transition-colors">
+              <div className="w-14 h-14 rounded-full border-2 border-emerald-100 flex items-center justify-center bg-emerald-50/30 text-emerald-600 transition-transform group-hover:scale-110">
+                <Wallet size={24} />
               </div>
-              <div className="w-16 h-16 bg-green-50 text-green-600 rounded-[24px] flex items-center justify-center transform group-hover:rotate-12 transition-transform">
-                 <Receipt size={32} />
+              <div className="flex flex-col">
+                <p className="text-sm font-bold text-gray-900 leading-none">Cash</p>
+                <p className="text-xs font-semibold text-gray-400 mt-1">
+                  {stats?.cash?.count || 0} Payments
+                </p>
+                <p className="text-lg font-black text-gray-900 mt-1 font-barlow">
+                  ₹{stats?.cash?.amount?.toLocaleString() || 0}
+                </p>
               </div>
-           </div>
+            </div>
 
-           <div className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100 flex items-center justify-between group">
-              <div>
-                 <p className="text-gray-400 text-[11px] font-black uppercase tracking-widest mb-1">Last Payment</p>
-                 <h4 className="text-xl font-black text-gray-900 tracking-tight">
-                    {payments.length > 0 ? new Date(payments[0].createdAt).toLocaleDateString() : 'N/A'}
-                 </h4>
+            {/* UPI */}
+            <div className="flex-1 w-full p-6 flex items-center gap-4 group hover:bg-gray-50/50 transition-colors">
+              <div className="w-14 h-14 rounded-full border-2 border-indigo-100 flex items-center justify-center bg-indigo-50/30 text-indigo-600 transition-transform group-hover:scale-110">
+                <ArrowUpRight size={24} />
               </div>
-              <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-[24px] flex items-center justify-center transform group-hover:scale-110 transition-transform">
-                 <Calendar size={32} />
+              <div className="flex flex-col">
+                <p className="text-sm font-bold text-gray-900 leading-none">UPI</p>
+                <p className="text-xs font-semibold text-gray-400 mt-1">
+                  {stats?.upi?.count || 0} Payments
+                </p>
+                <p className="text-lg font-black text-gray-900 mt-1 font-barlow">
+                  ₹{stats?.upi?.amount?.toLocaleString() || 0}
+                </p>
               </div>
-           </div>
+            </div>
+
+            {/* Card */}
+            <div className="flex-1 w-full p-6 flex items-center gap-4 group hover:bg-gray-50/50 transition-colors">
+              <div className="w-14 h-14 rounded-full border-2 border-amber-100 flex items-center justify-center bg-amber-50/30 text-amber-600 transition-transform group-hover:scale-110">
+                <CreditCard size={24} />
+              </div>
+              <div className="flex flex-col">
+                <p className="text-sm font-bold text-gray-900 leading-none">Card</p>
+                <p className="text-xs font-semibold text-gray-400 mt-1">
+                  {stats?.card?.count || 0} Payments
+                </p>
+                <p className="text-lg font-black text-gray-900 mt-1 font-barlow">
+                  ₹{stats?.card?.amount?.toLocaleString() || 0}
+                </p>
+              </div>
+            </div>
+
+            {/* Last Entry */}
+            <div className="flex-1 w-full p-6 flex items-center gap-4 group hover:bg-gray-50/50 transition-colors">
+              <div className="w-14 h-14 rounded-full border-2 border-rose-100 flex items-center justify-center bg-rose-50/30 text-rose-600 transition-transform group-hover:scale-110">
+                <Calendar size={24} />
+              </div>
+              <div className="flex flex-col">
+                <p className="text-sm font-bold text-gray-900 leading-none">Last Entry</p>
+                <p className="text-xs font-semibold text-gray-400 mt-1">Payment Date</p>
+                <p className="text-lg font-black text-gray-900 mt-1 font-barlow">
+                  {stats?.lastEntry ? new Date(stats.lastEntry).toLocaleDateString("en-GB", { day: '2-digit', month: 'short' }) : 'N/A'}
+                </p>
+              </div>
+            </div>
+
+          </div>
         </div>
 
         <DataTable
@@ -166,6 +218,7 @@ export default function PaymentManagement() {
           tabs={tabs}
           activeTab={activeTab}
           onTabChange={setActiveTab}
+          onSearch={(val) => setSearchTerm(val)}
           onView={(row) => router.push(`/payments/${row._id}`)}
           hiddenActions={['edit', 'delete']}
         />

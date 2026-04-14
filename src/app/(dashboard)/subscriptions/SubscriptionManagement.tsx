@@ -190,7 +190,7 @@ export default function SubscriptionManagement() {
   ];
 
   const tabs: TabDef[] = [
-    { label: "All", value: "All", count: stats.totalSub },
+    { label: "All", value: "All", count: stats.totalSub, color: "default" },
     { label: "Active", value: "active", count: stats.totalActive, color: "success" },
     { label: "Expired", value: "expired", count: stats.totalExpired, color: "warning" },
     { label: "Cancelled", value: "cancelled", count: stats.totalCancelled, color: "error" },

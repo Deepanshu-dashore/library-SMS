@@ -123,7 +123,7 @@ export default function UserManagement() {
   ];
 
   const tabs: TabDef[] = [
-    { label: "All Members", value: "All", count: stats.total },
+    { label: "All Members", value: "All", count: stats.total, color: "default" },
     { label: "Active", value: "Active", count: stats.active, color: "success" },
     { label: "Inactive", value: "Inactive", count: stats.inactive, color: "error" },
     { label: "Unverify", value: "Unverify", count: stats.unverify, color: "warning" },

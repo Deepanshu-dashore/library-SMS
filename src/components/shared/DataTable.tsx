@@ -41,6 +41,7 @@ export interface ColumnDef<T> {
   // For 'status' type
   getStatus?: (row: T) => string; // Now can return a status key like "pending", "active"
   getStatusColor?: (row: T) => string; // Optional direct color override
+  className?: string;
 }
 
 export interface ActionDef<T> {
@@ -462,11 +463,11 @@ export function DataTable<T>({
                                )
                             })() :
                             col.type === 'text' ? (
-                               <span className="text-[14px] text-gray-700 font-medium">
+                               <span className={`text-[14px] text-gray-700 font-medium ${col.className || ''}`}>
                                  {String((row as any)[col.key] || '-')}
                                </span>
                             ) : (
-                               <span className="text-[14px] text-gray-700 font-medium">
+                               <span className={`text-[14px] text-gray-700 font-medium ${col.className || ''}`}>
                                  {col.render ? col.render(row) : String((row as any)[col.key] || '-')}
                                </span>
                             )}

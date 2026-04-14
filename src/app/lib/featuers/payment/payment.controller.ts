@@ -3,14 +3,19 @@ import { PaymentService } from "./payment.service";
 import { verifyJWT } from "../../middlewares/verifyJWT";
 
 export class PaymentController {
-  static async getAllPayments() {
+  static async getAllPayments(req: Request) {
     const library = await verifyJWT();
     if (!library) {
       return ApiResponse(401, null, "Unauthorized");
     }
+
+    const { searchParams } = new URL(req.url);
+    const search = searchParams.get("search") || "";
+    const mode = searchParams.get("mode") || "All";
+
     try {
-      const payments = await PaymentService.getAllPayment();
-      return ApiResponse(200, payments, "Payments fetched successfully");
+      const { payments, stats } = await PaymentService.getAllPayment(search, mode);
+      return ApiResponse(200, { payments, stats }, "Payments fetched successfully");
     } catch (error) {
       return ApiResponse(500, null, "Failed to fetch payments");
     }
