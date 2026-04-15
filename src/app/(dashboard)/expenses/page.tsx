@@ -7,6 +7,7 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/shared/Button";
 
 interface ExpenseData {
   _id: string;
@@ -88,7 +89,7 @@ export default function ManageExpensesPage() {
       type: "text",
       // sortable: true,
       render: (row) => (
-        <span className="font-bold text-gray-900">
+        <span className="font-bold text-gray-900 font-barlow">
           ₹{row.amount.toLocaleString()}
         </span>
       ),
@@ -105,6 +106,7 @@ export default function ManageExpensesPage() {
       label: "Date",
       type: "date",
       // sortable: true,
+      className:"font-barlow",
       getDate: (row) => row.date,
     },
     {
@@ -120,7 +122,7 @@ export default function ManageExpensesPage() {
   ];
 
   return (
-    <div className="p-6 h-full flex flex-col overflow-auto font-sans">
+    <div className="h-full flex flex-col overflow-auto">
       <PageHeader
         title="Manage Expenses"
         breadcrumbs={[
@@ -129,17 +131,18 @@ export default function ManageExpensesPage() {
         ]}
         actionNode={
           <div className="flex items-center gap-4">
-             <div className="flex flex-col items-end mr-2">
-                <span className="text-[11px] font-black uppercase tracking-widest text-gray-400">Total Expenses</span>
-                <span className="text-xl font-black text-gray-900 tracking-tight">₹{totalAmount.toLocaleString()}</span>
-             </div>
+             <Button variant="edit" hideIcon className="font-medium">
+                 Total Expenses
+                <span className="font-semibold text-base tracking-tight font-barlow">₹{totalAmount.toLocaleString()}</span>
+             </Button>
+             <Button icon="ic:round-add" variant="primary" size="md" className="font-medium">   
             <Link
+            className="py-0.5"
               href="/expenses/add"
-              className="flex items-center gap-2 bg-[#4f46e5] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#4338ca] transition-all shadow-md shadow-indigo-500/10 active:scale-95"
             >
-              <PlusIcon className="w-5 h-5 stroke-[2.5px]" />
               Add New Expense
             </Link>
+             </Button>
           </div>
         }
       />

@@ -1,20 +1,33 @@
 "use client";
 
 import React, { useEffect, useState, use } from "react";
-import { PageHeader } from "@/components/shared/PageHeader";
 import { useRouter } from "next/navigation";
+import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
-import { Loader2, ArrowLeft, Calendar, Tag, CreditCard, FileText, StickyNote } from "lucide-react";
-import { StatusBadge } from "@/components/shared/StatusBadge";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/shared/Button";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { useSelector } from "react-redux";
 
 interface ViewExpenseProps {
   params: Promise<{ id: string }>;
 }
 
+function HorizontalInfoRow({ label, value }: { label: string; value?: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2 group py-4 border-b border-gray-100 border-dashed last:border-0 hover:bg-gray-50/50 transition-colors px-1">
+      <span className="text-sm font-bold text-slate-800 w-44 shrink-0 uppercase tracking-tight">{label}:</span>
+      <div className="text-sm font-bold text-slate-600 truncate flex-1 flex justify-end tracking-tight">
+        {value || "—"}
+      </div>
+    </div>
+  );
+}
+
 export default function ViewExpensePage({ params }: ViewExpenseProps) {
   const { id } = use(params);
   const router = useRouter();
+  const { color } = useSelector((state: any) => state.theme);
   const [fetching, setFetching] = useState(true);
   const [expense, setExpense] = useState<any>(null);
 
@@ -43,131 +56,146 @@ export default function ViewExpensePage({ params }: ViewExpenseProps) {
   if (fetching) {
     return (
       <div className="flex h-[80vh] w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
+        <div style={{ borderColor: color, borderTopColor: "transparent" }} className="w-12 h-12 border-4 rounded-full animate-spin"></div>
       </div>
     );
   }
-  console.log(expense)
 
   if (!expense) return null;
 
+  const isImage = expense.receipt && (expense.receipt.match(/\.(jpeg|jpg|gif|png|webp)$/i) || expense.receipt.includes("cloudinary"));
+
   return (
-    <div className="p-6 h-full flex flex-col font-sans max-w-4xl mx-auto">
-      <PageHeader
-        title="Expense Details"
-        breadcrumbs={[
-          { label: "Dashboard", href: "/" },
-          { label: "Expenses", href: "/expenses" },
-          { label: "View Details" },
-        ]}
-        backLink="/expenses"
-      />
+    <div className="bg-gray-50/50 min-h-screen font-public-sans pb-10">
+      <div className="max-w-[1200px] mx-auto">
+        <PageHeader
+          title="View Transaction"
+          breadcrumbs={[
+            { label: "Dashboard", href: "/" },
+            { label: "Expenses", href: "/expenses" },
+            { label: "View Details" },
+          ]}
+          backLink="/expenses"
+          actionNode={ 
+               <div className="flex items-center gap-3">
+                  <Button
+                    onClick={() => router.push(`/expenses/edit/${id}`)}
+                    variant="edit"
+                    size="md"
+                    className="font-medium"
+                  >
+                    Edit
+                  </Button>
+               </div>}
+        />
 
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-        {/* Banner Section */}
-        <div className="bg-linear-to-r from-indigo-50 to-purple-50 p-8 border-b border-gray-100">
-           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-              <div className="space-y-1">
-                 <span className="text-[11px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-50 px-2 py-1 rounded-md">Transaction Record</span>
-                 <h2 className="text-3xl font-black text-gray-900 tracking-tight">{expense.title}</h2>
-              </div>
-              <div className="flex flex-col items-end">
-                 <span className="text-[11px] font-black uppercase tracking-widest text-gray-400">Amount Paid</span>
-                 <span className="text-3xl font-black text-gray-900 tracking-tighter">₹{expense.amount.toLocaleString()}</span>
-              </div>
-           </div>
-        </div>
+          
+          {/* Main Content Card */}
+          <div className="bg-white rounded-xl shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_24px_48px_-8px_rgba(145,158,171,0.16)] border border-gray-100/80 overflow-hidden">
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2">
+               
+               {/* Left Column: Information Rows */}
+               <div className="p-8 md:p-10 border-b lg:border-b-0 lg:border-r border-gray-100">
+                  <div className="flex items-center gap-3 mb-8">
+                     <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+                        <Icon icon="solar:wallet-bold-duotone" width={22} className="text-indigo-600" />
+                     </div>
+                     <h3 className="text-base font-public-sans uppercase font-bold text-slate-900 tracking-wide">Expense Information</h3>
+                  </div>
 
-        {/* Content Section */}
-        <div className="p-10 space-y-10">
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              {/* Category */}
-              <div className="flex items-start gap-4">
-                 <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center shrink-0 border border-gray-100">
-                    <Tag className="w-5 h-5 text-gray-400" />
-                 </div>
-                 <div className="space-y-1">
-                    <p className="text-[13px] font-bold text-gray-400 uppercase tracking-wider">Category</p>
-                    <StatusBadge status={expense.category} size="md" />
-                 </div>
-              </div>
+                  <div className="space-y-1">
+                    <HorizontalInfoRow 
+                      label="Expense Title" 
+                      value={<span className=" capitalize">{expense.title}</span>} 
+                    />
+                    <HorizontalInfoRow 
+                      label="Date" 
+                      value={new Date(expense.date).toLocaleDateString("en-IN", { day: '2-digit', month: 'long', year: 'numeric' })} 
+                    />
+                    <HorizontalInfoRow 
+                      label="Category" 
+                      value={<StatusBadge status={expense.category} size="sm" />} 
+                    />
+                    <HorizontalInfoRow 
+                      label="Amount Base" 
+                      value={<span className="text-slate-900 font-black">₹{expense.amount.toLocaleString()}</span>} 
+                    />
+                    <HorizontalInfoRow 
+                      label="Notes" 
+                      value={<div className="text-right leading-relaxed text-slate-500 font-medium">
+                        {expense.note || "No notes available"}
+                      </div>} 
+                    />
+                  </div>
+               </div>
 
-              {/* Date */}
-              <div className="flex items-start gap-4">
-                 <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center shrink-0 border border-gray-100">
-                    <Calendar className="w-5 h-5 text-gray-400" />
-                 </div>
-                 <div className="space-y-1">
-                    <p className="text-[13px] font-bold text-gray-400 uppercase tracking-wider">Transaction Date</p>
-                    <p className="text-lg font-bold text-gray-800">
-                       {new Date(expense.date).toLocaleDateString("en-GB", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric"
-                       })}
-                    </p>
-                 </div>
-              </div>
+               {/* Right Column: Receipt Section */}
+               <div className="p-8 md:p-10 bg-slate-50/20 flex flex-col h-full">
+                  <div className="flex items-center justify-between mb-8">
+                     <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                           <Icon icon="mdi:invoice-text" width={22} className="text-amber-600" />
+                        </div>
+                        <h3 className="text-base font-public-sans uppercase font-bold text-slate-900 tracking-wide">Receipt Attachment</h3>
+                     </div>
+                     {expense.receipt && (
+                        <a 
+                          href={expense.receipt} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          className="text-[12px] font-medium uppercase text-indigo-600 hover:underline"
+                        >
+                           Expand View
+                        </a>
+                     )}
+                  </div>
 
-              {/* Expense ID */}
-              <div className="flex items-start gap-4">
-                 <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center shrink-0 border border-gray-100">
-                    <CreditCard className="w-5 h-5 text-gray-400" />
-                 </div>
-                 <div className="space-y-1">
-                    <p className="text-[13px] font-bold text-gray-400 uppercase tracking-wider">Reciept Number</p>
-                    <p className="font-mono text-gray-800 font-bold">{expense._id.slice(-8).toUpperCase()}</p>
-                 </div>
-              </div>
+                  <div className="flex-1 min-h-[450px] flex rounded-lg border border-gray-200 bg-white shadow-inner overflow-hidden relative group">
+                     {expense.receipt ? (
+                        isImage ? (
+                           <div className="w-full h-full flex items-center justify-center p-4">
+                              <img 
+                                src={expense.receipt} 
+                                alt="Receipt Preview" 
+                                className="max-w-full max-h-full object-contain rounded-xl transition-transform duration-500 group-hover:scale-105"
+                              />
+                              <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                                 <div className="bg-white/20 backdrop-blur-md p-4 rounded-full text-white">
+                                    <Icon icon="solar:magnifer-zoom-in-bold" width={24} />
+                                 </div>
+                              </div>
+                           </div>
+                        ) : (
+                           <div className="w-full flex flex-col items-center justify-center text-center p-10 space-y-4">
+                              <div className="w-20 h-20 rounded-3xl bg-amber-50 text-amber-600 flex items-center justify-center shadow-sm">
+                                 <Icon icon="solar:document-bold-duotone" width={36} height={36} />
+                              </div>
+                              <div className="space-y-1">
+                                 <p className="font-black text-slate-900">PDF/Binary Format</p>
+                                 <p className="text-[12px] font-bold text-slate-400">This receipt requires an external reader.</p>
+                              </div>
+                              <Button
+                                 onClick={() => window.open(expense.receipt, '_blank')}
+                                 variant="primary"
+                                 className="mt-4 px-10 bg-slate-900 h-11"
+                              >
+                                 View Document
+                              </Button>
+                           </div>
+                        )
+                     ) : (
+                        <div className="w-full flex flex-col items-center justify-center text-center p-10 space-y-3 grayscale opacity-40">
+                           <Icon icon="solar:bill-cross-bold-duotone" width={48} className="text-gray-300" />
+                           <p className="text-[14px] font-black text-gray-400 uppercase tracking-widest">No receipt found</p>
+                        </div>
+                     )}
+                  </div>
+               </div>
 
-              {/* Attachment */}
-              <div className="flex items-start gap-4">
-                 <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center shrink-0 border border-gray-100">
-                    <FileText className="w-5 h-5 text-gray-400" />
-                 </div>
-                 <div className="space-y-1">
-                    <p className="text-[13px] font-bold text-gray-400 uppercase tracking-wider">Attachment</p>
-                    {expense.receipt ? (
-                       <a href={expense.receipt} target="_blank" rel="noreferrer" className="text-indigo-600 font-bold hover:underline">View Receipt Attachment</a>
-                    ) : (
-                       <p className="text-gray-400 italic">No receipt attached</p>
-                    )}
-                 </div>
-              </div>
-           </div>
-
-           {/* Notes Section */}
-           <div className="pt-10 border-t border-gray-50 space-y-4">
-              <div className="flex items-center gap-2">
-                 <StickyNote className="w-5 h-5 text-indigo-500 rounded-sm" />
-                 <h3 className="text-[14px] font-black uppercase tracking-widest text-gray-900 underline decoration-indigo-200 underline-offset-4 decoration-2">Administrative Note</h3>
-              </div>
-              <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
-                 <p className="text-gray-600 leading-relaxed font-medium">
-                    {expense.note || "No additional notes provided for this transaction."}
-                 </p>
-              </div>
-           </div>
-
-           {/* Actions */}
-           <div className="flex justify-end gap-4 pt-10 mt-10 border-t border-gray-50">
-              <Button
-                 onClick={() => router.push(`/expenses/edit/${id}`)}
-                 variant="primary"
-                 className="px-8 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 shadow-lg"
-              >
-                 Edit Details
-              </Button>
-              <Button
-                 onClick={() => router.push("/expenses")}
-                 variant="outline"
-                 className="px-8 border border-gray-200 text-gray-600 rounded-xl font-bold hover:bg-gray-50"
-              >
-                 Close
-              </Button>
-           </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
   );
 }

@@ -52,11 +52,13 @@ export class ExpenceController {
       return ApiResponse(401, null, "Unauthorized request");
     }
     try {
-      const data = await ExpenceService.getAllExpence();
+      const { searchParams } = new URL(req.url);
+      const search = searchParams.get("search") || "";
+      const data = await ExpenceService.getAllExpence(search);
       const expence = data.data.map((item: any) => {
         return {
           ...item,
-          receipt: item.receipt ? getUrls.getUrl(item.receipt,"image") : "",
+          receipt: item.receipt ? getUrls.getUrl(item.receipt, "image") : "",
         };
       });
       return ApiResponse(

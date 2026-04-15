@@ -8,10 +8,22 @@ export class ExpenceService {
     return await Expense.create(data);
   }
 
-  static async getAllExpence() {
+  static async getAllExpence(search?: string) {
     await connectDB();
-    const data = await Expense.find().sort({ createdAt: -1 }).lean();
+    let query: any = {};
+    if (search) {
+      const isNumber = !isNaN(Number(search));
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { note: { $regex: search, $options: "i" } },
+      ];
+      if (isNumber) {
+        query.$or.push({ amount: Number(search) });
+      }
+    }
+    const data = await Expense.find(query).sort({ createdAt: -1 }).lean();
     const totalExpence = await Expense.aggregate([
+      { $match: query },
       {
         $group: {
           _id: null,
@@ -30,7 +42,9 @@ export class ExpenceService {
 
   static async updateExpence(id: string, data: any) {
     await connectDB();
-    return await Expense.findByIdAndUpdate(id, data, { returnDocument: 'after' }).lean();
+    return await Expense.findByIdAndUpdate(id, data, {
+      returnDocument: "after",
+    }).lean();
   }
 
   static async deleteExpence(id: string) {
