@@ -74,5 +74,9 @@ export const MENU_ITEMS = [
     title: "Settings",
     path: "/settings",
     icon: "solar:settings-bold-duotone",
+    subItems: [
+      { name: "Profile", path: "/settings" },
+      { name: "Personalization", path: "/settings/personalization" },
+    ],
   },
 ];
