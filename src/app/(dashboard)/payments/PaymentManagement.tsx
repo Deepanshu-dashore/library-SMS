@@ -16,7 +16,6 @@ import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, ColumnDef, TabDef } from "@/components/shared/DataTable";
-import { LineLoader } from "@/components/shared/LineLoader";
 
 const CircularProgress = ({ value, icon, color1, color2, id }: { value: number; icon: string; color1: string; color2: string; id: string }) => {
   const radius = 24;
@@ -280,8 +279,6 @@ export default function PaymentManagement() {
 
           </div>
         </div>
-
-        {loading && <LineLoader color="#3b82f6" height={3} className="mb-4" />}
 
         <DataTable
           data={filteredData}

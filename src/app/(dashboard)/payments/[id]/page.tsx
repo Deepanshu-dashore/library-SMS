@@ -14,8 +14,12 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
-
+import { useSelector } from "react-redux";
+import { Icon } from "@iconify/react";
 import { Button } from "@/components/shared/Button";
+import { SimpleLoader } from "@/components/shared/SimpleLoader";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface PaymentDetails {
   _id: string;
@@ -36,6 +40,7 @@ export default function ViewPaymentPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
+  const { currentUser } = useSelector((state: any) => state.user);
   const [payment, setPayment] = useState<PaymentDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -62,12 +67,73 @@ export default function ViewPaymentPage() {
     window.print();
   };
 
-  if (loading) return <div className="p-10 text-center font-black text-gray-300 animate-pulse">Processing Receipt...</div>;
+  const handleDownloadPDF = () => {
+    if (!payment) return;
+    const doc = new jsPDF();
+    
+    // Header Branding
+    doc.setFontSize(22);
+    doc.setTextColor(16, 185, 129); // Emerald color
+    doc.text("Library SMS", 20, 20);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("Official Payment Receipt", 20, 28);
+    
+    // Invoice details (Right aligned)
+    doc.setTextColor(0);
+    doc.setFontSize(12);
+    doc.text(`Invoice: INV-${payment.receiptNumber}`, 140, 20);
+    doc.setFontSize(10);
+    doc.text(`Date: ${new Date(payment.createdAt).toLocaleDateString()}`, 140, 26);
+    doc.text(`Status: Paid`, 140, 32);
+
+    // From and To
+    doc.setFontSize(12);
+    doc.setFont("Helvetica", "bold");
+    doc.text("From:", 20, 50);
+    doc.text("To:", 110, 50);
+    
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text([
+      currentUser?.name || "Library Office",
+      "Digital Management System",
+      `Email: ${currentUser?.email || "support@librarysms.com"}`,
+      `Phone: ${currentUser?.number || "+91 98765 43210"}`
+    ], 20, 57);
+    doc.text([payment.userId.name, payment.userId.email, `Phone: ${payment.userId.number}`], 110, 57);
+
+    // Items table
+    autoTable(doc, {
+      startY: 85,
+      head: [["#", "Description", "Duration", "Amount"]],
+      body: [
+        ["1", "Monthly Library Subscription", `${payment.durationDays} Days`, `Rs. ${payment.amount.toLocaleString()}`]
+      ],
+      headStyles: { fillColor: [31, 41, 55] },
+      margin: { top: 80 }
+    });
+
+    // Totals
+    const finalY = (doc as any).lastAutoTable.finalY + 10;
+    doc.setFont("Helvetica", "bold");
+    doc.text(`Total Amount: Rs. ${payment.amount.toLocaleString()}`, 140, finalY);
+
+    // Footer
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text("This is a computer-generated receipt. Support: support@librarysms.com", 20, 280);
+
+    doc.save(`Receipt_${payment.receiptNumber}.pdf`);
+  };
+
+  if (loading) return <SimpleLoader text="Generating Receipt..." />;
   if (!payment) return <div className="p-10 text-center font-black text-rose-500 bg-rose-50 rounded-2xl mx-10 mt-10">Receipt record not found</div>;
 
   return (
-    <div className="bg-gray-50/50 min-h-screen pb-20 selection:bg-indigo-100 selection:text-indigo-900">
-      <div className="max-w-[720px] mx-auto p-4 md:p-8">
+    <div className="bg-gray-50 min-h-screen pb-20 font-public-sans selection:bg-gray-100 selection:text-gray-900">
+      <div className="max-w-6xl mx-auto p-4 md:p-8">
         <PageHeader 
           title="Payment Details"
           breadcrumbs={[
@@ -75,173 +141,177 @@ export default function ViewPaymentPage() {
             { label: "Payments", href: "/payments" },
             { label: `Receipt #${payment.receiptNumber}` }
           ]}
+          backLink="/payments"
           actionNode={
-            <div className="flex gap-3">
-               <Button
-                  onClick={() => router.push("/payments")}
+            <div className="flex gap-2">
+               {/* <Button
                   variant="outline"
-                  className="rounded-2xl px-5 py-2 font-bold text-gray-500 hover:text-gray-900"
-               >
-                  <ChevronLeft size={18} />
-                  Back
-               </Button>
-               <Button
+                  size="sm"
                   onClick={handlePrint}
+                  className="bg-white hover:bg-gray-50 text-emerald-600 border-emerald-100"
+                  >
+                  <Download size={16} className="mr-2" />
+                  Save PDF
+               </Button> */}
+               <Button
+                  onClick={handleDownloadPDF}
                   variant="primary"
-                  className="bg-gray-900 hover:bg-black rounded-2xl px-6 py-2 shadow-xl shadow-gray-200"
+                  size="sm"
+                  className="bg-gray-900 hover:bg-black text-white px-5"
                >
-                  <Printer size={18} />
-                  Print Receipt
+                  <Printer size={16} className="mr-2" />
+                  Print
                </Button>
             </div>
           }
         />
-
-        <div className="bg-white rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.05)] overflow-hidden border border-gray-100 print:shadow-none print:border-none relative">
-          
-          {/* Header Strip */}
-          <div className="bg-gray-900 p-8 md:p-12 text-white relative flex flex-col md:flex-row md:items-end justify-between gap-6">
-             <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-4 bg-white/10 w-fit px-3 py-1 rounded-full border border-white/10">
-                   <BadgeCheck size={14} className="text-emerald-400" />
-                   <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Official E-Receipt</span>
-                </div>
-                <p className="text-gray-400 text-[11px] font-black uppercase tracking-[0.2em] mb-1">Receipt ID</p>
-                <h2 className="text-4xl font-black tracking-tighter font-barlow italic">{payment.receiptNumber}</h2>
-             </div>
-             
-             <div className="text-left md:text-right relative z-10">
-                <p className="text-gray-400 text-[11px] font-black uppercase tracking-[0.2em] mb-1">Generated On</p>
-                <p className="text-lg font-bold font-barlow">
-                   {new Date(payment.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-                </p>
-             </div>
-
-             {/* Background Decoration */}
-             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full -mr-32 -mt-32 blur-3xl" />
-          </div>
-
-          <div className="p-8 md:p-12 space-y-12">
-            {/* Main Statement */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 pb-12 border-b border-dashed border-gray-100">
-               <div>
-                  <p className="text-gray-400 text-[11px] font-black uppercase tracking-[0.2em] mb-2 font-public-sans">Payment Overview</p>
-                  <h3 className="text-7xl font-black text-gray-900 tracking-tighter font-barlow">₹{payment.amount.toLocaleString()}</h3>
-                  <div className="flex items-center gap-2 mt-4 text-emerald-600 font-bold text-sm bg-emerald-50 w-fit px-3 py-1 rounded-lg border border-emerald-100">
-                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                     Payment Successful
-                  </div>
-               </div>
-
-               <div className="flex flex-col gap-4">
-                  <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 min-w-[200px]">
-                     <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-2">Payment Mode</p>
-                     <div className="flex items-center gap-2 text-gray-900">
-                        <CreditCard size={18} className="text-indigo-500" />
-                        <span className="text-lg font-black uppercase tracking-tight">{payment.paymentMode}</span>
-                     </div>
-                  </div>
-               </div>
-            </div>
-
-            {/* Grid for Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-               {/* Member Section */}
-               <div className="space-y-6">
-                  <div className="flex items-center gap-3 border-b border-gray-50 pb-3">
-                     <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
-                        <User size={16} />
-                     </div>
-                     <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest">Subscriber Details</span>
-                  </div>
-                  <div className="space-y-2">
-                     <h4 className="text-2xl font-black text-gray-900 tracking-tight">{payment.userId.name}</h4>
-                     <p className="flex items-center gap-2 text-gray-500 font-medium">{payment.userId.email}</p>
-                     <p className="text-indigo-600 font-extrabold tracking-tight underline decoration-indigo-100 underline-offset-4 font-barlow text-lg">{payment.userId.number}</p>
-                  </div>
-               </div>
-
-               {/* Subscription Section */}
-               <div className="space-y-6">
-                  <div className="flex items-center gap-3 border-b border-gray-50 pb-3">
-                     <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
-                        <Calendar size={16} />
-                     </div>
-                     <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest">Subscription Validity</span>
-                  </div>
-                  <div className="space-y-4">
-                     <div className="flex items-center justify-between">
-                        <div className="flex flex-col">
-                           <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Active From</span>
-                           <span className="font-bold text-gray-700">{new Date(payment.subscriptionId.startDate).toLocaleDateString()}</span>
-                        </div>
-                        <div className="flex flex-col text-right">
-                           <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Valid Until</span>
-                           <span className="font-black text-amber-600 underline decoration-amber-100 decoration-4 underline-offset-2">{new Date(payment.subscriptionId.endDate).toLocaleDateString()}</span>
-                        </div>
-                     </div>
-                     
-                     <div className="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100/50 flex items-center justify-center gap-2">
-                        <Receipt size={14} className="text-indigo-600" />
-                        <span className="text-[11px] font-black text-indigo-700 uppercase tracking-widest">
-                           Duration: {payment.durationDays} Days Coverage
-                        </span>
-                     </div>
-                  </div>
-               </div>
-            </div>
-
-            {/* Terms/Statement */}
-            <div className="p-1 text-center bg-gray-50/50 rounded-2xl py-6 border border-gray-100 border-dashed">
-               <p className="text-[11px] font-bold text-gray-400 leading-relaxed max-w-sm mx-auto">
-                  By paying this amount, the subscriber agrees to the library's terms and conditions regarding membership usage and seat allocation.
-               </p>
-            </div>
-          </div>
-
-          {/* Clean Footer */}
-          <div className="px-12 py-8 bg-gray-950 text-white flex flex-col md:flex-row items-center justify-between gap-4 border-t-8 border-indigo-500">
-             <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center font-black italic shadow-lg shadow-indigo-500/20">L</div>
-                <div className="flex flex-col">
-                   <h5 className="font-black text-sm tracking-tight">LIBRARY SMS</h5>
-                   <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em]">Management System</p>
-                </div>
-             </div>
-             <p className="text-[10px] font-bold text-gray-500">
-                This is a digitally signed receipt and requires no physical signature.
-             </p>
-          </div>
-        </div>
         
-        {/* Action Buttons Shadowy Container */}
-        <div className="mt-8 flex justify-center pb-20">
-           <Button 
-            variant="outline" 
-            className="rounded-full px-12 py-3 bg-white text-gray-400 hover:text-indigo-600 font-black border-none shadow-sm"
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-           >
-              Scroll to top
-           </Button>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden print:shadow-none print:border-none">
+          <div className="p-8 md:p-12 space-y-12">
+            
+            {/* Header Section */}
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold italic shadow-sm">
+                   <Icon icon="solar:library-bold-duotone" width={24} />
+                </div>
+                <div>
+                   <h1 className="text-lg font-bold text-gray-900 tracking-tight leading-none">Library SMS</h1>
+                   <p className="text-[10px] text-gray-400 font-medium uppercase mt-1 tracking-wider">Management System</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold italic shadow-sm">
+                   <Icon icon="solar:library-bold-duotone" width={24} />
+                </div>
+                <div>
+                   <h1 className="text-lg font-bold text-gray-900 tracking-tight leading-none">Library SMS</h1>
+                   <p className="text-[10px] text-gray-400 font-medium uppercase mt-1 tracking-wider">Management System</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold italic shadow-sm">
+                   <Icon icon="solar:library-bold-duotone" width={24} />
+                </div>
+                <div>
+                   <h1 className="text-lg font-bold text-gray-900 tracking-tight leading-none">Library SMS</h1>
+                   <p className="text-[10px] text-gray-400 font-medium uppercase mt-1 tracking-wider">Management System</p>
+                </div>
+              </div>
+              <div className="text-right space-y-2">
+                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase tracking-wide">
+                    {payment.subscriptionId.status === 'active' ? 'Paid' : 'Completed'}
+                 </span>
+                 <h2 className="text-lg font-bold text-gray-900 leading-none">{payment.receiptNumber}</h2>
+              </div>
+            </div>
+
+            {/* Address Grid */}
+            <div className="grid grid-cols-2 gap-12">
+              <div className="space-y-4">
+                <p className="text-sm font-semibold text-gray-900">Invoice from</p>
+                <div className="space-y-1">
+                   <h4 className="font-bold text-gray-900 capitalize">{currentUser?.name || "Library Office"}</h4>
+                   <p className="text-sm text-gray-500 leading-relaxed">
+                     Digital Management System<br />
+                     Email: {currentUser?.email || "support@librarysms.com"}<br />
+                     Phone: {currentUser?.number || "+91 98765 43210"}
+                   </p>
+                </div>
+              </div>
+              <div className="space-y-4 text-right md:text-left">
+                <p className="text-sm font-semibold text-gray-900">Invoice to</p>
+                <div className="space-y-1">
+                   <h4 className="font-bold text-gray-900">{payment.userId.name}</h4>
+                   <p className="text-sm text-gray-500 leading-relaxed">
+                     {payment.userId.email}<br />
+                     Phone: {payment.userId.number}<br />
+                     ID: {payment.userId.name.split(' ').join('_').toLowerCase()}_{payment._id.slice(-4)}
+                   </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Date Grid */}
+            <div className="grid grid-cols-2 gap-12 border-t border-gray-50 pt-8 mt-8">
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-gray-900">Date create</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {new Date(payment.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                </p>
+              </div>
+              <div className="space-y-1 text-right md:text-left">
+                <p className="text-sm font-semibold text-gray-900">Validity Until</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {new Date(payment.subscriptionId.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                </p>
+              </div>
+            </div>
+
+            {/* Items Table */}
+            <div className="mt-12 overflow-hidden">
+               <table className="w-full text-sm">
+                  <thead className="bg-gray-50/80 border-y border-gray-100">
+                     <tr>
+                        <th className="px-4 py-3 text-left font-bold text-gray-400 uppercase tracking-widest text-[10px] w-12">#</th>
+                        <th className="px-4 py-3 text-left font-bold text-gray-400 uppercase tracking-widest text-[10px]">Description</th>
+                        <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-widest text-[10px]">Days</th>
+                        <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-widest text-[10px]">Unit price</th>
+                        <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-widest text-[10px]">Total</th>
+                     </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50 border-b border-gray-100">
+                     <tr>
+                        <td className="px-4 py-5 text-gray-900 font-medium">1</td>
+                        <td className="px-4 py-5">
+                           <p className="font-bold text-gray-900">Monthly Library Subscription</p>
+                           <p className="text-gray-400 text-xs mt-1">Full access to reading area with allocated seat.</p>
+                        </td>
+                        <td className="px-4 py-5 text-right text-gray-600">{payment.durationDays}</td>
+                        <td className="px-4 py-5 text-right text-gray-600">₹{payment.amount.toLocaleString()}</td>
+                        <td className="px-4 py-5 text-right text-gray-900 font-bold">₹{payment.amount.toLocaleString()}</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+
+            {/* Calculations Section */}
+            <div className="flex justify-end pt-8">
+               <div className="w-full max-w-xs space-y-3">
+                  <div className="flex justify-between text-sm">
+                     <span className="text-gray-400 font-medium">Subtotal</span>
+                     <span className="text-gray-900 font-bold">₹{payment.amount.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                     <span className="text-gray-400 font-medium tracking-tight">Tax (GST 0%)</span>
+                     <span className="text-gray-900 font-bold">₹0.00</span>
+                  </div>
+                  <div className="flex justify-between text-lg pt-4 border-t border-gray-100">
+                     <span className="text-gray-900 font-bold">Total</span>
+                     <span className="text-gray-900 font-black tracking-tight">₹{payment.amount.toLocaleString()}</span>
+                  </div>
+               </div>
+            </div>
+
+            {/* Footer Notes */}
+            <div className="grid grid-cols-2 gap-12 pt-16 mt-16 border-t border-gray-50">
+               <div className="space-y-2">
+                  <p className="text-xs font-bold text-gray-900 uppercase">NOTES</p>
+                  <p className="text-xs text-gray-400 leading-relaxed">
+                     Thank you for your membership. This is a computer-generated receipt. Please reach out if you need tax details.
+                  </p>
+               </div>
+               <div className="text-right space-y-1">
+                  <p className="text-xs font-bold text-gray-900">Have a question?</p>
+                  <p className="text-xs text-indigo-600 font-bold">support@librarysms.com</p>
+               </div>
+            </div>
+
+          </div>
         </div>
       </div>
-
-      <style jsx global>{`
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          .print-area, .print-area * {
-            visibility: visible;
-          }
-          .print-area {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-        }
-      `}</style>
     </div>
   );
 }
