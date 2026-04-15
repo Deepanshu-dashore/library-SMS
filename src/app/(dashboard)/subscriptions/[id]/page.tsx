@@ -103,6 +103,41 @@ export default function ViewSubscriptionPage() {
             { label: subscription.userId.name },
           ]}
           backLink="/subscriptions"
+          actionNode={
+            <div className="flex items-center gap-2.5">
+              {/* Cancel Button - Square Outline/Ghost style */}
+              <Button
+                variant="outline"
+                size="md"
+                icon="line-md:file-document-cancel-filled"
+                className="px-5 border-gray-200 border! py-2.5 text-sm font-medium"
+              >
+                Cancel
+              </Button>
+              {/* Renew Button - Dark Pill style like "Published" in Image 2 */}
+              <Button
+                variant="primary"
+                size="md"
+                icon="wpf:renew-subscription"
+                className="px-5 border-gray-200 py-2.5 text-sm font-medium"
+              >
+                Renew
+              </Button>
+              {/* Edit Button - Circular style like in Image 2 */}
+              <Button
+                variant="edit"
+                size="md"
+                // icon="lets-icons:edit-fill"
+                onClick={() => router.push(`/subscriptions/${id}/edit`)}
+                className="p-2.5 text-sm font-medium"
+                title="Edit Subscription"
+              >
+                {/* <Icon icon="lets-icons:edit-fill" className="w-5 h-5" /> */}
+                Edit
+              </Button>
+
+            </div>
+          }
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-2">
@@ -313,9 +348,9 @@ export default function ViewSubscriptionPage() {
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <Button
-                  variant="edit"
+                  variant="outline"
                   size="md"
-                  // icon="solar:pen-new-square-linear"
+                  icon="lets-icons:edit-fill"
                   className="font-medium"
                   onClick={() => router.push(`/subscriptions/${id}/edit`)}
                   fullWidth

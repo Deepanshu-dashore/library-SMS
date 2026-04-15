@@ -12,9 +12,61 @@ import {
   CheckCircle2,
   Calendar
 } from "lucide-react";
+import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, ColumnDef, TabDef } from "@/components/shared/DataTable";
+import { LineLoader } from "@/components/shared/LineLoader";
+
+const CircularProgress = ({ value, icon, color1, color2, id }: { value: number; icon: string; color1: string; color2: string; id: string }) => {
+  const radius = 24;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (value / 100) * circumference;
+
+  return (
+    <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
+      <svg className="w-full h-full transform -rotate-90">
+        <defs>
+          <linearGradient id={id} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={color1} />
+            <stop offset="100%" stopColor={color2} />
+          </linearGradient>
+        </defs>
+        {/* Background Circle */}
+        <circle
+          cx="32"
+          cy="32"
+          r={radius}
+          stroke="currentColor"
+          strokeWidth="3.5"
+          fill="transparent"
+          className="text-gray-100"
+        />
+        {/* Progress Circle */}
+        <circle
+          cx="32"
+          cy="32"
+          r={radius}
+          stroke={`url(#${id})`}
+          strokeWidth="3.5"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          fill="transparent"
+          className="transition-all duration-1000 ease-out"
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div 
+          className="w-12 h-12 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 shadow-sm border border-white/50"
+          style={{ background: `linear-gradient(135deg, ${color1}15, ${color2}15)` }}
+        >
+          <Icon icon={icon} className="w-7 h-7" style={{ color: color1 }} />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 interface Payment {
   _id: string;
@@ -129,32 +181,40 @@ export default function PaymentManagement() {
         />
 
         {/* Financial Summary */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm mb-10 overflow-hidden">
-          <div className="flex flex-col md:flex-row items-center divide-y md:divide-y-0 md:divide-x divide-gray-100 divide-dashed">
+        <div className="bg-white rounded-2xl border border-gray-100/80 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.02)] mb-10 overflow-hidden">
+          <div className="flex flex-col md:flex-row items-center divide-y md:divide-y-0 md:divide-x divide-gray-200/90 divide-dashed">
             
             {/* Total */}
             <div className="flex-1 w-full p-6 flex items-center gap-4 group hover:bg-gray-50/50 transition-colors">
-              <div className="w-14 h-14 rounded-full border-2 border-cyan-100 flex items-center justify-center bg-cyan-50/30 text-cyan-600 transition-transform group-hover:scale-110">
-                <Receipt size={24} />
-              </div>
+              <CircularProgress 
+                id="grad-total"
+                value={100} 
+                icon="solar:bill-list-bold-duotone" 
+                color1="#06b6d4" 
+                color2="#3b82f6" 
+              />
               <div className="flex flex-col">
-                <p className="text-sm font-bold text-gray-900 leading-none">Total</p>
-                <p className="text-xs font-semibold text-gray-400 mt-1">{stats?.count || 0} Payments</p>
-                <p className="text-lg font-black text-gray-900 mt-1 font-barlow">₹{stats?.total?.toLocaleString() || 0}</p>
+                <p className="text-[14.5px] font-medium text-gray-900 leading-none">Total Revenue</p>
+                <p className="text-xs font-semibold text-gray-400 mt-1.5">{stats?.count || 0} Invoices</p>
+                <p className="text-base font-medium text-gray-900 mt-1 font-barlow tracking-tight">₹{stats?.total?.toLocaleString() || 0}</p>
               </div>
             </div>
 
             {/* Cash */}
             <div className="flex-1 w-full p-6 flex items-center gap-4 group hover:bg-gray-50/50 transition-colors">
-              <div className="w-14 h-14 rounded-full border-2 border-emerald-100 flex items-center justify-center bg-emerald-50/30 text-emerald-600 transition-transform group-hover:scale-110">
-                <Wallet size={24} />
-              </div>
+              <CircularProgress 
+                id="grad-cash"
+                value={stats?.count ? Math.round((stats.cash?.count / stats.count) * 100) : 0} 
+                icon="solar:wallet-money-bold-duotone" 
+                color1="#10b981" 
+                color2="#059669" 
+              />
               <div className="flex flex-col">
-                <p className="text-sm font-bold text-gray-900 leading-none">Cash</p>
-                <p className="text-xs font-semibold text-gray-400 mt-1">
-                  {stats?.cash?.count || 0} Payments
+                <p className="text-[14.5px] font-medium text-gray-900 leading-none">Cash Payment</p>
+                <p className="text-xs font-semibold text-gray-400 mt-1.5">
+                  {stats?.cash?.count || 0} Invoices
                 </p>
-                <p className="text-lg font-black text-gray-900 mt-1 font-barlow">
+                <p className="text-base font-medium text-gray-900 mt-1 font-barlow tracking-tight">
                   ₹{stats?.cash?.amount?.toLocaleString() || 0}
                 </p>
               </div>
@@ -162,15 +222,19 @@ export default function PaymentManagement() {
 
             {/* UPI */}
             <div className="flex-1 w-full p-6 flex items-center gap-4 group hover:bg-gray-50/50 transition-colors">
-              <div className="w-14 h-14 rounded-full border-2 border-indigo-100 flex items-center justify-center bg-indigo-50/30 text-indigo-600 transition-transform group-hover:scale-110">
-                <ArrowUpRight size={24} />
-              </div>
+              <CircularProgress 
+                id="grad-upi"
+                value={stats?.count ? Math.round((stats.upi?.count / stats.count) * 100) : 0} 
+                icon="solar:clapperboard-edit-bold-duotone" 
+                color1="#6366f1" 
+                color2="#4f46e5" 
+              />
               <div className="flex flex-col">
-                <p className="text-sm font-bold text-gray-900 leading-none">UPI</p>
-                <p className="text-xs font-semibold text-gray-400 mt-1">
-                  {stats?.upi?.count || 0} Payments
+                <p className="text-[14.5px] font-medium text-gray-900 leading-none">UPI Payment</p>
+                <p className="text-xs font-semibold text-gray-400 mt-1.5">
+                  {stats?.upi?.count || 0} Invoices
                 </p>
-                <p className="text-lg font-black text-gray-900 mt-1 font-barlow">
+                <p className="text-base font-medium text-gray-900 mt-1 font-barlow tracking-tight">
                   ₹{stats?.upi?.amount?.toLocaleString() || 0}
                 </p>
               </div>
@@ -178,15 +242,19 @@ export default function PaymentManagement() {
 
             {/* Card */}
             <div className="flex-1 w-full p-6 flex items-center gap-4 group hover:bg-gray-50/50 transition-colors">
-              <div className="w-14 h-14 rounded-full border-2 border-amber-100 flex items-center justify-center bg-amber-50/30 text-amber-600 transition-transform group-hover:scale-110">
-                <CreditCard size={24} />
-              </div>
+              <CircularProgress 
+                id="grad-card"
+                value={stats?.count ? Math.round((stats.card?.count / stats.count) * 100) : 0} 
+                icon="solar:card-2-bold-duotone" 
+                color1="#f59e0b" 
+                color2="#d97706" 
+              />
               <div className="flex flex-col">
-                <p className="text-sm font-bold text-gray-900 leading-none">Card</p>
-                <p className="text-xs font-semibold text-gray-400 mt-1">
-                  {stats?.card?.count || 0} Payments
+                <p className="text-[14.5px] font-medium text-gray-900 leading-none">Card Payment</p>
+                <p className="text-xs font-semibold text-gray-400 mt-1.5">
+                  {stats?.card?.count || 0} Invoices
                 </p>
-                <p className="text-lg font-black text-gray-900 mt-1 font-barlow">
+                <p className="text-base font-medium text-gray-900 mt-1 font-barlow tracking-tight">
                   ₹{stats?.card?.amount?.toLocaleString() || 0}
                 </p>
               </div>
@@ -194,13 +262,17 @@ export default function PaymentManagement() {
 
             {/* Last Entry */}
             <div className="flex-1 w-full p-6 flex items-center gap-4 group hover:bg-gray-50/50 transition-colors">
-              <div className="w-14 h-14 rounded-full border-2 border-rose-100 flex items-center justify-center bg-rose-50/30 text-rose-600 transition-transform group-hover:scale-110">
-                <Calendar size={24} />
-              </div>
+              <CircularProgress 
+                id="grad-last"
+                value={100} 
+                icon="solar:calendar-date-bold-duotone" 
+                color1="#f43f5e" 
+                color2="#e11d48" 
+              />
               <div className="flex flex-col">
-                <p className="text-sm font-bold text-gray-900 leading-none">Last Entry</p>
-                <p className="text-xs font-semibold text-gray-400 mt-1">Payment Date</p>
-                <p className="text-lg font-black text-gray-900 mt-1 font-barlow">
+                <p className="text-[14.5px] font-medium text-gray-900 leading-none">Last Entry</p>
+                <p className="text-xs font-semibold text-gray-400 mt-1.5">Recent Activity</p>
+                <p className="text-base font-medium text-gray-900 mt-1 font-barlow tracking-tight">
                   {stats?.lastEntry ? new Date(stats.lastEntry).toLocaleDateString("en-GB", { day: '2-digit', month: 'short' }) : 'N/A'}
                 </p>
               </div>
@@ -208,6 +280,8 @@ export default function PaymentManagement() {
 
           </div>
         </div>
+
+        {loading && <LineLoader color="#3b82f6" height={3} className="mb-4" />}
 
         <DataTable
           data={filteredData}
