@@ -6,22 +6,23 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { Loader2, Save, X, Phone, Mail, MapPin, Clock, Calendar, Plus, Upload, Building, PenTool, Globe, Layers } from "lucide-react";
 import { Button } from "@/components/shared/Button";
+import { Icon } from "@iconify/react";
 import { useDispatch } from "react-redux";
 import { setUserSuccess } from "@/store/userSlice";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
 const inputBase =
-  "w-full text-sm px-5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-600 transition-all outline-none font-medium text-gray-900";
+  "w-full text-[14px] px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 transition-all outline-none font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-medium";
 
 const Label = ({ children }: { children: React.ReactNode }) => (
-  <label className="text-[12px] mb-1.5 inline-block font-bold text-gray-500 uppercase tracking-widest">
+  <label className="text-[11px] mb-2 px-1 inline-block font-black text-slate-400 uppercase tracking-[0.1em]">
     {children}
   </label>
 );
 
 const Hint = ({ children }: { children: React.ReactNode }) => (
-  <span className="mt-1 text-[11px] text-gray-400 leading-snug block font-medium">
+  <span className="mt-2 px-1 text-[11px] text-slate-400 leading-snug block font-bold italic">
     {children}
   </span>
 );
@@ -29,16 +30,16 @@ const Hint = ({ children }: { children: React.ReactNode }) => (
 // ─── Section Header ───────────────────────────────────────────────────────────
 
 function SectionHeader({
-  step, title, sub, color,
-}: { step: string; title: string; sub: string; color: string }) {
+  icon, title, sub, colorBadge,
+}: { icon: string; title: string; sub: string; colorBadge: string }) {
   return (
-    <div className="flex items-center gap-4 mb-10 bg-gray-100/70 p-1.5 rounded-xl">
-      <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center font-bold text-sm`}>
-        {step}
+    <div className="flex items-center gap-4 mb-10 pb-6 border-b border-gray-50">
+      <div className={`w-14 h-14 ${colorBadge} rounded-[20px] flex items-center justify-center shadow-sm shrink-0`}>
+        <Icon icon={icon} width={28} />
       </div>
       <div>
-        <h3 className="text-base font-bold text-gray-800">{title}</h3>
-        <p className="text-xs text-gray-500 font-medium">{sub}</p>
+        <h3 className="text-xl font-black text-slate-900 tracking-tight">{title}</h3>
+        <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">{sub}</p>
       </div>
     </div>
   );
@@ -63,29 +64,31 @@ function ImageUploadField({ label, hint, preview, onFile, onClear }: ImageUpload
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       <Label>{label}</Label>
       {preview ? (
-        <div className="relative w-full border border-gray-200 rounded-xl overflow-hidden bg-gray-50/30">
-          <img src={preview} alt={label} className="w-full h-32 object-contain p-4 mix-blend-multiply" />
+        <div className="relative w-full border border-slate-200 rounded-3xl overflow-hidden bg-white shadow-inner group">
+          <img src={preview} alt={label} className="w-full h-40 object-contain p-6 mix-blend-multiply transition-transform duration-500 group-hover:scale-105" />
           <button
             type="button"
             onClick={() => { onClear(); if (ref.current) ref.current.value = ""; }}
-            className="absolute top-2 right-2 bg-white border border-gray-200 rounded-lg p-1 hover:bg-red-50 hover:border-red-200 transition-colors shadow-sm"
+            className="absolute top-4 right-4 bg-white/90 backdrop-blur-md border border-slate-200 rounded-xl p-2 hover:bg-red-50 hover:border-red-200 transition-all shadow-xl active:scale-95 group"
           >
-            <X className="w-4 h-4 text-gray-500" />
+            <X className="w-4 h-4 text-slate-500 group-hover:text-red-500" strokeWidth={3} />
           </button>
         </div>
       ) : (
         <button
           type="button"
           onClick={() => ref.current?.click()}
-          className="w-full flex flex-col items-center gap-3 py-8 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50 hover:bg-blue-50/30 hover:border-blue-300 transition-all group"
+          className="w-full flex flex-col items-center gap-4 py-12 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50 hover:bg-white hover:border-indigo-400 hover:shadow-xl transition-all group"
         >
-          <Upload className="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" />
+          <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+             <Upload className="w-8 h-8" />
+          </div>
           <div className="text-center">
-             <p className="text-xs font-bold text-gray-600 group-hover:text-blue-600">Click to upload {label.toLowerCase()}</p>
-             <p className="text-[10px] text-gray-400 mt-0.5">JPG, PNG or WebP</p>
+             <p className="text-[13px] font-black text-slate-600 group-hover:text-indigo-600">Register {label}</p>
+             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">High fidelity JPG/PNG</p>
           </div>
         </button>
       )}
@@ -136,7 +139,6 @@ export default function EditProfilePage() {
     floors: [],
   });
 
-  // Local state for file previews to avoid constant URL.createObjectURL calls in render
   const [logoPreview, setLogoPreview] = useState<string>("");
   const [sigPreview, setSigPreview] = useState<string>("");
 
@@ -220,6 +222,7 @@ export default function EditProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const t = toast.loading("Syncing profile framework...");
     setLoading(true);
 
     try {
@@ -247,13 +250,13 @@ export default function EditProfilePage() {
 
       if (response.ok && data.success) {
         dispatch(setUserSuccess(data.data));
-        toast.success("Profile updated successfully");
+        toast.success("Profile updated successfully", { id: t });
         router.push("/settings");
       } else {
-        toast.error(data.message || "Failed to update profile");
+        toast.error(data.message || "Failed to update profile", { id: t });
       }
     } catch (error) {
-      toast.error("An error occurred while updating the profile");
+      toast.error("An error occurred while updating the profile", { id: t });
     } finally {
       setLoading(false);
     }
@@ -262,264 +265,249 @@ export default function EditProfilePage() {
   if (fetching) {
     return (
       <div className="flex h-[80vh] w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+        <Loader2 className="h-12 w-12 animate-spin text-indigo-600" />
       </div>
     );
   }
 
   return (
-    <div className="p-6 h-full flex flex-col font-sans max-w-6xl mx-auto w-full">
-      <PageHeader
-        title="Edit Library Profile"
-        breadcrumbs={[
-          { label: "Dashboard", href: "/" },
-          { label: "Settings", href: "/settings" },
-          { label: "Edit" },
-        ]}
-        backLink="/settings"
-      />
+    <div className="bg-gray-50/50 min-h-screen font-public-sans pb-20">
+      <div className="max-w-6xl mx-auto">
+        <PageHeader
+          title="Edit Framework"
+          breadcrumbs={[
+            { label: "Dashboard", href: "/" },
+            { label: "Settings", href: "/settings" },
+            { label: "Edit Profile" },
+          ]}
+          backLink="/settings"
+        />
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* ── 01 Identity & Contact ── */}
-        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-8 md:p-10 ring-1 ring-gray-100">
-          <SectionHeader
-            step="01"
-            title="Identity & Global Contact"
-            sub="Essential identification and reachable addresses"
-            color="bg-blue-100 text-blue-600"
-          />
+        <form onSubmit={handleSubmit} className="px-6 pt-0 space-y-10 focus-within:outline-none">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            
+            {/* Left Col: Core Identity */}
+            <div className="lg:col-span-2 space-y-10">
+              <div className="bg-white rounded-[40px] shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_24px_48px_-8px_rgba(145,158,171,0.12)] border border-gray-100 p-10 md:p-12">
+                <SectionHeader
+                  icon="solar:shield-user-bold-duotone"
+                  title="Organization Identity"
+                  sub="Global identifiers and branding assets"
+                  colorBadge="bg-indigo-50 text-indigo-600"
+                />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
-            <div>
-              <Label>Library Name *</Label>
-              <input
-                type="text"
-                name="name"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="e.g. Central Library"
-                className={inputBase}
-              />
-            </div>
-
-            <div>
-              <Label>Official Email *</Label>
-              <input
-                type="email"
-                name="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="contact@library.com"
-                className={inputBase}
-              />
-            </div>
-
-            <div>
-              <Label>Official Phone</Label>
-              <input
-                type="text"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="+91 00000 00000"
-                className={inputBase}
-              />
-            </div>
-
-            <ImageUploadField
-              label="Library Logo"
-              hint="Recommended size: 512x512px"
-              preview={logoPreview}
-              onFile={(file) => {
-                setFormData(prev => ({ ...prev, logo: file }));
-                setLogoPreview(URL.createObjectURL(file));
-              }}
-              onClear={() => {
-                setFormData(prev => ({ ...prev, logo: "" }));
-                setLogoPreview("");
-              }}
-            />
-
-            <ImageUploadField
-              label="Official Signature"
-              hint="For documents & certifications"
-              preview={sigPreview}
-              onFile={(file) => {
-                setFormData(prev => ({ ...prev, signature: file }));
-                setSigPreview(URL.createObjectURL(file));
-              }}
-              onClear={() => {
-                setFormData(prev => ({ ...prev, signature: "" }));
-                setSigPreview("");
-              }}
-            />
-
-            <div className="flex flex-col gap-2">
-               <Label>Quick Configuration</Label>
-               <div className="flex flex-wrap gap-2">
-                  <div className="bg-blue-50 text-blue-700 px-4 py-2.5 rounded-lg text-xs font-black border border-blue-100 flex items-center gap-2">
-                    <Building size={14} /> {formData.floors?.length || 0} Floors
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="md:col-span-2">
+                    <Label>Library Full Name</Label>
+                    <div className="relative">
+                      <Icon icon="solar:library-bold-duotone" className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" width={22} />
+                      <input
+                        type="text"
+                        name="name"
+                        required
+                        value={formData.name}
+                        onChange={handleChange}
+                        placeholder="e.g. Central National Library"
+                        className={`${inputBase} pl-14`}
+                      />
+                    </div>
                   </div>
-                  <div className="bg-emerald-50 text-emerald-700 px-4 py-2.5 rounded-lg text-xs font-black border border-emerald-100 flex items-center gap-2">
-                    <Globe size={14} /> Active Session
+
+                  <div>
+                    <Label>Official Support Email</Label>
+                    <div className="relative">
+                      <Icon icon="solar:letter-bold-duotone" className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" width={22} />
+                      <input
+                        type="email"
+                        name="email"
+                        required
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="support@library.com"
+                        className={`${inputBase} pl-14`}
+                      />
+                    </div>
                   </div>
-               </div>
-               <Hint>Summary of current library architecture.</Hint>
-            </div>
 
-            <div className="md:col-span-2 lg:col-span-3">
-              <Label>Primary Physical Address</Label>
-              <textarea
-                name="address"
-                rows={3}
-                value={formData.address}
-                onChange={handleChange}
-                placeholder="Global office or headquarters location..."
-                className={`${inputBase} resize-none`}
-              ></textarea>
-            </div>
-          </div>
-        </div>
+                  <div>
+                    <Label>Registered Phone</Label>
+                    <div className="relative">
+                      <Icon icon="solar:phone-bold-duotone" className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" width={22} />
+                      <input
+                        type="text"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        placeholder="+91 00000 00000"
+                        className={`${inputBase} pl-14`}
+                      />
+                    </div>
+                  </div>
 
-        {/* ── 02 Infrastructure ── */}
-        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-8 md:p-10 ring-1 ring-gray-100">
-          <SectionHeader
-            step="02"
-            title="Library Infrastructure"
-            sub="Configure internal layouts and sections"
-            color="bg-purple-100 text-purple-600"
-          />
+                  <ImageUploadField
+                    label="Library Logo"
+                    hint="Preferred 1:1 ratio with white/transparent background"
+                    preview={logoPreview}
+                    onFile={(file) => {
+                      setFormData(prev => ({ ...prev, logo: file }));
+                      setLogoPreview(URL.createObjectURL(file));
+                    }}
+                    onClear={() => {
+                      setFormData(prev => ({ ...prev, logo: "" }));
+                      setLogoPreview("");
+                    }}
+                  />
 
-          <div className="space-y-4">
-             <Label>Registered Floors</Label>
-             <div className="flex flex-wrap gap-3 items-center">
-                {(formData.floors || []).map((floor, idx) => (
-                  <div key={idx} className="flex items-center gap-2 bg-purple-50 text-purple-700 px-5 py-3 rounded-xl font-bold border border-purple-100 text-sm">
-                    <Layers size={14} className="text-purple-400" />
-                    {floor}
-                    <button type="button" onClick={() => handleRemoveFloor(idx)} className="ml-1 text-purple-300 hover:text-red-500 transition-colors">
-                      <X size={16} strokeWidth={3} />
+                  <ImageUploadField
+                    label="Chief Signature"
+                    hint="Required for automated document certification"
+                    preview={sigPreview}
+                    onFile={(file) => {
+                      setFormData(prev => ({ ...prev, signature: file }));
+                      setSigPreview(URL.createObjectURL(file));
+                    }}
+                    onClear={() => {
+                      setFormData(prev => ({ ...prev, signature: "" }));
+                      setSigPreview("");
+                    }}
+                  />
+
+                  <div className="md:col-span-2">
+                    <Label>Official Corporate Address</Label>
+                    <textarea
+                      name="address"
+                      rows={3}
+                      value={formData.address}
+                      onChange={handleChange}
+                      placeholder="Enter the full physical location of headquarters..."
+                      className={`${inputBase} resize-none min-h-[120px]`}
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+
+              {/* Infrastructure */}
+              <div className="bg-white rounded-[40px] shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_24px_48px_-8px_rgba(145,158,171,0.12)] border border-gray-100 p-10 md:p-12">
+                <SectionHeader
+                  icon="solar:layers-bold-duotone"
+                  title="Internal Infrastructure"
+                  sub="Defining structural levels and floor plans"
+                  colorBadge="bg-purple-50 text-purple-600"
+                />
+
+                <div className="space-y-6">
+                  <div className="flex flex-wrap gap-4 items-center">
+                    {(formData.floors || []).map((floor, idx) => (
+                      <div key={idx} className="flex items-center gap-3 bg-slate-900 text-white px-6 py-4 rounded-2xl font-black text-sm shadow-xl group hover:bg-slate-800 transition-all">
+                        <Icon icon="solar:ranking-bold-duotone" width={18} className="text-purple-400" />
+                        {floor}
+                        <button type="button" onClick={() => handleRemoveFloor(idx)} className="ml-2 text-white/30 hover:text-red-400 transition-colors">
+                          <X size={20} strokeWidth={3} />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={handleAddFloor}
+                      className="flex items-center gap-3 bg-white border-2 border-dashed border-slate-200 text-slate-500 hover:border-indigo-400 hover:text-indigo-600 px-8 py-4 rounded-2xl font-black transition-all text-sm group"
+                    >
+                      <Plus size={20} strokeWidth={3} className="group-hover:rotate-90 transition-transform" />
+                      Assign New Floor
                     </button>
                   </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={handleAddFloor}
-                  className="flex items-center gap-2 bg-white border-2 border-dashed border-gray-200 text-gray-500 hover:border-purple-400 hover:text-purple-600 px-6 py-3 rounded-xl font-bold transition-all text-sm"
-                >
-                  <Plus size={16} strokeWidth={3} /> Add New Level
-                </button>
-             </div>
-             <Hint>These floors will be visible in seat management modules.</Hint>
+                  <Hint>These labels are used globally within the seat allocation system.</Hint>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Col: Support & Action */}
+            <div className="space-y-10">
+              <div className="bg-slate-900 rounded-[40px] shadow-2xl p-10 text-white relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-10 opacity-5 -mr-10 -mt-10 group-hover:scale-110 transition-transform">
+                   <Icon icon="solar:help-bold-duotone" width={240} />
+                </div>
+
+                <div className="flex items-center gap-4 mb-10 pb-6 border-b border-white/10">
+                   <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
+                      <Icon icon="solar:headphones-round-bold-duotone" width={24} className="text-indigo-400" />
+                   </div>
+                   <h3 className="text-lg font-black tracking-tight">Support Desk</h3>
+                </div>
+
+                <div className="space-y-8 relative z-10">
+                   <div className="space-y-6">
+                      <div>
+                        <Label>Support Hotline</Label>
+                        <input
+                          type="text"
+                          name="number"
+                          value={formData.helpDesk.number}
+                          onChange={handleHelpDeskChange}
+                          className="w-full bg-white/5 border border-white/5 rounded-2xl px-5 py-4 text-white font-bold outline-none focus:border-indigo-500 transition-all"
+                          placeholder="Hotline number"
+                        />
+                      </div>
+                      <div>
+                        <Label>Desk Email</Label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.helpDesk.email}
+                          onChange={handleHelpDeskChange}
+                          className="w-full bg-white/5 border border-white/5 rounded-2xl px-5 py-4 text-white font-bold outline-none focus:border-indigo-500 transition-all"
+                          placeholder="support@domain.com"
+                        />
+                      </div>
+                      <div>
+                        <Label>Operating Hours</Label>
+                        <input
+                          type="text"
+                          name="hours"
+                          value={formData.helpDesk.hours}
+                          onChange={handleHelpDeskChange}
+                          className="w-full bg-white/5 border border-white/5 rounded-2xl px-5 py-4 text-white font-bold outline-none focus:border-indigo-500 transition-all"
+                          placeholder="e.g. 9 AM - 6 PM"
+                        />
+                      </div>
+                      <div>
+                        <Label>Holidays</Label>
+                        <textarea
+                          name="holidays"
+                          rows={2}
+                          value={formData.helpDesk.holidays.join(", ")}
+                          onChange={handleHolidaysChange}
+                          className="w-full bg-white/5 border border-white/5 rounded-2xl px-5 py-4 text-white font-bold outline-none focus:border-indigo-500 transition-all resize-none"
+                          placeholder="Comma separated days"
+                        ></textarea>
+                      </div>
+                   </div>
+                </div>
+              </div>
+
+              {/* Form Action */}
+              <div className="bg-white rounded-[40px] border border-gray-100 p-10 flex flex-col gap-4 shadow-xl">
+                 <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-5 bg-indigo-600 text-white font-black rounded-3xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50"
+                 >
+                    {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <><Icon icon="solar:diskette-bold-duotone" width={24} /> Sync All Changes</>}
+                 </Button>
+                 <Button
+                    type="button"
+                    onClick={() => router.push("/settings")}
+                    variant="outline"
+                    className="w-full py-5 font-black text-slate-500 border-slate-100 rounded-3xl hover:bg-slate-50"
+                 >
+                    Discard Changes
+                 </Button>
+              </div>
+            </div>
+
           </div>
-        </div>
-
-        {/* ── 03 Support Desk ── */}
-        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-8 md:p-10 ring-1 ring-gray-100">
-          <SectionHeader
-            step="03"
-            title="Support & Help Desk"
-            sub="Public assistance details for students"
-            color="bg-amber-100 text-amber-600"
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-             <div>
-               <Label>Support Hotline</Label>
-               <div className="relative">
-                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                 <input
-                   type="text"
-                   name="number"
-                   value={formData.helpDesk.number}
-                   onChange={handleHelpDeskChange}
-                   className={`${inputBase} pl-12`}
-                   placeholder="1800-000-0000"
-                 />
-               </div>
-             </div>
-
-             <div>
-               <Label>Support Email</Label>
-               <div className="relative">
-                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                 <input
-                   type="email"
-                   name="email"
-                   value={formData.helpDesk.email}
-                   onChange={handleHelpDeskChange}
-                   className={`${inputBase} pl-12`}
-                   placeholder="support@library.com"
-                 />
-               </div>
-             </div>
-
-             <div>
-               <Label>Operating Hours</Label>
-               <div className="relative">
-                 <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                 <input
-                   type="text"
-                   name="hours"
-                   value={formData.helpDesk.hours}
-                   onChange={handleHelpDeskChange}
-                   placeholder="e.g. 08:00 AM - 10:00 PM"
-                   className={`${inputBase} pl-12`}
-                 />
-               </div>
-             </div>
-
-             <div>
-               <Label>Public Holidays (Comma separated)</Label>
-               <div className="relative">
-                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                 <input
-                   type="text"
-                   name="holidays"
-                   value={formData.helpDesk.holidays.join(", ")}
-                   onChange={handleHolidaysChange}
-                   placeholder="Sunday, Diwali, etc."
-                   className={`${inputBase} pl-12`}
-                 />
-               </div>
-             </div>
-
-             <div className="md:col-span-2">
-               <Label>Support Desk Specific Location</Label>
-               <textarea
-                 name="address"
-                 rows={2}
-                 value={formData.helpDesk.address}
-                 onChange={handleHelpDeskChange}
-                 placeholder="Specific floor or room for support..."
-                 className={`${inputBase} resize-none`}
-               ></textarea>
-             </div>
-          </div>
-        </div>
-
-        {/* ── Action Bar ── */}
-        <div className="flex justify-end gap-3 pt-4 pb-10">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.push("/settings")}
-            className="px-10 py-3 rounded-xl border border-gray-200 text-sm font-bold text-gray-500 hover:bg-gray-50 transition-all font-sans"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={loading}
-            className="px-12 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 shadow-xl shadow-blue-500/10 flex items-center gap-3 transition-all active:scale-95 disabled:opacity-50"
-          >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save size={20} /> Update Framework</>}
-          </Button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }
