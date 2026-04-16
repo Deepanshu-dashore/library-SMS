@@ -1,9 +1,11 @@
 import { ApiResponse } from "../../utils/ApiResponse";
 import { PaymentService } from "./payment.service";
 import { verifyJWT } from "../../middlewares/verifyJWT";
+import { connectDB } from "../../db/connectDB";
 
 export class PaymentController {
   static async getAllPayments(req: Request) {
+    await connectDB();
     const library = await verifyJWT();
     if (!library) {
       return ApiResponse(401, null, "Unauthorized");
@@ -22,6 +24,7 @@ export class PaymentController {
   }
 
   static async getPaymentById(params: Promise<{ id: string }>) {
+    await connectDB();
     const library = await verifyJWT();
     if (!library) {
       return ApiResponse(401, null, "Unauthorized");

@@ -63,7 +63,7 @@ export class LibraryController {
         { status: 200 },
       );
 
-      response.cookies.set("authToken", token, {
+      response.cookies.set("__lms_token", token, {
         httpOnly: true,
         secure: true,
         sameSite: "strict",

@@ -5,10 +5,11 @@ export function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   // Define public paths that don't require authentication
-  const isPublicPath = path === "/login" || path === "/register" || path.startsWith("/status/");
-  
+  const isPublicPath =
+    path === "/login" || path === "/register" || path.startsWith("/status/");
+
   // Get token from cookies
-  const token = request.cookies.get("authToken")?.value || "";
+  const token = request.cookies.get("__lms_token")?.value || "";
 
   // If trying to access a protected route without a token
   if (!isPublicPath && !token) {

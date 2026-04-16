@@ -20,6 +20,7 @@ import { Button } from "@/components/shared/Button";
 import { SimpleLoader } from "@/components/shared/SimpleLoader";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { Invoice } from "@/components/Invoice";
 
 interface PaymentDetails {
   _id: string;
@@ -28,6 +29,11 @@ interface PaymentDetails {
     startDate: string;
     endDate: string;
     status: string;
+    seatId: {
+      seatNumber: string;
+      type: string;
+      floor?: string;
+    };
   };
   amount: number;
   paymentMode: string;
@@ -67,73 +73,204 @@ export default function ViewPaymentPage() {
     window.print();
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (!payment) return;
-    const doc = new jsPDF();
     
-    // Header Branding
-    doc.setFontSize(22);
-    doc.setTextColor(16, 185, 129); // Emerald color
-    doc.text("Library SMS", 20, 20);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text("Official Payment Receipt", 20, 28);
-    
-    // Invoice details (Right aligned)
-    doc.setTextColor(0);
-    doc.setFontSize(12);
-    doc.text(`Invoice: INV-${payment.receiptNumber}`, 140, 20);
-    doc.setFontSize(10);
-    doc.text(`Date: ${new Date(payment.createdAt).toLocaleDateString()}`, 140, 26);
-    doc.text(`Status: Paid`, 140, 32);
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
 
-    // From and To
-    doc.setFontSize(12);
-    doc.setFont("Helvetica", "bold");
-    doc.text("From:", 20, 50);
-    doc.text("To:", 110, 50);
-    
-    doc.setFont("Helvetica", "normal");
-    doc.setFontSize(10);
-    doc.text([
-      currentUser?.name || "Library Office",
-      "Digital Management System",
-      `Email: ${currentUser?.email || "support@librarysms.com"}`,
-      `Phone: ${currentUser?.number || "+91 98765 43210"}`
-    ], 20, 57);
-    doc.text([payment.userId.name, payment.userId.email, `Phone: ${payment.userId.number}`], 110, 57);
+    // Helper to get image as base64
+    const getImageData = (url: string): Promise<string> => {
+      return new Promise((resolve) => {
+        const img = new (window as any).Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = () => resolve('');
+        img.src = url;
+      });
+    };
 
-    // Items table
-    autoTable(doc, {
-      startY: 85,
-      head: [["#", "Description", "Duration", "Amount"]],
-      body: [
-        ["1", "Monthly Library Subscription", `${payment.durationDays} Days`, `Rs. ${payment.amount.toLocaleString()}`]
-      ],
-      headStyles: { fillColor: [31, 41, 55] },
-      margin: { top: 80 }
-    });
+    try {
+      // Load all required images
+      const [bgData, logoData, signData] = await Promise.all([
+        getImageData('/Recipet.png'),
+        getImageData(currentUser?.logo || currentUser?.photo || '/Logo.png'),
+        getImageData(currentUser?.signature || '')
+      ]);
 
-    // Totals
-    const finalY = (doc as any).lastAutoTable.finalY + 10;
-    doc.setFont("Helvetica", "bold");
-    doc.text(`Total Amount: Rs. ${payment.amount.toLocaleString()}`, 140, finalY);
+      // 1. Background Image
+      if (bgData) {
+        doc.addImage(bgData, 'PNG', 0, 0, pageWidth, pageHeight);
+      }
 
-    // Footer
-    doc.setFontSize(8);
-    doc.setTextColor(150);
-    doc.text("This is a computer-generated receipt. Support: support@librarysms.com", 20, 280);
+      // 2. Logo
+      if (logoData) {
+        doc.addImage(logoData, 'PNG', 20, 15, 50, 12, undefined, 'FAST');
+      }
 
-    doc.save(`Receipt_${payment.receiptNumber}.pdf`);
+      // 3. Title
+      doc.setFontSize(22);
+      doc.setTextColor(30, 27, 75); // Indigo 900
+      doc.setFont('helvetica', 'bold');
+      const title = "PAYMENT RECEIPT";
+      const titleWidth = doc.getTextWidth(title);
+      doc.text(title, (pageWidth - titleWidth) / 2, 45);
+      doc.setDrawColor(30, 27, 75);
+      doc.setLineWidth(0.5);
+      doc.line((pageWidth - titleWidth) / 2, 47, (pageWidth + titleWidth) / 2, 47);
+
+      // 4. Receipt Meta
+      doc.setFontSize(11);
+      doc.setTextColor(0);
+      doc.text("REC -", 20, 65);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(75);
+      doc.text(payment.receiptNumber, 35, 65);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0);
+      doc.text("Generated On -", 130, 65);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(75);
+      doc.text(new Date(payment.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }), 165, 65);
+
+      // Divider
+      doc.setDrawColor(230);
+      doc.setLineWidth(0.1);
+      doc.line(20, 72, 190, 72);
+
+      // 5. Billed To
+      doc.setFontSize(10);
+      doc.setTextColor(150);
+      doc.setFont('helvetica', 'bold');
+      doc.text("Billed To :", 20, 85);
+      
+      doc.setFontSize(20);
+      doc.setTextColor(0);
+      doc.text(payment.userId.name, 20, 95);
+      
+      doc.setDrawColor(245);
+      doc.setLineWidth(1);
+      doc.line(20, 100, 190, 100);
+
+      // 6. Membership Details Title
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text("Membership Details", 20, 115);
+
+      // 7. Membership Details Table (using autoTable to align columns beautifully)
+      const seat = payment.subscriptionId.seatId;
+      autoTable(doc, {
+        startY: 125,
+        margin: { left: 20 },
+        tableWidth: 160,
+        body: [
+          ["Seat Number (Type)", ":", `${seat?.seatNumber} (${seat?.type?.toUpperCase()})`],
+          ["Floor", ":", `${seat?.floor || "Ground"}`],
+          ["Payment Method", ":", `${payment.paymentMode.toUpperCase()}`],
+          ["Payment Date", ":", `${new Date(payment.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`],
+          ["Subscription Period", ":", `${new Date(payment.subscriptionId.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} To ${new Date(payment.subscriptionId.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`]
+        ],
+        theme: 'plain',
+        styles: {
+          fontSize: 11,
+          cellPadding: 2,
+          textColor: [75, 75, 75],
+        },
+        columnStyles: {
+          0: { fontStyle: 'bold', textColor: [0, 0, 0], cellWidth: 50 },
+          1: { cellWidth: 5 },
+          2: { cellWidth: 'auto' }
+        }
+      });
+
+      // 8. Amount Paid
+      const amountY = (doc as any).lastAutoTable.finalY + 15;
+      doc.setDrawColor(245);
+      doc.setLineWidth(0.5);
+      doc.line(20, amountY - 7, 190, amountY - 7);
+      
+      doc.setFontSize(14);
+      doc.setTextColor(0);
+      doc.setFont('helvetica', 'bold');
+      doc.text("Amount Paid :", 20, amountY);
+      
+      doc.setFontSize(18);
+      doc.setTextColor(67, 56, 202); // Indigo 700
+      doc.text(`${payment.amount} rs`, 60, amountY);
+      
+      doc.setDrawColor(245);
+      doc.line(20, amountY + 5, 190, amountY + 5);
+
+      // 9. Signature
+      const signY = amountY + 25;
+      if (signData) {
+        doc.addImage(signData, 'PNG', 20, signY, 40, 12);
+      }
+      doc.setDrawColor(150);
+      doc.setLineWidth(0.2);
+      doc.setLineDashPattern([1, 1], 0);
+      doc.line(20, signY + 15, 65, signY + 15);
+      doc.setLineDashPattern([], 0);
+      
+      doc.setFontSize(9);
+      doc.setTextColor(0);
+      doc.setFont('helvetica', 'bold');
+      doc.text("Authorized Signature", 26, signY + 20);
+
+      // 10. Note
+      doc.setFontSize(8);
+      doc.setTextColor(100);
+      doc.setFont('helvetica', 'bold');
+      doc.text("Note :", 20, 245);
+      doc.setFont('helvetica', 'normal');
+      doc.text("This is a system-generated receipt. For any corrections, please contact support.", 32, 245);
+
+      // 11. Footer (Contact Information)
+      doc.setFontSize(10);
+      doc.setTextColor(0);
+      doc.setFont('helvetica', 'bold');
+      doc.text("Help Desk & Contact Information :", 20, 255);
+      doc.line(20, 256, 75, 256);
+
+      // Footer - Address row
+      doc.setFontSize(8);
+      doc.setTextColor(75);
+      doc.setFont('helvetica', 'normal');
+      
+      const address = currentUser?.helpDesk?.address || currentUser?.address || "Slice 2, Phase 1, Scheme No. 78, Vijay Nagar, Indore, M.P.";
+      doc.text(`Address: ${address}`, 20, 265);
+      
+      // Footer - Inline Contact row
+      const email = currentUser?.helpDesk?.email || currentUser?.email || "helpdesk@library.com";
+      const phone = currentUser?.helpDesk?.number || currentUser?.phone || currentUser?.phoneNumber || "+91 8305818506";
+      const hours = currentUser?.helpDesk?.hours || "09:00 AM - 08:00 PM";
+      
+      doc.text(`Email: ${email}    |    Phone: ${phone}    |    Hours: ${hours}`, 20, 275);
+
+      window.open(doc.output('bloburl'), '_blank');
+      doc.save(`Receipt_${payment.receiptNumber}.pdf`);
+      
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to generate PDF");
+    }
   };
 
   if (loading) return <SimpleLoader text="Generating Receipt..." />;
   if (!payment) return <div className="p-10 text-center font-black text-rose-500 bg-rose-50 rounded-2xl mx-10 mt-10">Receipt record not found</div>;
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-20 font-public-sans selection:bg-gray-100 selection:text-gray-900">
-      <div className="max-w-6xl mx-auto p-4 md:p-8">
+    <div className="selection:bg-gray-100 selection:text-gray-900">
+      <div className="max-w-6xl">
         <PageHeader 
           title="Payment Details"
           breadcrumbs={[
@@ -144,17 +281,17 @@ export default function ViewPaymentPage() {
           backLink="/payments"
           actionNode={
             <div className="flex gap-2">
-               {/* <Button
+               <Button
                   variant="outline"
                   size="sm"
-                  onClick={handlePrint}
+                  onClick={handleDownloadPDF}
                   className="bg-white hover:bg-gray-50 text-emerald-600 border-emerald-100"
                   >
                   <Download size={16} className="mr-2" />
                   Save PDF
-               </Button> */}
+               </Button>
                <Button
-                  onClick={handleDownloadPDF}
+                  onClick={handlePrint}
                   variant="primary"
                   size="sm"
                   className="bg-gray-900 hover:bg-black text-white px-5"
@@ -165,150 +302,15 @@ export default function ViewPaymentPage() {
             </div>
           }
         />
-        
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden print:shadow-none print:border-none">
-          <div className="p-8 md:p-12 space-y-12">
-            
-            {/* Header Section */}
-            <div className="flex justify-between items-start">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold italic shadow-sm">
-                   <Icon icon="solar:library-bold-duotone" width={24} />
-                </div>
-                <div>
-                   <h1 className="text-lg font-bold text-gray-900 tracking-tight leading-none">Library SMS</h1>
-                   <p className="text-[10px] text-gray-400 font-medium uppercase mt-1 tracking-wider">Management System</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold italic shadow-sm">
-                   <Icon icon="solar:library-bold-duotone" width={24} />
-                </div>
-                <div>
-                   <h1 className="text-lg font-bold text-gray-900 tracking-tight leading-none">Library SMS</h1>
-                   <p className="text-[10px] text-gray-400 font-medium uppercase mt-1 tracking-wider">Management System</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-between items-start">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold italic shadow-sm">
-                   <Icon icon="solar:library-bold-duotone" width={24} />
-                </div>
-                <div>
-                   <h1 className="text-lg font-bold text-gray-900 tracking-tight leading-none">Library SMS</h1>
-                   <p className="text-[10px] text-gray-400 font-medium uppercase mt-1 tracking-wider">Management System</p>
-                </div>
-              </div>
-              <div className="text-right space-y-2">
-                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase tracking-wide">
-                    {payment.subscriptionId.status === 'active' ? 'Paid' : 'Completed'}
-                 </span>
-                 <h2 className="text-lg font-bold text-gray-900 leading-none">{payment.receiptNumber}</h2>
-              </div>
-            </div>
 
-            {/* Address Grid */}
-            <div className="grid grid-cols-2 gap-12">
-              <div className="space-y-4">
-                <p className="text-sm font-semibold text-gray-900">Invoice from</p>
-                <div className="space-y-1">
-                   <h4 className="font-bold text-gray-900 capitalize">{currentUser?.name || "Library Office"}</h4>
-                   <p className="text-sm text-gray-500 leading-relaxed">
-                     Digital Management System<br />
-                     Email: {currentUser?.email || "support@librarysms.com"}<br />
-                     Phone: {currentUser?.number || "+91 98765 43210"}
-                   </p>
-                </div>
-              </div>
-              <div className="space-y-4 text-right md:text-left">
-                <p className="text-sm font-semibold text-gray-900">Invoice to</p>
-                <div className="space-y-1">
-                   <h4 className="font-bold text-gray-900">{payment.userId.name}</h4>
-                   <p className="text-sm text-gray-500 leading-relaxed">
-                     {payment.userId.email}<br />
-                     Phone: {payment.userId.number}<br />
-                     ID: {payment.userId.name.split(' ').join('_').toLowerCase()}_{payment._id.slice(-4)}
-                   </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Date Grid */}
-            <div className="grid grid-cols-2 gap-12 border-t border-gray-50 pt-8 mt-8">
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-gray-900">Date create</p>
-                <p className="text-sm font-semibold text-gray-900">
-                  {new Date(payment.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-                </p>
-              </div>
-              <div className="space-y-1 text-right md:text-left">
-                <p className="text-sm font-semibold text-gray-900">Validity Until</p>
-                <p className="text-sm font-semibold text-gray-900">
-                  {new Date(payment.subscriptionId.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-                </p>
-              </div>
-            </div>
-
-            {/* Items Table */}
-            <div className="mt-12 overflow-hidden">
-               <table className="w-full text-sm">
-                  <thead className="bg-gray-50/80 border-y border-gray-100">
-                     <tr>
-                        <th className="px-4 py-3 text-left font-bold text-gray-400 uppercase tracking-widest text-[10px] w-12">#</th>
-                        <th className="px-4 py-3 text-left font-bold text-gray-400 uppercase tracking-widest text-[10px]">Description</th>
-                        <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-widest text-[10px]">Days</th>
-                        <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-widest text-[10px]">Unit price</th>
-                        <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-widest text-[10px]">Total</th>
-                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50 border-b border-gray-100">
-                     <tr>
-                        <td className="px-4 py-5 text-gray-900 font-medium">1</td>
-                        <td className="px-4 py-5">
-                           <p className="font-bold text-gray-900">Monthly Library Subscription</p>
-                           <p className="text-gray-400 text-xs mt-1">Full access to reading area with allocated seat.</p>
-                        </td>
-                        <td className="px-4 py-5 text-right text-gray-600">{payment.durationDays}</td>
-                        <td className="px-4 py-5 text-right text-gray-600">₹{payment.amount.toLocaleString()}</td>
-                        <td className="px-4 py-5 text-right text-gray-900 font-bold">₹{payment.amount.toLocaleString()}</td>
-                     </tr>
-                  </tbody>
-               </table>
-            </div>
-
-            {/* Calculations Section */}
-            <div className="flex justify-end pt-8">
-               <div className="w-full max-w-xs space-y-3">
-                  <div className="flex justify-between text-sm">
-                     <span className="text-gray-400 font-medium">Subtotal</span>
-                     <span className="text-gray-900 font-bold">₹{payment.amount.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                     <span className="text-gray-400 font-medium tracking-tight">Tax (GST 0%)</span>
-                     <span className="text-gray-900 font-bold">₹0.00</span>
-                  </div>
-                  <div className="flex justify-between text-lg pt-4 border-t border-gray-100">
-                     <span className="text-gray-900 font-bold">Total</span>
-                     <span className="text-gray-900 font-black tracking-tight">₹{payment.amount.toLocaleString()}</span>
-                  </div>
-               </div>
-            </div>
-
-            {/* Footer Notes */}
-            <div className="grid grid-cols-2 gap-12 pt-16 mt-16 border-t border-gray-50">
-               <div className="space-y-2">
-                  <p className="text-xs font-bold text-gray-900 uppercase">NOTES</p>
-                  <p className="text-xs text-gray-400 leading-relaxed">
-                     Thank you for your membership. This is a computer-generated receipt. Please reach out if you need tax details.
-                  </p>
-               </div>
-               <div className="text-right space-y-1">
-                  <p className="text-xs font-bold text-gray-900">Have a question?</p>
-                  <p className="text-xs text-indigo-600 font-bold">support@librarysms.com</p>
-               </div>
-            </div>
-
+        {/* Premium Invoice for Printing (Hidden on screen, used for print) */}
+        <div className="mt-10 flex flex-col items-center">
+          {/* <div className="mb-4 flex items-center gap-2 text-gray-500 font-medium">
+             <Icon icon="solar:document-text-bold-duotone" width={20} />
+             <span>Premium Receipt Preview</span>
+          </div> */}
+          <div className="scale-75 origin-top border border-gray-200 shadow-xs rounded-sm">
+             <Invoice payment={payment} owner={currentUser} />
           </div>
         </div>
       </div>

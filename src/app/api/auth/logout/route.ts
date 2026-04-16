@@ -8,7 +8,7 @@ export async function POST() {
     );
 
     // Clear the authToken cookie
-    response.cookies.set("authToken", "", {
+    response.cookies.set("__lms_token", "", {
       httpOnly: true,
       secure: true,
       sameSite: "strict",

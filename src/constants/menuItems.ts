@@ -58,9 +58,9 @@ export const MENU_ITEMS = [
 
   // INSIGHTS
   {
-    title: "Reports",
-    path: "/reports",
-    icon: "solar:document-text-bold-duotone",
+    title: "Banking",
+    path: "/banking",
+    icon: "duo-icons:bank",
   },
 
   // LOW PRIORITY

@@ -49,7 +49,13 @@ export class PaymentService {
     try {
       const payment = await Payment.findById(id)
         .populate("userId")
-        .populate("subscriptionId")
+        .populate({
+          path: "subscriptionId",
+          populate: {
+            path: "seatId",
+            model: "Seat"
+          }
+        })
         .select("-__v");
       return payment;
     } catch (error) {
