@@ -76,32 +76,32 @@ export default function LoginPage() {
       <div className="w-full max-w-5xl px-6 relative z-10 flex flex-col md:flex-row items-center justify-center">
         
         {/* Left Side: Image Illustration */}
-        <div className="hidden md:flex flex-1 items-center justify-center bg-white h-auto self-stretch rounded-l-lg shadow-2xl p-10 border-r border-gray-100 min-h-[550px]">
+        <div className="hidden relative md:flex flex-1 items-center justify-center bg-white h-auto self-stretch rounded-l-lg shadow-2xl p-10 border-r border-gray-100 min-h-[550px]">
            <img 
               src="/loginSide.png" 
               alt="Login Side Illustration" 
               className="w-full h-auto object-contain bg-white"
               loading="eager"
            />
-        </div>
-
-        {/* Right Side: Form (Restored original UI) */}
-        <div className="w-full max-w-md bg-white rounded-lg md:rounded-l-none md:rounded-r-lg shadow-2xl p-10 md:p-10  space-y-8 h-auto min-h-[550px] flex flex-col justify-center">
-
-          {/* Logo Section */}
-          <div className="mb-2 flex gap-4 items-center">
+            {/* Logo Section */}
+          <div className="mb-2 flex bg-gray-200 w-full justify-center border-x-16 border-white gap-4 items-center absolute bottom-5">
             <img 
                src="/LogoWithoutBg.png" 
                alt="Library Management Software" 
-               className="w-10 h-10 object-contain"
+               className="w-12.5 h-12.5 object-contain"
                loading="eager"
             />
              <div>
-              <h1 className="text-lg text-gray-600 font-public-sans font-bold" style={{ color: "var(--text)" }}>
-                  Library SMS
+              <h1 className="text-lg mt-2 text-gray-700 font-public-sans font-medium" >
+                  Library Management System
                 </h1>
                 </div>
           </div>
+        </div>
+
+        {/* Right Side: Form (Restored original UI) */}
+        <div className="w-full max-w-md bg-white rounded-lg md:rounded-l-none md:rounded-r-lg p-10 md:p-10  space-y-8 h-auto min-h-[550px] flex flex-col justify-center">
+
 
           {/* Heading Section */}
           <div className="space-y-2 mb-3">
