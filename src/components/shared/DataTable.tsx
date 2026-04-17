@@ -84,6 +84,7 @@ export interface DataTableProps<T> {
   
   // Custom Filter Chips
   filterChips?: React.ReactNode;
+  hideSearch?: boolean;
 }
 
 function DropdownMenu<T>({ 
@@ -180,6 +181,7 @@ export function DataTable<T>({
   rowKey,
   showCheckBox = false,
   filterChips,
+  hideSearch = false,
 }: DataTableProps<T>) {
   
   const [searchInput, setSearchInput] = useState("");
@@ -296,34 +298,36 @@ export function DataTable<T>({
       )}
 
       {/* 2. Top Toolbar (Search, Filter, actions) */}
-      <div className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <form 
-          className="relative w-full max-w-md flex items-center gap-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            setQuery(searchInput);
-            onSearch?.(searchInput);
-          }}
-        >
-           <div className="relative w-full">
-             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-             <input 
-               value={searchInput}
-               onChange={(e) => setSearchInput(e.target.value)}
-               placeholder={searchPlaceholder}
-               className="w-full pl-10 pr-4 py-2.5 bg-gray-50/50 outline-none border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-[13px] text-gray-800 font-medium font-sans"
-             />
-           </div>
-           
-           <button 
-             type="submit"
-             className="px-5 py-2.5 cursor-pointer bg-gray-900 text-white text-[13px] font-bold rounded-xl hover:bg-gray-800 transition-colors shadow-sm whitespace-nowrap"
-           >
-             Search
-           </button>
-        </form>
-        {/* Placeholder for Add/Export buttons if needed from parent */}
-      </div>
+      {!hideSearch && (
+        <div className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-gray-100">
+          <form 
+            className="relative w-full max-w-md flex items-center gap-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              setQuery(searchInput);
+              onSearch?.(searchInput);
+            }}
+          >
+             <div className="relative w-full">
+               <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+               <input 
+                 value={searchInput}
+                 onChange={(e) => setSearchInput(e.target.value)}
+                 placeholder={searchPlaceholder}
+                 className="w-full pl-10 pr-4 py-2.5 bg-gray-50/50 outline-none border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-[13px] text-gray-800 font-medium font-sans"
+               />
+             </div>
+             
+             <button 
+               type="submit"
+               className="px-5 py-2.5 cursor-pointer bg-gray-900 text-white text-[13px] font-bold rounded-xl hover:bg-gray-800 transition-colors shadow-sm whitespace-nowrap"
+             >
+               Search
+             </button>
+          </form>
+          {/* Placeholder for Add/Export buttons if needed from parent */}
+        </div>
+      )}
 
       {filterChips && (
         <div className="px-4 pb-2">

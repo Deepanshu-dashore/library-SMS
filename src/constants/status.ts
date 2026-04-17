@@ -84,6 +84,14 @@ export const STATUS_STYLES: Record<string, StatusStyle> = {
     label: "UPI",
     color: "bg-indigo-100/80 text-indigo-700",
   },
+  income: {
+    label: "Income",
+    color: "bg-emerald-100/80 text-emerald-700",
+  },
+  expense: {
+    label: "Expense",
+    color: "bg-rose-100/80 text-rose-700",
+  },
 };
 
 export const getStatusStyle = (status: string): StatusStyle => {
