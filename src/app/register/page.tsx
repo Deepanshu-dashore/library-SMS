@@ -1,19 +1,53 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import Cropper from "react-easy-crop";
 import getCroppedImg from "@/utils/cropImage";
 import { Stepper, Step } from "@/components/shared/Stepper";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/shared/Button";
 
-const inputBase = "w-full text-[14px] font-semibold px-11 py-3.5 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 transition-all outline-none text-gray-700 placeholder:text-gray-400 placeholder:font-normal shadow-sm group-hover:border-indigo-200";
+const inputBase = "w-full text-sm px-6 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 transition-all outline-none text-gray-700 placeholder:text-gray-400 font-medium placeholder:font-normal shadow-sm group-hover:border-indigo-200";
+
+const slides = [
+  {
+    image: "/login-bg.png",
+    title: "Silent Study Zones",
+    description: "Experience 24/7 access to premium, distraction-free environments with high-speed internet and ergonomic seating.",
+    icon: "solar:leaf-bold-duotone"
+  },
+  {
+    image: "/loginSide.png",
+    title: "Digital Ecosystem",
+    description: "Instant access to a vast collection of e-books, research journals, and advanced computerized study stations.",
+    icon: "solar:laptop-bold-duotone"
+  }
+];
+
+function SectionHeader({
+  step, title, sub, color,
+}: { step: string; title: string; sub: string; color: string }) {
+  return (
+    <div className="flex items-center gap-4 mb-8 bg-gray-50 p-2 rounded-2xl border border-gray-100/50">
+      <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center font-black text-sm shadow-sm`}>
+        {step}
+      </div>
+      <div>
+        <h3 className="text-base font-black text-gray-900 tracking-tight leading-none mb-1">{title}</h3>
+        <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">{sub}</p>
+      </div>
+    </div>
+  );
+}
 
 export default function RegisterPage() {
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [registeredId, setRegisteredId] = useState<string | null>(null);
+  const [activeSlide, setActiveSlide] = useState(0);
   
   // Cropper States
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -55,6 +89,14 @@ export default function RegisterPage() {
     { id: 4, title: "Media", icon: () => <Icon icon="solar:camera-bold-duotone" className="w-6 h-6" /> },
     { id: 5, title: "Review", icon: () => <Icon icon="solar:magnifer-bold-duotone" className="w-6 h-6" /> },
   ];
+
+  const nextSlide = () => setActiveSlide((prev) => (prev + 1) % slides.length);
+  const prevSlide = () => setActiveSlide((prev) => (prev - 1 + slides.length) % slides.length);
+
+  useEffect(() => {
+    const timer = setInterval(nextSlide, 8000);
+    return () => clearInterval(timer);
+  }, []);
 
   const onCropComplete = useCallback((_initialed: any, croppedAreaPixels: any) => {
     setCroppedAreaPixels(croppedAreaPixels);
@@ -130,8 +172,8 @@ export default function RegisterPage() {
 
   if (submitted && registeredId) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-6 lg:p-12 font-public-sans animate-in fade-in zoom-in duration-700">
-        <div className="max-w-xl w-full text-center flex flex-col items-center">
+      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-4 font-public-sans selection:bg-indigo-100">
+        <div className="max-w-xl w-full text-center flex flex-col items-center bg-white p-12 rounded-[3rem] shadow-2xl border border-gray-100 animate-in fade-in zoom-in duration-700">
           <div className="relative group mb-10">
              <div className="absolute inset-0 bg-emerald-400 blur-3xl opacity-20 group-hover:opacity-40 transition-opacity" />
              <div className="relative w-28 h-28 bg-emerald-500 text-white rounded-[32px] flex items-center justify-center rotate-6 group-hover:rotate-0 transition-transform duration-500 shadow-2xl shadow-emerald-200">
@@ -146,22 +188,22 @@ export default function RegisterPage() {
              <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Icon icon="solar:crown-minimalistic-bold-duotone" className="text-amber-400 text-3xl" />
              </div>
-             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 mb-2">Your Unique Member ID</p>
+             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 mb-2">Member Reference ID</p>
              <p className="text-4xl font-black text-gray-900 tracking-widest uppercase italic mb-8 select-all decoration-indigo-200 decoration-8 underline-offset-[10px] underline">{registeredId.slice(-8)}</p>
              
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full relative z-10">
                 <Link 
                    href={`/status/${registeredId}`} 
-                   className="flex items-center justify-center gap-3 bg-indigo-600 text-white font-black py-4.5 rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-95"
+                   className="flex items-center justify-center gap-3 bg-indigo-600 text-white font-black py-4.5 rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-95 text-sm"
                 >
                    Track Status <Icon icon="solar:map-point-wave-bold-duotone" className="text-xl" />
                 </Link>
                 <button 
                    onClick={() => {
                       navigator.clipboard.writeText(`${window.location.origin}/status/${registeredId}`);
-                      toast.success("URL Copied!");
+                      toast.success("Link Copied!");
                    }}
-                   className="flex items-center justify-center gap-3 bg-white border border-gray-100 text-gray-900 font-black py-4.5 rounded-2xl hover:bg-gray-100 transition-all shadow-sm active:scale-95"
+                   className="flex items-center justify-center gap-3 bg-white border border-gray-100 text-gray-900 font-black py-4.5 rounded-2xl hover:bg-gray-100 transition-all shadow-sm active:scale-95 text-sm"
                 >
                    Share Link <Icon icon="solar:link-bold-duotone" className="text-xl" />
                 </button>
@@ -177,24 +219,23 @@ export default function RegisterPage() {
     );
   }
 
-  const InputCard = ({ icon, label, children, active }: any) => (
-    <div className={`space-y-6 animate-in duration-500 ${active ? "slide-in-from-right-8 opacity-100" : "opacity-0 hidden"}`}>
-      <div className="flex items-center gap-4 mb-4">
-         <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-xl shadow-indigo-100">
-            <Icon icon={icon} className="text-2xl" />
-         </div>
-         <div className="flex flex-col">
-            <h3 className="text-xl font-black text-gray-900 tracking-tight leading-none mb-1">{label}</h3>
-            <p className="text-xs font-semibold text-gray-400 italic">Please fill accurate information</p>
-         </div>
-      </div>
-      {children}
+  const InputCard = ({ active, stepNumber, title, sub, color, children }: any) => (
+    <div className={`animate-in duration-500 ${active ? "slide-in-from-right-8 opacity-100" : "opacity-0 hidden"}`}>
+        <div className="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-sm border border-gray-100 ring-1 ring-gray-100/50">
+            <SectionHeader
+                step={stepNumber}
+                title={title}
+                sub={sub}
+                color={color}
+            />
+            {children}
+        </div>
     </div>
   );
 
   const FormItem = ({ icon, label, ...props }: any) => (
     <div className="space-y-2 flex flex-col group relative">
-       <label className="text-[12px] font-black text-gray-500 uppercase tracking-widest ml-1 pointer-events-none group-focus-within:text-indigo-600 transition-colors">{label}</label>
+       <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-1 pointer-events-none group-focus-within:text-indigo-600 transition-colors uppercase leading-none">{label}</label>
        <div className="relative">
           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-all duration-300">
              <Icon icon={icon} className="text-xl" />
@@ -230,7 +271,7 @@ export default function RegisterPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#fafbfc] flex flex-col lg:flex-row overflow-hidden font-public-sans selection:bg-indigo-100">
+    <div className="min-h-screen bg-[#f1f5f9] flex items-center justify-center p-4 lg:p-12 font-public-sans selection:bg-indigo-100 overflow-x-hidden">
       
       {/* Photo Cropper Modal Overlay */}
       {isCropping && (
@@ -240,7 +281,7 @@ export default function RegisterPage() {
                 image={imageSrc || ""}
                 crop={crop}
                 zoom={zoom}
-                aspect={4/5} // Passport size aspect ratio (approx 3.5:4.5)
+                aspect={4/5} 
                 onCropChange={setCrop}
                 onCropComplete={onCropComplete}
                 onZoomChange={setZoom}
@@ -258,285 +299,336 @@ export default function RegisterPage() {
               </div>
               <div className="flex gap-4">
                  <button onClick={() => { setIsCropping(false); setImageSrc(null); }} className="px-8 py-3 rounded-full text-white font-black hover:bg-white/10 transition-all">Cancel</button>
-                 <button onClick={handleApplyCrop} className="px-12 py-3 bg-indigo-600 rounded-full text-white font-black shadow-2xl shadow-indigo-500/40 active:scale-95 transition-all">Set Passport Photo</button>
+                 <button onClick={handleApplyCrop} className="px-12 py-3 bg-indigo-600 rounded-full text-white font-black shadow-2xl shadow-indigo-500/40 active:scale-95 transition-all">Set Crop</button>
               </div>
            </div>
         </div>
       )}
 
-      {/* Corporate Sidebar */}
-      <div className="hidden lg:flex lg:w-[420px] bg-indigo-600 p-16 flex-col justify-between relative overflow-hidden text-white shrink-0 border-r border-indigo-500 shadow-2xl">
-         <div className="relative z-10">
-            <Link href="/" className="group inline-flex flex-col items-center">
-               <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-2xl rotate-3 group-hover:rotate-0 transition-transform">
-                  <span className="text-indigo-600 text-3xl font-black italic">L</span>
+      {/* Main Card Container */}
+      <div className="max-w-7xl w-full bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row min-h-[850px] border border-white">
+        
+        {/* Left Side: Modern Slider */}
+        <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden group/slider border-r border-gray-50">
+           <AnimatePresence mode="wait">
+              <motion.div
+                key={activeSlide}
+                initial={{ opacity: 0, scale: 1.1 }}
+                animate={{ opacity: 1, scale: 1.05 }}
+                exit={{ opacity: 0, scale: 1 }}
+                transition={{ duration: 1.2, ease: "circOut" }}
+                className="absolute inset-0"
+              >
+                 <img src={slides[activeSlide].image} className="w-full h-full object-cover" alt="Slide" />
+                 
+                 {/* Glass Overlay Content */}
+                 <div className="absolute inset-x-0 bottom-0 p-10 pt-32 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                    <div className="p-8 rounded-[2.5rem] bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl">
+                       <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mb-6">
+                          <Icon icon={slides[activeSlide].icon} className="text-white text-2xl" />
+                       </div>
+                       <h3 className="text-2xl font-black text-white italic uppercase tracking-tight mb-4">{slides[activeSlide].title}</h3>
+                       <p className="text-white/80 font-medium leading-relaxed italic text-sm">
+                          {slides[activeSlide].description}
+                       </p>
+                    </div>
+                 </div>
+              </motion.div>
+           </AnimatePresence>
+
+           {/* Reusable Slider Nav Buttons */}
+           <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between px-6 opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300">
+              <button 
+                onClick={prevSlide}
+                className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all active:scale-90"
+              >
+                 <Icon icon="solar:round-alt-arrow-left-bold" className="text-2xl" />
+              </button>
+              <button 
+                onClick={nextSlide}
+                className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all active:scale-90"
+              >
+                 <Icon icon="solar:round-alt-arrow-right-bold" className="text-2xl" />
+              </button>
+           </div>
+        </div>
+
+        {/* Right Side: Form Workflow */}
+        <div className="lg:w-1/2 flex flex-col relative z-10 bg-white overflow-hidden">
+           {/* Fixed Header */}
+           <div className="px-6 py-10 lg:px-14 bg-white border-b border-gray-50 flex items-center justify-between shrink-0">
+               <div>
+                  <h1 className="text-3xl font-black text-gray-900 tracking-tight italic uppercase leading-none mb-1">Onboarding</h1>
+                  <p className="text-[10px] font-black text-indigo-500 italic uppercase tracking-[0.2em]">New Member Registration</p>
                </div>
-               <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-60">Virtual SMS</p>
-            </Link>
-            
-            <h2 className="text-5xl font-black leading-[1.05] tracking-tight mt-12 mb-8 italic uppercase text-indigo-50 drop-shadow-sm">
-               New Member <br /> 
-               <span className="text-indigo-400 bg-white/10 px-2 rounded-lg not-italic">Onboarding</span>
-            </h2>
-            <p className="text-indigo-100 text-lg font-medium leading-relaxed max-w-[300px] opacity-80">
-               Complete your digital profile to join our premium learning spaces.
-            </p>
-         </div>
+               <Link href="/login" className="px-6 py-2.5 bg-gray-50 rounded-xl text-gray-400 font-bold text-[10px] uppercase tracking-widest hover:bg-gray-100 transition-all flex items-center gap-2">
+                  Already Member? <Icon icon="solar:round-alt-arrow-right-bold" className="text-sm" />
+               </Link>
+           </div>
 
-         <div className="relative z-10 flex flex-col gap-6">
-            {[
-               { icon: "solar:rocket-bold-duotone", t: "Express Pass", s: "Approval in 24 hours" },
-               { icon: "solar:shield-keyhole-bold-duotone", t: "Private Vault", s: "Data handled with secrecy" },
-               { icon: "solar:star-rainbow-bold-duotone", t: "Premium Perks", s: "Access 24/7 silent zones" }
-            ].map((f, i) => (
-               <div key={i} className="flex items-center gap-4 group">
-                  <div className="w-14 h-14 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center transition-all group-hover:bg-indigo-500 group-hover:scale-105 shadow-inner">
-                     <Icon icon={f.icon} className="text-2xl" />
-                  </div>
-                  <div>
-                     <p className="font-black tracking-tight text-white/90">{f.t}</p>
-                     <p className="text-indigo-200 text-xs font-semibold">{f.s}</p>
-                  </div>
-               </div>
-            ))}
-            <div className="pt-12 flex items-center gap-4 border-t border-indigo-500 mt-6">
-               <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-100">Live Registration Active</p>
-            </div>
-         </div>
+           {/* Scrollable Content */}
+           <div className="flex-1 overflow-y-auto px-6 py-10 lg:px-14 lg:py-12 custom-scrollbar">
+              <div className="max-w-2xl mx-auto w-full">
+                {/* Modular Stepper Navigation */}
+                <Stepper 
+                  steps={steps} 
+                  currentStep={step} 
+                  className="mb-14 scale-105" 
+                  activeColor="bg-indigo-600" 
+                  progressColor="bg-indigo-600" 
+                />
 
-         {/* Backdrop Art */}
-         <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-white opacity-5 rounded-full blur-[140px]" />
-         <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] bg-black opacity-10 rounded-full blur-[100px]" />
-      </div>
+                <form onSubmit={handleSubmit} className="pb-10">
+                   {/* Step 1: Personal Profile */}
+                   <InputCard 
+                      active={step === 1} 
+                      stepNumber="01" 
+                      title="Personal Identity" 
+                      sub="Basic background credentials"
+                      color="bg-indigo-100 text-indigo-600"
+                   >
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+                         <FormItem 
+                            label="Full Name" icon="solar:user-bold-duotone" required
+                            placeholder="John Doe"
+                            value={formData.name}
+                            onChange={(e: any) => setFormData({...formData, name: e.target.value})}
+                         />
+                         <FormItem 
+                            label="Email Address" icon="solar:letter-bold-duotone" required
+                            placeholder="user@example.com"
+                            value={formData.email}
+                            onChange={(e: any) => setFormData({...formData, email: e.target.value})}
+                         />
+                         <FormItem 
+                            label="Father's Name" icon="solar:users-group-two-rounded-bold-duotone" required
+                            value={formData.fatherName}
+                            onChange={(e: any) => setFormData({...formData, fatherName: e.target.value})}
+                         />
+                         <FormItem 
+                            label="Mother's Name" icon="solar:heart-bold-duotone" required
+                            value={formData.motherName}
+                            onChange={(e: any) => setFormData({...formData, motherName: e.target.value})}
+                         />
+                         <FormItem 
+                            label="Date of Birth" icon="solar:calendar-bold-duotone" required
+                            type="date"
+                            value={formData.dob}
+                            onChange={(e: any) => setFormData({...formData, dob: e.target.value})}
+                         />
+                         <FormItem 
+                            label="Gender" icon="solar:mirror-bold-duotone" required
+                            type="select" options={["Male", "Female", "Other"]}
+                            value={formData.gender}
+                            onChange={(e: any) => setFormData({...formData, gender: e.target.value})}
+                         />
+                      </div>
+                      <div className="flex justify-end pt-12">
+                         <Button 
+                           onClick={() => setStep(2)} 
+                           variant="primary"
+                           icon="solar:round-alt-arrow-right-bold-duotone"
+                           iconPosition="right"
+                           className="h-16 px-14 rounded-[2rem] shadow-2xl shadow-indigo-100 uppercase tracking-widest text-xs font-black"
+                         >
+                            Next Stage
+                         </Button>
+                      </div>
+                   </InputCard>
 
-      {/* Optimized Form Workflow */}
-      <div className="flex-1 overflow-y-auto px-6 py-12 lg:px-24 lg:py-20 flex flex-col bg-white">
-         <div className="max-w-3xl mx-auto w-full">
-            
-            {/* Modular Stepper Navigation */}
-            <Stepper 
-              steps={steps} 
-              currentStep={step} 
-              className="mb-20 scale-110" 
-              activeColor="bg-indigo-600" 
-              progressColor="bg-indigo-500" 
-            />
+                   {/* Step 2: Contact Matrix */}
+                   <InputCard 
+                      active={step === 2} 
+                      stepNumber="02" 
+                      title="Contact Matrix" 
+                      sub="Communication & reachability"
+                      color="bg-emerald-100 text-emerald-600"
+                   >
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+                         <FormItem 
+                            label="Primary Mobile" icon="solar:iphone-bold-duotone" required
+                            placeholder="+91-00000-00000"
+                            value={formData.number}
+                            onChange={(e: any) => setFormData({...formData, number: e.target.value})}
+                         />
+                         <FormItem 
+                            label="Alt Number" icon="solar:phone-bold-duotone"
+                            value={formData.secondaryNumber}
+                            onChange={(e: any) => setFormData({...formData, secondaryNumber: e.target.value})}
+                         />
+                         <FormItem 
+                            label="Aadhar Number" icon="solar:card-2-bold-duotone" required
+                            value={formData.adharNumber}
+                            onChange={(e: any) => setFormData({...formData, adharNumber: e.target.value})}
+                         />
+                         <FormItem 
+                            label="Category" icon="solar:ranking-bold-duotone" required
+                            type="select" options={["General", "OBC", "SC", "ST"]}
+                            value={formData.category}
+                            onChange={(e: any) => setFormData({...formData, category: e.target.value})}
+                         />
+                      </div>
+                      <div className="flex justify-between pt-14 items-center">
+                         <Button 
+                           onClick={() => setStep(1)} 
+                           variant="ghost"
+                           className="font-black text-gray-400 uppercase text-[10px] tracking-[0.2em]"
+                         >
+                            Modified Back
+                         </Button>
+                         <Button 
+                           onClick={() => setStep(3)} 
+                           variant="primary"
+                           icon="solar:round-alt-arrow-right-bold-duotone"
+                           iconPosition="right"
+                           className="h-16 px-14 rounded-[2rem] shadow-2xl shadow-indigo-100 uppercase tracking-widest text-xs font-black"
+                         >
+                            Location Info
+                         </Button>
+                      </div>
+                   </InputCard>
 
-            <form onSubmit={handleSubmit} className="pb-24">
-               {/* Step 1: Personal Profile */}
-               <InputCard icon="solar:document-text-bold-duotone" label="Identity Details" active={step === 1}>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                     <FormItem 
-                        label="Member Name" icon="solar:user-bold-duotone" required
-                        placeholder="Ex: David Miller"
-                        value={formData.name}
-                        onChange={(e: any) => setFormData({...formData, name: e.target.value})}
-                     />
-                     <FormItem 
-                        label="Email Sync" icon="solar:letter-bold-duotone" required
-                        placeholder="hello@example.com"
-                        value={formData.email}
-                        onChange={(e: any) => setFormData({...formData, email: e.target.value})}
-                     />
-                     <FormItem 
-                        label="Father's Full Name" icon="solar:users-group-two-rounded-bold-duotone" required
-                        value={formData.fatherName}
-                        onChange={(e: any) => setFormData({...formData, fatherName: e.target.value})}
-                     />
-                     <FormItem 
-                        label="Mother's Full Name" icon="solar:heart-bold-duotone" required
-                        value={formData.motherName}
-                        onChange={(e: any) => setFormData({...formData, motherName: e.target.value})}
-                     />
-                     <FormItem 
-                        label="Birthday" icon="solar:calendar-bold-duotone" required
-                        type="date"
-                        value={formData.dob}
-                        onChange={(e: any) => setFormData({...formData, dob: e.target.value})}
-                     />
-                     <FormItem 
-                        label="Biological Gender" icon="solar:mirror-bold-duotone" required
-                        type="select" options={["Male", "Female", "Other"]}
-                        value={formData.gender}
-                        onChange={(e: any) => setFormData({...formData, gender: e.target.value})}
-                     />
-                  </div>
-                  <div className="flex justify-end pt-12">
-                     <button type="button" onClick={() => setStep(2)} className="h-16 px-14 bg-indigo-600 text-white font-black rounded-3xl shadow-2xl shadow-indigo-100 flex items-center gap-3 active:scale-95 hover:bg-indigo-700 transition-all text-sm uppercase tracking-widest">
-                        Proceed To Contact <Icon icon="solar:round-alt-arrow-right-bold-duotone" className="text-2xl" />
-                     </button>
-                  </div>
-               </InputCard>
+                   {/* Step 3: Geography */}
+                   <InputCard 
+                      active={step === 3} 
+                      stepNumber="03" 
+                      title="Resident Address" 
+                      sub="Physical location details"
+                      color="bg-amber-100 text-amber-600"
+                   >
+                      <div className="space-y-6">
+                         <FormItem 
+                            label="House No / Street" icon="solar:map-point-bold-duotone" required
+                            type="textarea"
+                            value={formData.address.detailedAddress}
+                            onChange={(e: any) => setFormData({...formData, address: {...formData.address, detailedAddress: e.target.value}})}
+                         />
+                         <div className="grid grid-cols-2 gap-6">
+                            <FormItem label="Tehsil" icon="solar:city-bold-duotone" value={formData.address.tehsil} onChange={(e: any) => setFormData({...formData, address: {...formData.address, tehsil: e.target.value}})} />
+                            <FormItem label="District" icon="solar:map-bold-duotone" value={formData.address.district} onChange={(e: any) => setFormData({...formData, address: {...formData.address, district: e.target.value}})} />
+                            <FormItem label="State" icon="solar:globus-bold-duotone" value={formData.address.state} onChange={(e: any) => setFormData({...formData, address: {...formData.address, state: e.target.value}})} />
+                            <FormItem label="Pincode" icon="solar:mailbox-bold-duotone" value={formData.address.pincode} onChange={(e: any) => setFormData({...formData, address: {...formData.address, pincode: e.target.value}})} />
+                         </div>
+                      </div>
+                      <div className="flex justify-between pt-14 items-center">
+                         <Button 
+                           onClick={() => setStep(2)} 
+                           variant="ghost"
+                           className="font-black text-gray-400 uppercase text-[10px] tracking-[0.2em]"
+                         >
+                            Address Back
+                         </Button>
+                         <Button 
+                           onClick={() => setStep(4)} 
+                           variant="primary"
+                           icon="solar:round-alt-arrow-right-bold-duotone"
+                           iconPosition="right"
+                           className="h-16 px-14 rounded-[2rem] shadow-2xl shadow-indigo-100 uppercase tracking-widest text-xs font-black"
+                         >
+                            Digital Matrix
+                         </Button>
+                      </div>
+                   </InputCard>
 
-               {/* Step 2: Contact Matrix */}
-               <InputCard icon="solar:phone-bold-duotone" label="Communication" active={step === 2}>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                     <FormItem 
-                        label="Active Mobile" icon="solar:iphone-bold-duotone" required
-                        placeholder="+91-XXXX-XXXXXX"
-                        value={formData.number}
-                        onChange={(e: any) => setFormData({...formData, number: e.target.value})}
-                     />
-                     <FormItem 
-                        label="Emergency Contact" icon="solar:shield-warning-bold-duotone"
-                        placeholder="Family member number"
-                        value={formData.secondaryNumber}
-                        onChange={(e: any) => setFormData({...formData, secondaryNumber: e.target.value})}
-                     />
-                     <FormItem 
-                        label="Aadhar ID" icon="solar:card-2-bold-duotone" required
-                        placeholder="12 digit numeric ID"
-                        value={formData.adharNumber}
-                        onChange={(e: any) => setFormData({...formData, adharNumber: e.target.value})}
-                     />
-                     <FormItem 
-                        label="Social Background" icon="solar:ranking-bold-duotone" required
-                        type="select" options={["General", "OBC", "SC", "ST"]}
-                        value={formData.category}
-                        onChange={(e: any) => setFormData({...formData, category: e.target.value})}
-                     />
-                  </div>
-                  <div className="flex justify-between pt-14">
-                     <button type="button" onClick={() => setStep(1)} className="font-black text-gray-400 hover:text-gray-900 transition-all uppercase text-[10px] tracking-[0.2em] flex items-center gap-2 group">
-                        <Icon icon="solar:round-alt-arrow-left-bold-duotone" className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> Previous
-                     </button>
-                     <button type="button" onClick={() => setStep(3)} className="h-16 px-14 bg-indigo-600 text-white font-black rounded-3xl shadow-2xl shadow-indigo-100 flex items-center gap-3 active:scale-95 transition-all text-sm uppercase tracking-widest">
-                        Location Details <Icon icon="solar:round-alt-arrow-right-bold-duotone" className="text-2xl" />
-                     </button>
-                  </div>
-               </InputCard>
+                   {/* Step 4: Digital Assets */}
+                   <InputCard 
+                      active={step === 4} 
+                      stepNumber="04" 
+                      title="Digital Media" 
+                      sub="Photo & Signature registry"
+                      color="bg-pink-100 text-pink-600"
+                   >
+                      <div className="space-y-6">
+                         <FormItem 
+                            label="Target Course" icon="solar:notebook-bold-duotone"
+                            placeholder="Ex: UPSC, GATE, etc."
+                            value={formData.course}
+                            onChange={(e: any) => setFormData({...formData, course: e.target.value})}
+                         />
+                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                            <div>
+                               <FormItem 
+                                 label="Member Photo" icon="solar:upload-bold-duotone" type="file" 
+                                 file={formData.photo}
+                                 onChange={(e: any) => handleFileChange(e, "photo")} 
+                               />
+                               <p className="text-[10px] font-black text-indigo-500 mt-2 italic px-1">* Auto-cropping active</p>
+                            </div>
+                            <FormItem 
+                              label="Member Sign" icon="solar:pen-new-square-bold-duotone" type="file" 
+                              file={formData.signature}
+                              onChange={(e: any) => handleFileChange(e, "signature")} 
+                            />
+                         </div>
+                      </div>
+                      <div className="flex justify-between pt-14 items-center">
+                         <Button 
+                           onClick={() => setStep(3)} 
+                           variant="ghost"
+                           className="font-black text-gray-400 uppercase text-[10px] tracking-[0.2em]"
+                         >
+                            Back to Geo
+                         </Button>
+                         <Button 
+                           onClick={() => setStep(5)} 
+                           variant="primary"
+                           color="#10b981"
+                           icon="solar:eye-bold-duotone"
+                           iconPosition="right"
+                           className="h-16 px-14 rounded-[2rem] shadow-2xl shadow-emerald-100 uppercase tracking-widest text-xs font-black"
+                         >
+                            Review Matrix
+                         </Button>
+                      </div>
+                   </InputCard>
 
-               {/* Step 3: Geography */}
-               <InputCard icon="solar:home-bold-duotone" label="Residential Address" active={step === 3}>
-                  <div className="space-y-8">
-                     <FormItem 
-                        label="House No / Street / Landmark" icon="solar:map-point-bold-duotone" required
-                        type="textarea"
-                        placeholder="Enter your complete home address..."
-                        value={formData.address.detailedAddress}
-                        onChange={(e: any) => setFormData({...formData, address: {...formData.address, detailedAddress: e.target.value}})}
-                     />
-                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                        <FormItem label="Tehsil" icon="solar:city-bold-duotone" value={formData.address.tehsil} onChange={(e: any) => setFormData({...formData, address: {...formData.address, tehsil: e.target.value}})} />
-                        <FormItem label="District" icon="solar:map-bold-duotone" value={formData.address.district} onChange={(e: any) => setFormData({...formData, address: {...formData.address, district: e.target.value}})} />
-                        <FormItem label="State" icon="solar:globus-bold-duotone" value={formData.address.state} onChange={(e: any) => setFormData({...formData, address: {...formData.address, state: e.target.value}})} />
-                        <FormItem label="Zip / Pincode" icon="solar:mailbox-bold-duotone" value={formData.address.pincode} onChange={(e: any) => setFormData({...formData, address: {...formData.address, pincode: e.target.value}})} />
-                     </div>
-                  </div>
-                  <div className="flex justify-between pt-14">
-                     <button type="button" onClick={() => setStep(2)} className="font-black text-gray-400 hover:text-gray-900 transition-all uppercase text-[10px] tracking-[0.2em] flex items-center gap-2 group">
-                        <Icon icon="solar:round-alt-arrow-left-bold-duotone" className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> Address Back
-                     </button>
-                     <button type="button" onClick={() => setStep(4)} className="h-16 px-14 bg-indigo-600 text-white font-black rounded-3xl shadow-2xl shadow-indigo-100 flex items-center gap-3 active:scale-95 transition-all text-sm uppercase tracking-widest">
-                        Verify Documents <Icon icon="solar:round-alt-arrow-right-bold-duotone" className="text-2xl" />
-                     </button>
-                  </div>
-               </InputCard>
-
-               {/* Step 4: Digital Assets */}
-               <InputCard icon="solar:camera-bold-duotone" label="Media Identity" active={step === 4}>
-                  <div className="space-y-8">
-                     <FormItem 
-                        label="Academic Goal / Course" icon="solar:notebook-bold-duotone"
-                        placeholder="Ex: UPSC Preparation, Engineering, etc."
-                        value={formData.course}
-                        onChange={(e: any) => setFormData({...formData, course: e.target.value})}
-                     />
-                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                        <div>
-                           <FormItem 
-                             label="Passport Size Photo" icon="solar:upload-bold-duotone" type="file" 
-                             file={formData.photo}
-                             onChange={(e: any) => handleFileChange(e, "photo")} 
-                           />
-                           <p className="text-[10px] font-bold text-indigo-500 mt-2 italic px-1">* Post-upload cropping will open automatically</p>
-                        </div>
-                        <FormItem 
-                          label="Digital Signature" icon="solar:pen-new-square-bold-duotone" type="file" 
-                          file={formData.signature}
-                          onChange={(e: any) => handleFileChange(e, "signature")} 
-                        />
-                     </div>
-                     
-                     {/* Preview Previews */}
-                     {(formData.photo || formData.signature) && (
-                        <div className="flex gap-4 p-6 bg-gray-50 rounded-3xl border border-gray-100 border-dashed">
-                           {formData.photo && (
-                              <div className="flex flex-col items-center gap-2">
-                                 <div className="w-20 h-24 bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-                                    <img src={URL.createObjectURL(formData.photo)} className="w-full h-full object-cover" />
-                                 </div>
-                                 <span className="text-[8px] font-black uppercase text-gray-400">Cropped Photo</span>
-                              </div>
-                           )}
-                           {formData.signature && (
-                              <div className="flex flex-col items-center gap-2">
-                                 <div className="w-40 h-24 bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm flex items-center justify-center p-2">
-                                    <img src={URL.createObjectURL(formData.signature)} className="max-w-full max-h-full object-contain" />
-                                 </div>
-                                 <span className="text-[8px] font-black uppercase text-gray-400">Signature</span>
-                              </div>
-                           )}
-                        </div>
-                     )}
-                  </div>
-                  <div className="flex justify-between pt-14">
-                     <button type="button" onClick={() => setStep(3)} className="font-black text-gray-400 hover:text-gray-900 transition-all uppercase text-[10px] tracking-[0.2em] flex items-center gap-2 group">
-                        <Icon icon="solar:round-alt-arrow-left-bold-duotone" className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> Media Back
-                     </button>
-                     <button type="button" onClick={() => setStep(5)} className="h-16 px-14 bg-emerald-500 text-white font-black rounded-3xl shadow-2xl shadow-emerald-100 flex items-center gap-3 active:scale-95 transition-all text-sm uppercase tracking-widest">
-                        Review Profile <Icon icon="solar:eye-bold-duotone" className="text-2xl" />
-                     </button>
-                  </div>
-               </InputCard>
-
-               {/* Step 5: Master Review */}
-               <InputCard icon="solar:verified-check-bold-duotone" label="Quality Control" active={step === 5}>
-                  <div className="bg-white rounded-[3rem] border border-gray-100 p-10 shadow-xs grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-10 relative overflow-hidden">
-                     <div className="absolute top-0 right-0 w-32 h-32 bg-gray-50 -mr-16 -mt-16 rounded-full" />
-                     <div className="absolute bottom-0 left-0 w-32 h-32 bg-gray-50 -ml-16 -mb-16 rounded-full opacity-50" />
-
-                     {[
-                        { icon: "solar:user-bold", l: "Full Name", v: formData.name },
-                        { icon: "solar:letter-bold", l: "Email Address", v: formData.email },
-                        { icon: "solar:iphone-bold", l: "Mobile Number", v: formData.number },
-                        { icon: "solar:calendar-bold", l: "Date of Birth", v: formData.dob },
-                        { icon: "solar:card-2-bold", l: "Aadhar Data", v: formData.adharNumber },
-                        { icon: "solar:notebook-bold", l: "Applied Course", v: formData.course || "Open Study" }
-                     ].map((item, i) => (
-                        <div key={i} className="flex gap-4 group/rev items-start">
-                           <div className="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center shrink-0 border border-transparent group-hover/rev:bg-indigo-50 group-hover/rev:text-indigo-600 group-hover/rev:border-indigo-100 transition-all">
-                              <Icon icon={item.icon} className="text-lg" />
-                           </div>
-                           <div className="flex flex-col gap-1">
-                              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 leading-none">{item.l}</p>
-                              <p className="font-black text-gray-900 tracking-tight text-base truncate max-w-[180px]">{item.v || "---"}</p>
-                           </div>
-                        </div>
-                     ))}
-                     <div className="sm:col-span-2 pt-8 border-t border-gray-100 relative z-10">
-                        <div className="flex items-center gap-2 mb-3">
-                           <Icon icon="solar:map-point-bold-duotone" className="text-indigo-500 text-lg" />
-                           <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Verified Address</p>
-                        </div>
-                        <p className="font-semibold text-gray-500 italic leading-relaxed text-sm">
-                           {formData.address.detailedAddress}, {formData.address.tehsil}, {formData.address.district}, {formData.address.state} - {formData.address.pincode}
-                        </p>
-                     </div>
-                  </div>
-                  <div className="flex justify-between pt-16 items-center flex-col sm:flex-row gap-8">
-                     <button type="button" onClick={() => setStep(4)} className="font-black text-gray-400 hover:text-gray-900 transition-all uppercase text-[10px] tracking-[0.2em] flex items-center gap-2 group order-2 sm:order-1">
-                        <Icon icon="solar:round-alt-arrow-left-bold-duotone" className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> Re-Check Media
-                     </button>
-                     <button type="submit" className="w-full sm:w-auto h-20 px-20 bg-indigo-600 text-white font-black rounded-3xl shadow-2xl shadow-indigo-200 flex items-center justify-center gap-4 active:scale-95 transition-all text-sm uppercase tracking-[0.1em] order-1 sm:order-2">
-                        Initialize ID
-                        <Icon icon="solar:magic-stick-3-bold-duotone" className="text-3xl animate-pulse" />
-                     </button>
-                  </div>
-               </InputCard>
-            </form>
-         </div>
+                   {/* Step 5: Master Review */}
+                   <InputCard 
+                      active={step === 5} 
+                      stepNumber="05" 
+                      title="Master Review" 
+                      sub="Quality control check"
+                      color="bg-indigo-600 text-white"
+                   >
+                      <div className="bg-gray-50 rounded-[2rem] border border-gray-100 p-8 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-8 relative overflow-hidden italic font-medium">
+                         {[
+                            { icon: "solar:user-bold", l: "Full Name", v: formData.name },
+                            { icon: "solar:letter-bold", l: "Registry Email", v: formData.email },
+                            { icon: "solar:iphone-bold", l: "Active Mobile", v: formData.number },
+                            { icon: "solar:card-2-bold", l: "Aadhar ID", v: formData.adharNumber },
+                         ].map((item, i) => (
+                            <div key={i} className="flex flex-col gap-1">
+                               <div className="flex items-center gap-2 mb-1">
+                                  <Icon icon={item.icon} className="text-gray-400 text-sm" />
+                                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 leading-none">{item.l}</p>
+                               </div>
+                               <p className="font-black text-gray-900 tracking-tight text-sm truncate uppercase">{item.v || "---"}</p>
+                            </div>
+                         ))}
+                      </div>
+                      <div className="flex justify-between pt-14 items-center flex-col sm:flex-row gap-8">
+                         <Button 
+                           onClick={() => setStep(4)} 
+                           variant="ghost"
+                           className="font-black text-gray-400 hover:text-gray-900 uppercase text-[10px] tracking-[0.2em] order-2 sm:order-1"
+                         >
+                            Back to Media
+                         </Button>
+                         <Button 
+                           type="submit" 
+                           variant="primary"
+                           icon="solar:verified-check-bold-duotone"
+                           iconPosition="right"
+                           className="w-full sm:w-auto h-20 px-20 rounded-[2.5rem] shadow-2xl shadow-indigo-200 uppercase tracking-[0.15em] text-xs font-black order-1 sm:order-2"
+                         >
+                            Submit Registry
+                         </Button>
+                      </div>
+                   </InputCard>
+                </form>
+              </div>
+           </div>
+        </div>
       </div>
     </div>
   );
