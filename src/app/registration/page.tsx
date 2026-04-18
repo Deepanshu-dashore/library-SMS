@@ -88,6 +88,7 @@ export default function RegisterPage() {
   const [submitted, setSubmitted] = useState(false);
   const [registeredId, setRegisteredId] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [declared, setDeclared] = useState(false);
   
   // Status Modal States
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -436,6 +437,19 @@ export default function RegisterPage() {
                                         <UploadZone preview={previews.signature} disabled field="signature" />
                                      </div>
                                 </div>
+                                <div className="md:col-span-2 mt-8">
+                                     <label className={`flex items-start gap-4 p-5 rounded-2x border transition-all cursor-pointer ${declared ? 'bg-green-50 border-green-100 shadow-sm' : 'bg-slate-50 border-slate-100 hover:bg-slate-100/50'}`}>
+                                         <input 
+                                             type="checkbox" 
+                                             checked={declared}
+                                             onChange={(e) => setDeclared(e.target.checked)}
+                                             className="w-5 h-5 mt-0.5 rounded border-slate-300 text-[#98c156] focus:ring-[#98c156] accent-[#98c156]"
+                                         />
+                                         <span className={`text-[13px] font-bold leading-relaxed ${declared ? 'text-green-700' : 'text-slate-500'}`}>
+                                            I hereby declare that I have taken admission in Shri Sanwariya Library and I will pay the monthly fees on time. I will follow all the rules and regulations of the library.
+                                         </span>
+                                     </label>
+                                </div>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -452,8 +466,8 @@ export default function RegisterPage() {
                         <button
                             type={step === 4 ? "submit" : "button"}
                             onClick={step === 4 ? undefined : handleNext}
-                            className={`btn-next ${isRegistering ? 'opacity-70 cursor-not-allowed' : ''}`}
-                            disabled={isRegistering}
+                            className={`btn-next ${(isRegistering || (step === 4 && !declared)) ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            disabled={isRegistering || (step === 4 && !declared)}
                         >
                             {isRegistering ? (
                                 <>
