@@ -17,6 +17,7 @@ interface User {
   number: string;
   category: string;
   status: string;
+  isVerified?: boolean;
   course?: string;
   photo?: string;
   signature?: string;
@@ -86,6 +87,21 @@ export default function UserManagement() {
     }
   };
 
+  const handleVerify = async (user: User) => {
+    const loadingToast = toast.loading(`Verifying ${user.name}...`);
+    try {
+      const { data } = await axios.patch(`/api/user/verify/${user._id}`);
+      if (data.success) {
+        toast.success("User verified successfully", { id: loadingToast });
+        fetchUsers();
+      } else {
+        toast.error(data.message || "Verification failed", { id: loadingToast });
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Something went wrong", { id: loadingToast });
+    }
+  };
+
   const columns: ColumnDef<User>[] = [
     {
       key: "name",
@@ -117,8 +133,6 @@ export default function UserManagement() {
       key: "status",
       label: "Status",
       type: "status",
-      getStatus: (row) => row.status,
-      sortable: true
     }
   ];
 
@@ -206,6 +220,14 @@ export default function UserManagement() {
           onView={(user) => router.push(`/users/${user._id}`)}
           onEdit={(user) => router.push(`/users/${user._id}/edit`)}
           onDelete={handleDelete}
+          additionalActions={[
+            {
+              label: "Verify Member",
+              icon: UserCheck,
+              disabled: (user) => !!(user.isVerified || user.status === "Active"),
+              onClick: (user) => handleVerify(user)
+            }
+          ]}
         />
       </div>
     </div>

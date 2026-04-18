@@ -463,9 +463,6 @@ export default function BankingPage() {
                    <div className="flex flex-col gap-0.5">
                       <div className="flex items-center gap-2">
                         <h2 className="text-lg font-bold text-gray-900 tracking-tight">Balance Statistics</h2>
-                        <span className="text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full transition-transform hover:scale-105 cursor-default">
-                          (+43%) than last year
-                        </span>
                       </div>
                       <p className="text-xs font-medium text-gray-400">Statistics on balance over time</p>
                    </div>

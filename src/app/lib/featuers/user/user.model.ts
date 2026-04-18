@@ -48,8 +48,12 @@ const userSchema = new Schema(
     notes: { type: String },
     status: {
       type: String,
-      enum: ["Active", "Inactive", "Unverify"],
+      enum: ["Active", "Inactive", "Unverify", "Verified"],
       default: "Unverify",
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
     },
     isDeleted: {
       type: Boolean,

@@ -85,6 +85,33 @@ export class UserController {
     }
   }
 
+  static async verifyUser(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const admin: any = await verifyJWT();
+    if (!admin) {
+      return ApiResponse(401, null, "Unauthorized");
+    }
+
+    const { id } = await params;
+    const userData = await UserService.getUserByIdService(id);
+    
+    if (!userData) {
+      return ApiResponse(404, null, "User not found");
+    }
+
+    if (userData.user?.isVerified) {
+      return ApiResponse(400, null, "User is already verified");
+    }
+
+    try {
+      const userUpdated = await UserService.updateUserService(id, {
+        status: "Active",
+        isVerified: true,
+      });
+      return ApiResponse(200, userUpdated, "User verified successfully");
+    } catch (error: any) {
+      return ApiResponse(500, null, error.message || error);
+    }
+  }
   static async getVerificationAndSeat(
     req: NextRequest,
     params: Promise<{ id: string }>,

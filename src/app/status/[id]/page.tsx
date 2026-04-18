@@ -3,22 +3,51 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { 
-  CheckCircle2, 
-  XCircle, 
-  Clock, 
-  Armchair, 
-  User, 
-  Mail, 
-  Phone, 
-  ArrowLeft,
-  Copy,
-  ExternalLink,
+  Check,
   ShieldCheck,
-  MapPin
+  Armchair,
+  Rocket,
+  Info
 } from "lucide-react";
-import toast from "react-hot-toast";
-import Link from "next/link";
-import { Button } from "@/components/shared/Button";
+import { motion } from "framer-motion";
+
+// --- Sub-components ---
+
+const ProgressStep = ({ completed, current, label, id }: { completed: boolean; current?: boolean; label: string; id: number }) => (
+  <div className="flex flex-col items-center flex-1 relative">
+    <div 
+        className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-500 z-10
+            ${completed ? 'bg-[#98c156] text-white shadow-lg shadow-[#98c156]/20' : 'bg-white text-gray-200'}
+            ${current ? 'ring-4 ring-[#98c156]/20 border-2 border-[#98c156]' : ''}
+        `}
+    >
+      <Check size={18} className={completed ? "scale-100" : "scale-0 transition-transform"} />
+    </div>
+    <span className={`mt-2 text-[9px] md:text-[10px] font-bold tracking-tight ${completed || current ? 'text-slate-800' : 'text-slate-400'}`}>
+        {label}
+    </span>
+    {id < 5 && (
+        <div className="absolute top-4 md:top-5 left-[60%] w-[80%] h-[2px] bg-slate-50 -z-0">
+            <div 
+                className={`h-full bg-[#98c156] transition-all duration-1000`} 
+                style={{ width: completed ? '100%' : '0%' }}
+            />
+        </div>
+    )}
+  </div>
+);
+
+const DetailItem = ({ icon, title, description, colorClass }: any) => (
+    <div className="flex gap-4 mb-6">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-white shadow-md ${colorClass}`}>
+            {React.cloneElement(icon as any, { size: 20 })}
+        </div>
+        <div className="flex flex-col gap-0.5">
+            <h3 className="text-base font-bold text-slate-800 leading-tight">{title}</h3>
+            <p className="text-[13px] text-slate-500 font-medium leading-normal max-w-sm">{description}</p>
+        </div>
+    </div>
+);
 
 export default function StatusCheckPage() {
   const params = useParams();
@@ -37,14 +66,13 @@ export default function StatusCheckPage() {
     }
 
     try {
-      // We use the cheak-status endpoint with query param or slug
       const res = await fetch(`/api/user/cheak-status/${id}`);
       const result = await res.json();
       
       if (result.success) {
         setData(result.data);
       } else {
-        setError(result.message || "User not found or error fetching status.");
+        setError(result.message || "Member not found.");
       }
     } catch (err) {
       setError("Failed to connect to server.");
@@ -57,18 +85,12 @@ export default function StatusCheckPage() {
     fetchStatus();
   }, [id]);
 
-  const copyStatusLink = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url);
-    toast.success("Status link copied!");
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#f1f5f9] flex items-center justify-center p-6 font-public-sans">
         <div className="flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
-          <p className="mt-4 text-gray-500 font-medium">Checking your status...</p>
+          <div className="w-12 h-12 border-[5px] border-white border-t-[#98c156] rounded-full animate-spin"></div>
+          <p className="mt-4 text-slate-400 font-bold uppercase tracking-widest text-[10px]">Verifying...</p>
         </div>
       </div>
     );
@@ -76,155 +98,106 @@ export default function StatusCheckPage() {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white rounded-3xl p-8 shadow-xl text-center">
-          <XCircle className="w-16 h-16 text-red-500 mx-auto mb-6" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Notice</h1>
-          <p className="text-gray-500 mb-8">{error || "Could not find student data."}</p>
-          <div className="flex flex-col gap-3">
-            <Link 
-              href="/register" 
-              className="w-full bg-indigo-600 text-white font-bold py-3 rounded-2xl hover:bg-indigo-700 transition-all"
-            >
-              New Registration
-            </Link>
-            <Link href="/" className="text-gray-400 font-bold py-2">Back to Home</Link>
-          </div>
-        </div>
+      <div className="min-h-screen bg-[#f1f5f9] flex items-center justify-center p-6 font-public-sans">
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md w-full bg-white rounded-[32px] p-10 shadow-xl text-center">
+          <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6 font-black text-3xl">!</div>
+          <h1 className="text-xl font-black text-slate-900 mb-2">Notice</h1>
+          <p className="text-slate-500 mb-8 font-medium text-sm">{error || "The requested record could not be found."}</p>
+          <button onClick={() => window.location.href = '/'} className="text-[#98c156] text-sm font-bold">Return Home</button>
+        </motion.div>
       </div>
     );
   }
 
   const { user, seat } = data;
+  
+  const steps = [
+    { label: "Submitted", completed: true },
+    { label: "In Review", completed: user.status !== "Pending" },
+    { label: "Verified", completed: user.status === "Active" },
+    { label: "Allocated", completed: !!seat },
+    { label: "All Set", completed: user.status === "Active" && !!seat },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50/50 p-6 md:p-12 lg:p-24 selection:bg-indigo-100 selection:text-indigo-900">
-      <div className="max-w-3xl mx-auto">
-        <div className="flex items-center justify-between mb-12">
-          <Link href="/" className="flex items-center gap-2 text-gray-500 hover:text-indigo-600 transition-colors font-bold group">
-            <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" /> Back
-          </Link>
-          <Button 
-            variant="outline"
-            onClick={copyStatusLink}
-            className="flex items-center gap-2 text-indigo-600 border border-indigo-100 bg-indigo-50/50 hover:bg-indigo-50 px-4 py-2 rounded-xl"
-          >
-            <Copy size={16} /> Share Link
-          </Button>
-        </div>
-
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
-          {/* Main Status Hero */}
-          <div className="bg-white rounded-[32px] p-8 md:p-12 shadow-sm border border-gray-100 overflow-hidden relative">
-            <div className="absolute top-0 right-0 p-8">
-              <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center text-3xl font-black text-indigo-200">
-                {user.name.charAt(0)}
-              </div>
+    <div className="min-h-screen bg-[#f1f5f9] py-8 px-6 flex flex-col items-center justify-center font-public-sans">
+      <div className="w-full max-w-xl">
+        
+        {/* Main Card */}
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-[32px] overflow-hidden shadow-xl shadow-slate-200/40 border border-white"
+        >
+            {/* Header / Stepper Section */}
+            <div className="bg-slate-50/50 p-8 md:p-10 border-b border-slate-100">
+                <h1 className="text-2xl font-black text-slate-900 mb-8 tracking-tight text-center">Registration Status</h1>
+                
+                <div className="flex justify-between items-start">
+                    {steps.map((s, idx) => (
+                        <ProgressStep key={idx} id={idx + 1} label={s.label} completed={s.completed} current={steps.findIndex(st => !st.completed) === idx} />
+                    ))}
+                </div>
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">{user.name}</h1>
-            <p className="text-indigo-600 font-bold inline-flex items-center gap-1">
-              Member ID: <span className="tracking-widest uppercase opacity-60 ml-1">{id?.slice(-8) || "N/A"}</span>
-            </p>
-
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Verification Card */}
-              <div className={`p-6 rounded-3xl border-2 transition-all ${
-                user.status === "Active" 
-                  ? "bg-green-50 border-green-100 ring-4 ring-green-50/50" 
-                  : user.status === "Inactive"
-                  ? "bg-red-50 border-red-100"
-                  : "bg-amber-50 border-amber-100"
-              }`}>
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    user.status === "Active" ? "bg-green-500 text-white" : "bg-white text-gray-400"
-                  }`}>
-                    {user.status === "Active" ? <ShieldCheck size={20} /> : <Clock size={20} />}
-                  </div>
-                  <span className={`text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full ${
-                    user.status === "Active" ? "bg-green-200 text-green-700" : "bg-amber-200 text-amber-700"
-                  }`}>
-                    {user.status}
-                  </span>
+            {/* Content / Details Section */}
+            <div className="bg-white p-8 md:p-10">
+                <div className="flex flex-col items-start gap-1 mb-10 text-center w-full">
+                   <h2 className="text-xl font-black text-slate-900 tracking-tight w-full">Welcome, <span className="text-[#98c156]">{user.name}</span>!</h2>
+                   <p className="text-slate-400 font-medium text-xs w-full text-center">
+                      Current overview of your membership verification status.
+                   </p>
                 </div>
-                <h3 className="text-lg font-black text-gray-900 mb-1">Verification Status</h3>
-                <p className="text-gray-500 text-sm">
-                  {user.status === "Active" 
-                    ? "Verified for all digital and offline library services." 
-                    : "Your profile is under verification by admission desk."}
-                </p>
-              </div>
 
-              {/* Seat Allocation Card */}
-              <div className={`p-6 rounded-3xl border-2 transition-all ${
-                seat 
-                  ? "bg-indigo-50 border-indigo-100 ring-4 ring-indigo-50/50" 
-                  : "bg-gray-50 border-gray-100 opacity-60"
-              }`}>
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    seat ? "bg-indigo-600 text-white shadow-lg" : "bg-white text-gray-300"
-                  }`}>
-                    <Armchair size={20} />
-                  </div>
-                  <span className={`text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full ${
-                    seat ? "bg-indigo-200 text-indigo-700" : "bg-gray-200 text-gray-400"
-                  }`}>
-                    {seat ? "Allocated" : "N/A"}
-                  </span>
+                <div className="space-y-1">
+                    <DetailItem 
+                        icon={<ShieldCheck />}
+                        title="Verification Milestone"
+                        colorClass="bg-[#fb923c]"
+                        description={
+                            user.status === "Active" 
+                            ? "Your ID has been successfully verified by our team."
+                            : "Your biometric verification is currently being processed."
+                        }
+                    />
+
+                    <DetailItem 
+                        icon={<Armchair />}
+                        title="Seat Selection Status"
+                        colorClass="bg-[#ef4444]"
+                        description={
+                            seat 
+                            ? `Seat ${seat.seatNumber} in Room ${seat.roomNumber || 'A'}. Ready to use!`
+                            : "Seat allocation is pending final biometric verification."
+                        }
+                    />
+
+                    <DetailItem 
+                        icon={<Rocket />}
+                        title="Next Steps"
+                        colorClass="bg-indigo-500"
+                        description="If pending, visit the entrance with your physical Aadhar card."
+                    />
                 </div>
-                <h3 className="text-lg font-black text-gray-900 mb-1">Seat Allocation</h3>
-                <p className="text-gray-500 text-sm">
-                  {seat 
-                    ? `You have been allocated Seat No. ${seat.seatNumber} in Room ${seat.roomNumber || 'A'}.` 
-                    : "Seat allocation will be processed after verification."}
-                </p>
-              </div>
+
+                {/* Important Notice Footer */}
+                <div className="mt-10 pt-8 border-t border-slate-50">
+                    <div className="bg-slate-50 rounded-xl p-5 flex items-start gap-3 border border-slate-100">
+                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-slate-400 shrink-0 shadow-sm border border-slate-100">
+                            <Info size={16} />
+                        </div>
+                        <p className="text-[12px] text-slate-600 font-semibold leading-relaxed">
+                            If your application is pending for more than <span className="text-red-500 font-bold">7 days</span>, please connect with the library administration directly.
+                        </p>
+                    </div>
+                </div>
             </div>
-          </div>
+        </motion.div>
 
-          {/* Quick Info Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-             <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4">
-                <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-indigo-600">
-                  <Mail size={20} />
-                </div>
-                <div>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Email Address</p>
-                  <p className="text-gray-900 font-bold">{user.email}</p>
-                </div>
-             </div>
-             <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4">
-                <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-indigo-600">
-                  <Phone size={20} />
-                </div>
-                <div>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Phone Number</p>
-                  <p className="text-gray-900 font-bold">{user.phone}</p>
-                </div>
-             </div>
-          </div>
-
-          {/* Next Steps for Inactive/Pending */}
-          {user.status !== "Active" && (
-             <div className="bg-amber-600 rounded-3xl p-8 text-white shadow-xl shadow-amber-100 overflow-hidden relative">
-                <div className="relative z-10">
-                  <h3 className="text-xl font-black mb-2">Requirement: Final Verification</h3>
-                  <p className="opacity-90 max-w-lg mb-6">
-                    Please visit the library entrance desk with your Aadhar Card and a physical copy of your registration for the final biometric verification.
-                  </p>
-                  <Link 
-                    href="/contact" 
-                    className="inline-flex items-center gap-2 bg-white text-amber-700 px-6 py-2.5 rounded-xl font-black hover:bg-amber-50 transition-all"
-                  >
-                    View Desk Location <ExternalLink size={16} />
-                  </Link>
-                </div>
-                <Clock size={120} className="absolute -right-10 -bottom-10 opacity-20 rotate-12" />
-             </div>
-          )}
-        </div>
+        {/* Branding Footer */}
+        <p className="mt-8 text-center text-slate-300 font-bold text-[9px] uppercase tracking-[0.2em]">
+            Library SMS Portal
+        </p>
       </div>
     </div>
   );
