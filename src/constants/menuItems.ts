@@ -35,6 +35,7 @@ export const MENU_ITEMS = [
     icon: "solar:ticket-bold-duotone",
     subItems: [
       { name: "Manage Subscriptions", path: "/subscriptions" },
+      { name: "Seat Calendar", path: "/seat-calendar" },
       { name: "Add Subscription", path: "/subscriptions/add" },
     ],
   },

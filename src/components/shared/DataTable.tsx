@@ -437,7 +437,7 @@ export function DataTable<T>({
                                      }
                                   })()}
                                   <div className="flex flex-col text-left">
-                                     <span className="font-semibold text-gray-900">{col.getTitle?.(row)}</span>
+                                     <span className="font-semibold text-gray-900 capitalize">{col.getTitle?.(row)}</span>
                                      <span className="text-[13px] text-gray-500 font-medium tracking-tight">{col.getSubtitle?.(row)}</span>
                                   </div>
                                </div>

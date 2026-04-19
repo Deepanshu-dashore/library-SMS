@@ -33,7 +33,9 @@ export class SubscriptionService {
       }).session(session);
 
       if (userConflict) {
-        throw new Error(`Member already has an active subscription until ${userConflict.endDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`);
+        throw new Error(
+          `Member already has an active subscription until ${userConflict.endDate.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}`,
+        );
       }
 
       const conflict = await Subscription.findOne({
@@ -282,14 +284,36 @@ export class SubscriptionService {
     return { subscription, payment };
   }
 
+  static async seatCalender(month: number, year: number) {
+    await connectDB();
+    const start = new Date(year, month, 1);
+    const end = new Date(year, month + 1, 0);
+    const seatCalender = await Subscription.find({
+      status: { $in: ["active", "expired"] },
+      startDate: { $lte: end },
+      endDate: { $gte: start },
+    })
+      .populate("seatId", "seatNumber")
+      .populate("userId", "name")
+      .lean();
+    const events = seatCalender.map((sub) => ({
+      title: `Seat ${sub.seatId.seatNumber}`,
+      start: sub.startDate,
+      end: sub.endDate,
+      user: sub.userId.name,
+      status: sub.status,
+    }));
+    return events;
+  }
+
   static async getAllSubscription(filterQuery?: any) {
     await connectDB();
     const today = new Date();
-    
+
     // Base stats calculation
-    const totalActive = await Subscription.countDocuments({ 
-      status: "active", 
-      endDate: { $gte: today } 
+    const totalActive = await Subscription.countDocuments({
+      status: "active",
+      endDate: { $gte: today },
     });
     const totalExpired = await Subscription.countDocuments({
       status: "active",

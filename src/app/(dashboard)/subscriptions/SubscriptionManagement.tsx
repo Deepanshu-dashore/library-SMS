@@ -19,6 +19,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, ColumnDef, TabDef, ActionDef } from "@/components/shared/DataTable";
 import { Button } from "@/components/shared/Button";
 import { StatsCard } from "@/components/shared/StatsCard";
+import SeatCalendar from "./SeatCalendar";
 
 interface Subscription {
   _id: string;

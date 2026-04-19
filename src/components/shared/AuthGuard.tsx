@@ -16,8 +16,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       try {
         const response = await fetch("/api/auth/verify");
         const data = await response.json();
-
-        if (!response.ok || !data.success) {
+        if (!response.ok || !data.success||response.status===404||response.status===401) {
           // If the token is missing or invalid, redirect to login
           if (pathname !== "/login") {
             router.push("/login");

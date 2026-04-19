@@ -219,8 +219,13 @@ export default function RegisterPage() {
     e.preventDefault();
     if (step !== 4 || isRegistering) return;
 
+    if (!declared) {
+      toast.error("Please accept the declaration to proceed.");
+      return;
+    }
+
     setIsRegistering(true);
-    const loadingToast = toast.loading("Processing your membership...");
+    const loadingToast = toast.loading("Processing your membership and uploading documents...");
 
     try {
       const formDataToSend = new FormData();
@@ -241,14 +246,24 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (data.success) {
-        toast.success("Welcome aboard!", { id: loadingToast });
+        toast.success(`Welcome to the library, ${formData.name}! Registration successful.`, { id: loadingToast, duration: 5000 });
         setRegisteredId(data.data._id);
         setSubmitted(true);
       } else {
-        toast.error(data.message || "Registration failed", { id: loadingToast });
+        let errorMessage = data.message || "Registration failed. Please try again.";
+        
+        // Handle Mongoose duplicate key error specifically
+        if (errorMessage.includes("E11000") && errorMessage.includes("email")) {
+          errorMessage = "This email address is already registered. Please use a different email.";
+        } else if (errorMessage.includes("E11000")) {
+          errorMessage = "A record with these details already exists.";
+        }
+        
+        toast.error(errorMessage, { id: loadingToast, duration: 6000 });
       }
-    } catch (error) {
-      toast.error("Connection error. Try again.", { id: loadingToast });
+    } catch (error: any) {
+      console.error("Registration Error:", error);
+      toast.error("Connection error. Please check your internet and try again.", { id: loadingToast });
     } finally {
         setIsRegistering(false);
     }

@@ -34,20 +34,43 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
     setLoading(true);
+    const loadingToast = toast.loading("Authenticating...");
 
     try {
       const response = await proxy("/api/auth/login", "POST", { email, password });
       
       if (response.success) {
-        toast.success("Login Successful!");
+        toast.success("Welcome back! Login successful.", { id: loadingToast });
         router.push("/");
       } else {
-        toast.error(response.message || "Invalid credentials");
+        // This part might not be reached if proxy throws on !ok
+        toast.error(response.message || "Invalid credentials", { id: loadingToast });
       }
     } catch (err: any) {
-      console.log(err);
-      toast.error(err.message || "Something went wrong.");
+      console.log("Login Error:", err);
+      
+      let errorMessage = "An unexpected error occurred. Please try again.";
+      
+      if (err.message) {
+        if (err.message.includes("Library not found")) {
+          errorMessage = "No account found with this email address.";
+        } else if (err.message.includes("Invalid password")) {
+          errorMessage = "Incorrect password. Please check and try again.";
+        } else if (err.message.includes("All fields are required")) {
+          errorMessage = "Please enter both email and password.";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
+      toast.error(errorMessage, { id: loadingToast });
     } finally {
       setLoading(false);
     }

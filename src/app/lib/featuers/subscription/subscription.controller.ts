@@ -11,7 +11,9 @@ export class SubscriptionController {
     try {
       const { searchParams } = new URL(req.url);
       const status = searchParams.get("status");
-      const subscriptions = await SubscriptionService.getAllSubscription({ status });
+      const subscriptions = await SubscriptionService.getAllSubscription({
+        status,
+      });
       return ApiResponse(
         200,
         subscriptions,
@@ -21,6 +23,30 @@ export class SubscriptionController {
       return ApiResponse(500, null, "Failed to fetch subscriptions");
     }
   }
+
+  static async getSeatCalender(req: Request) {
+    const library = await verifyJWT();
+    if (!library) {
+      return ApiResponse(401, null, "Unauthorized");
+    }
+    const { searchParams } = new URL(req.url);
+    const month = searchParams.get("month");
+    const year = searchParams.get("year");
+    try {
+      const seatCalender = await SubscriptionService.seatCalender(
+        Number(month),
+        Number(year),
+      );
+      return ApiResponse(
+        200,
+        seatCalender,
+        "Seat calender fetched successfully",
+      );
+    } catch (error) {
+      return ApiResponse(500, null, "Failed to fetch seat calender");
+    }
+  }
+
   static async getSubscription(params: Promise<{ id: string }>) {
     const library = await verifyJWT();
     if (!library) {
@@ -59,7 +85,11 @@ export class SubscriptionController {
         "Subscription created successfully",
       );
     } catch (error: any) {
-      return ApiResponse(400, null, error.message || "Failed to create subscription");
+      return ApiResponse(
+        400,
+        null,
+        error.message || "Failed to create subscription",
+      );
     }
   }
   static async transferSubscription(req: Request) {
