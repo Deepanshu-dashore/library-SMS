@@ -10,10 +10,10 @@ export async function GET(req: Request) {
       return ApiResponse(401, null, "Unauthorized request");
     }
     const user = await Library.findById(library.id)
-      .select("name email logo")
+      .select("name email logo signature address phone helpdesk")
       .lean();
     if (!user) {
-      return ApiResponse(404, null, "User not found");
+      return ApiResponse(401, null, "Unauthorized request no user found");
     }
     return ApiResponse(
       200,

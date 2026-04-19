@@ -3,7 +3,7 @@ import React from "react";
 
 interface StatusBadgeProps {
   status: string;
-  size?: "xs" | "sm" | "md" | "lg";
+  size?: "xxs" | "xs" | "sm" | "md" | "lg";
   className?: string;
 }
 
@@ -15,6 +15,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   const style = getStatusStyle(status);
   
   const sizeClasses = {
+    xxs: "px-1.5 py-0 text-[8px]",
     xs: "px-2 py-0.5 text-[10px]",
     sm: "px-2.5 py-1 text-xs",
     md: "px-3 py-1.5 text-sm",
