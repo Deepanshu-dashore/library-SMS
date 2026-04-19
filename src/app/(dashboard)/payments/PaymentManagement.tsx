@@ -15,6 +15,7 @@ import {
 import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { SimpleLoader } from "@/components/shared/SimpleLoader";
 import { DataTable, ColumnDef, TabDef } from "@/components/shared/DataTable";
 
 const CircularProgress = ({ value, icon, color1, color2, id }: { value: number; icon: string; color1: string; color2: string; id: string }) => {
@@ -166,6 +167,8 @@ export default function PaymentManagement() {
   ];
 
   const filteredData = payments;
+
+  if (loading && payments.length === 0) return <SimpleLoader text="Loading Payments" />;
 
   return (
     <div className="bg-gray-50/50 min-h-screen">

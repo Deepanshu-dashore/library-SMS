@@ -1,37 +1,52 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Trash2, RotateCcw, Users, Square } from "lucide-react";
+import { Trash2, RotateCcw } from "lucide-react";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { DataTable, ColumnDef, TabDef } from "@/components/shared/DataTable";
+import { DataTable, ColumnDef, TabDef, ActionDef } from "@/components/shared/DataTable";
 import { Button } from "@/components/shared/Button";
+import { SimpleLoader } from "@/components/shared/SimpleLoader";
+import { Icon } from "@iconify/react";
 
 export default function TrashPage() {
   const [activeTab, setActiveTab] = useState("members");
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [stats, setStats] = useState({ members: 0, seats: 0 });
 
-  const fetchTrash = async () => {
+  const fetchTrash = async (tab = activeTab) => {
     setLoading(true);
     try {
-      const endpoint = activeTab === "members" ? "/api/user/trash" : "/api/seat/trash";
-      const res = await fetch(endpoint);
-      const result = await res.json();
-      if (result.success) {
-        setData(activeTab === "members" ? result.data.users : result.data);
-      } else {
-        toast.error(result.message || "Failed to fetch trash");
-      }
+      // Fetch both for counts
+      const [userRes, seatRes] = await Promise.all([
+        fetch("/api/user/trash"),
+        fetch("/api/seat/trash")
+      ]);
+      
+      const userResult = await userRes.json();
+      const seatResult = await seatRes.json();
+      
+      const users = userResult.success ? userResult.data.users : [];
+      const seats = seatResult.success ? seatResult.data : [];
+      
+      setStats({
+        members: users.length,
+        seats: seats.length
+      });
+
+      setData(tab === "members" ? users : seats);
     } catch (error) {
       toast.error("Error fetching trash items");
     } finally {
       setLoading(false);
+      setIsInitialLoad(false);
     }
   };
 
   useEffect(() => {
-    fetchTrash();
+    fetchTrash(activeTab);
   }, [activeTab]);
 
   const handleRestore = async (item: any) => {
@@ -79,75 +94,93 @@ export default function TrashPage() {
   };
 
   const memberColumns: ColumnDef<any>[] = [
-    { key: "name", label: "Name", type: "text", sortable: true },
-    { key: "email", label: "Email", type: "text" },
+    {
+      key: "name",
+      label: "Member",
+      type: "user",
+      getTitle: (row) => row.name,
+      getSubtitle: (row) => row.email || "No email",
+      getAvatar: (row) => row.photo || row.name.charAt(0),
+      sortable: true
+    },
     { key: "number", label: "Contact", type: "text" },
     { 
         key: "updatedAt", 
         label: "Deleted At", 
-        type: "custom", 
-        render: (row) => new Date(row.updatedAt).toLocaleDateString() 
+        type: "date",
+        getDate: (row) => row.updatedAt,
+        sortable: true 
     },
+    {
+      key: "status",
+      label: "Last Status",
+      type: "status",
+      getStatus: (row) => row.status,
+    }
   ];
 
   const seatColumns: ColumnDef<any>[] = [
-    { key: "seatNumber", label: "Seat Number", type: "text", sortable: true },
+    {
+      key: "seatNumber",
+      label: "Seat Info",
+      type: "custom",
+      render: (row) => (
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-700 font-bold font-barlow">
+            {row.seatNumber}
+          </div>
+          <div className="flex flex-col">
+            <span className="font-semibold text-gray-900">Seat {row.seatNumber}</span>
+            <span className="text-xs text-gray-500 font-medium">{row.floor || "General"}</span>
+          </div>
+        </div>
+      ),
+      sortable: true
+    },
     { key: "type", label: "Type", type: "status", getStatus: (row) => row.type },
-    { key: "floor", label: "Floor", type: "text" },
     { 
         key: "updatedAt", 
         label: "Deleted At", 
-        type: "custom", 
-        render: (row) => new Date(row.updatedAt).toLocaleDateString() 
+        type: "date",
+        getDate: (row) => row.updatedAt,
+        sortable: true 
     },
   ];
 
-  const tabs = [
-    { label: "Members", value: "members", icon: <Users size={16} /> },
-    { label: "Seats", value: "seats", icon: <Square size={16} /> },
+  const tabs: TabDef[] = [
+    { label: "Members", value: "members", count: stats.members, color: "info" },
+    { label: "Seats", value: "seats", count: stats.seats, color: "warning" },
   ];
 
-  const additionalActions = [
+  const additionalActions: ActionDef<any>[] = [
     {
-      label: "Restore",
+      label: "Restore Item",
       icon: RotateCcw,
       onClick: (item: any) => handleRestore(item),
     }
   ];
 
+  if (isInitialLoad) return <SimpleLoader text="Cleaning up trash" />;
+
   return (
-    <div className="bg-gray-50/50 min-h-screen">
-      <div className="max-w-[1240px] mx-auto p-4 md:p-8">
+    <div className="min-h-screen">
+      <div className="max-w-6xl">
         <PageHeader 
           title="Recycle Bin" 
-          breadcrumbs={[{ label: "Dashboard", href: "/" }, { label: "Trash" }]}
+          breadcrumbs={[{ label: "Dashboard", href: "/" }, { label: "Recycle Bin" }]}
         />
-
-        <div className="mb-6 flex gap-2">
-            {tabs.map(tab => (
-                <Button
-                    key={tab.value}
-                    variant={activeTab === tab.value ? "primary" : "secondary"}
-                    onClick={() => setActiveTab(tab.value)}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black transition-all shadow-sm ${
-                        activeTab === tab.value 
-                        ? "bg-gray-900 text-white" 
-                        : "bg-white text-gray-400 hover:text-gray-900 border border-gray-100"
-                    }`}
-                >
-                    {tab.icon}
-                    {tab.label}
-                </Button>
-            ))}
-        </div>
 
         <DataTable 
           data={data}
           columns={activeTab === "members" ? memberColumns : seatColumns}
           loading={loading}
           rowKey={(row) => row._id}
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={(val) => setActiveTab(val)}
           hiddenActions={["view", "edit"]}
           onDelete={handleDelete}
+          searchPlaceholder={`Search by ${activeTab === "members" ? "member name" : "seat number"}...`}
           additionalActions={additionalActions}
         />
       </div>

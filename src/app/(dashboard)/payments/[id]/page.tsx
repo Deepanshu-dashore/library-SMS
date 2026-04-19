@@ -111,19 +111,34 @@ export default function ViewPaymentPage() {
         doc.addImage(bgData, 'PNG', 0, 0, pageWidth, pageHeight);
       }
 
-      // 2. Logo
+      // 2. Logo & Branding Header
       if (logoData) {
-        doc.addImage(logoData, 'PNG', 20, 15, 50, 12, undefined, 'FAST');
+        // Square logo with amber background simulation
+        doc.setFillColor(251, 191, 36); // Amber 400
+        doc.rect(20, 15, 17, 17, 'F');
+        doc.addImage(logoData, 'PNG', 20, 15, 17, 17, undefined, 'FAST');
       }
+
+      doc.setFontSize(20);
+      doc.setTextColor(17, 24, 39); // Gray 900
+      doc.setFont('helvetica', 'bold');
+      doc.text(currentUser?.name || "Library Management System", 40, 22);
+
+      // Address badge in PDF
+      doc.setFillColor(49, 44, 133); // #312c85
+      doc.rect(40, 25, 150, 6, 'F');
+      doc.setFontSize(8);
+      doc.setTextColor(255);
+      doc.text(currentUser?.address || "Smart Library Management System", 42, 29);
 
       // 3. Title
       doc.setFontSize(22);
-      doc.setTextColor(30, 27, 75); // Indigo 900
+      doc.setTextColor(49, 44, 133); // Indigo 900
       doc.setFont('helvetica', 'bold');
       const title = "PAYMENT RECEIPT";
       const titleWidth = doc.getTextWidth(title);
       doc.text(title, (pageWidth - titleWidth) / 2, 45);
-      doc.setDrawColor(30, 27, 75);
+      doc.setDrawColor(49, 44, 133);
       doc.setLineWidth(0.5);
       doc.line((pageWidth - titleWidth) / 2, 47, (pageWidth + titleWidth) / 2, 47);
 
@@ -155,7 +170,8 @@ export default function ViewPaymentPage() {
       
       doc.setFontSize(20);
       doc.setTextColor(0);
-      doc.text(payment.userId.name, 20, 95);
+      const capitalizedName = payment.userId.name.replace(/\b\w/g, (l: string) => l.toUpperCase());
+      doc.text(capitalizedName, 20, 95);
       
       doc.setDrawColor(245);
       doc.setLineWidth(1);
@@ -204,8 +220,8 @@ export default function ViewPaymentPage() {
       doc.text("Amount Paid :", 20, amountY);
       
       doc.setFontSize(18);
-      doc.setTextColor(67, 56, 202); // Indigo 700
-      doc.text(`${payment.amount} rs`, 60, amountY);
+      doc.setTextColor(30, 27, 75); // Indigo 900
+      doc.text(`${payment.amount} RS`, 60, amountY);
       
       doc.setDrawColor(245);
       doc.line(20, amountY + 5, 190, amountY + 5);
@@ -254,7 +270,12 @@ export default function ViewPaymentPage() {
       const phone = currentUser?.helpDesk?.number || currentUser?.phone || currentUser?.phoneNumber || "+91 8305818506";
       const hours = currentUser?.helpDesk?.hours || "09:00 AM - 08:00 PM";
       
-      doc.text(`Email: ${email}    |    Phone: ${phone}    |    Hours: ${hours}`, 20, 275);
+      doc.text(`Email: ${email}    |    Phone: ${phone}    |    Hours: ${hours}`, 20, 268);
+      
+      // Bottom border line for finish
+      // doc.setDrawColor(30, 27, 75);
+      // doc.setLineWidth(1.5);
+      // doc.line(20, 275, 190, 275);
 
       window.open(doc.output('bloburl'), '_blank');
       doc.save(`Receipt_${payment.receiptNumber}.pdf`);
@@ -265,7 +286,7 @@ export default function ViewPaymentPage() {
     }
   };
 
-  if (loading) return <SimpleLoader text="Generating Receipt..." />;
+  if (loading) return <SimpleLoader text="Generating Receipt" />;
   if (!payment) return <div className="p-10 text-center font-black text-rose-500 bg-rose-50 rounded-2xl mx-10 mt-10">Receipt record not found</div>;
 
   return (
@@ -282,22 +303,15 @@ export default function ViewPaymentPage() {
           actionNode={
             <div className="flex gap-2">
                <Button
-                  variant="outline"
-                  size="sm"
                   onClick={handleDownloadPDF}
-                  className="bg-white hover:bg-gray-50 text-emerald-600 border-emerald-100"
-                  >
-                  <Download size={16} className="mr-2" />
-                  Save PDF
-               </Button>
-               <Button
-                  onClick={handlePrint}
                   variant="primary"
                   size="sm"
-                  className="bg-gray-900 hover:bg-black text-white px-5"
+                  icon="solar:printer-line-duotone"
+                  // color="#111827"
+                  className="px-6 py-2.5 font-medium flex items-center gap-2"
                >
-                  <Printer size={16} className="mr-2" />
-                  Print
+                  {/* <Printer size={16} /> */}
+                  Print Receipt
                </Button>
             </div>
           }
@@ -309,7 +323,7 @@ export default function ViewPaymentPage() {
              <Icon icon="solar:document-text-bold-duotone" width={20} />
              <span>Premium Receipt Preview</span>
           </div> */}
-          <div className="scale-75 origin-top border border-gray-200 shadow-xs rounded-sm">
+          <div className="scale-75 origin-top border border-gray-100 rounded-sm">
              <Invoice payment={payment} owner={currentUser} />
           </div>
         </div>

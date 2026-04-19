@@ -31,6 +31,7 @@ import { Button } from "@/components/shared/Button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { generateAdmissionPDF } from "@/utils/pdfGenerator";
 import { Download } from "lucide-react";
+import { SimpleLoader } from "@/components/shared/SimpleLoader";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -233,15 +234,7 @@ export default function ViewUserPage() {
   };
 
   // ── Render states ──
-  if (loading) {
-    return (
-      <div className="bg-gray-50/50 min-h-screen">
-        <div className="max-w-[1200px] mx-auto p-4 md:p-8">
-          <Skeleton />
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <SimpleLoader text="Fetching Member" />;
 
   if (!user) {
     return (

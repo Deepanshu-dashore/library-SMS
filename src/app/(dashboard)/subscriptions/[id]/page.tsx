@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { motion } from "framer-motion";
 import { Button } from "@/components/shared/Button";
+import { SimpleLoader } from "@/components/shared/SimpleLoader";
 
 interface SubscriptionDetails {
   subscription: {
@@ -59,15 +60,7 @@ export default function ViewSubscriptionPage() {
     fetchDetails();
   }, [id]);
 
-  if (loading)
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm font-medium text-gray-400">Fetching records...</p>
-        </div>
-      </div>
-    );
+  if (loading) return <SimpleLoader text="Fetching records" />;
   if (!data)
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
@@ -284,11 +277,11 @@ export default function ViewSubscriptionPage() {
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-gray-400">Seat Number</p>
-                    <p className="text-base font-black text-gray-900 leading-tight">{subscription.seatId.seatNumber}</p>
+                    <p className="text-base font-bold font-barlow text-gray-900 leading-tight">{subscription.seatId.seatNumber}</p>
                   </div>
                   <div className="ml-auto text-right">
                     <p className="text-xs font-semibold text-gray-400">Floor</p>
-                    <p className="text-sm font-bold text-blue-600">{subscription.seatId.floor || "1st Floor"}</p>
+                    <p className="text-sm font-bold capitalize text-blue-600">{subscription.seatId.floor || "1st Floor"}</p>
                   </div>
                 </div>
 

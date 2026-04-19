@@ -54,13 +54,40 @@ export default function Header() {
     const segments = path.split("/").filter(Boolean);
     if (segments.length === 0) return "Dashboard";
 
-    // Standardize "Users" to "Members"
-    if (segments[0] === "users") {
-      if (segments.length === 1) return "Member Management";
-      if (segments.length === 2 && !["create", "trash"].includes(segments[1])) return "Member Details";
-      if (segments[1] === "create") return "Add Member";
+    const base = segments[0];
+    const moduleMap: Record<string, string> = {
+      "users": "Member",
+      "subscriptions": "Subscription",
+      "payments": "Payment",
+      "seat-management": "Seat",
+      "expenses": "Expense",
+      "attendance": "Attendance",
+      "banking": "Banking",
+      "trash": "Recycle Bin",
+      "settings": "Setting",
+      "seat-calendar": "Seat Calendar",
+    };
+
+    const moduleName = moduleMap[base] || (base.charAt(0).toUpperCase() + base.slice(1).replace(/-/g, " "));
+
+    if (segments.length === 1) {
+      if (base === "users") return "Member Management";
+      if (base === "seat-management") return "Seat Layout";
+      return `${moduleName}s`;
+    }
+
+    if (segments.length === 2) {
+      if (segments[1] === "create") return `Add ${moduleName}`;
       if (segments[1] === "trash") return "Recycle Bin";
-      if (segments[2] === "edit") return "Edit Member";
+      if (segments[1] === "bulk-add") return "Bulk Add Seats";
+      // Assuming segments[1] is an ID
+      return `${moduleName} Details`;
+    }
+
+    if (segments.length === 3) {
+      if (segments[2] === "edit") return `Edit ${moduleName}`;
+      if (segments[2] === "renewal") return `${moduleName} Renewal`;
+      if (segments[2] === "transfer") return `${moduleName} Transfer`;
     }
 
     const lastSegment = segments[segments.length - 1];

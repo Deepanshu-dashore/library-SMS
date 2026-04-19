@@ -19,6 +19,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, ColumnDef, TabDef, ActionDef } from "@/components/shared/DataTable";
 import { Button } from "@/components/shared/Button";
 import { StatsCard } from "@/components/shared/StatsCard";
+import { SimpleLoader } from "@/components/shared/SimpleLoader";
 import SeatCalendar from "./SeatCalendar";
 
 interface Subscription {
@@ -123,35 +124,14 @@ export default function SubscriptionManagement() {
       label: "Seat",
       type: "custom",
       render: (row) => (
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold border border-indigo-100">
+        <div className="flex items-center gap-2.5 font-barlow ">
+          <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-sm text-indigo-600 font-bold border border-indigo-100">
             {row.seatId?.seatNumber || "-"}
           </div>
           <span className="font-semibold text-gray-700">Seat {row.seatId?.seatNumber}</span>
         </div>
       ),
       sortable: true
-    },
-    {
-      key: "startDate",
-      label: "Period",
-      type: "custom",
-      render: (row) => {
-        const start = new Date(row.startDate);
-        const end = new Date(row.endDate);
-        return (
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-               <span className="font-semibold text-gray-900">{start.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
-               <ArrowRightLeft className="w-3 h-3 text-gray-400" />
-               <span className="font-semibold text-gray-900">{end.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-            </div>
-            <span className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">
-               {Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))} Days
-            </span>
-          </div>
-        )
-      }
     },
     {
        key: "status",
@@ -165,6 +145,27 @@ export default function SubscriptionManagement() {
           return "Active";
        },
        sortable: true
+    },
+    {
+      key: "startDate",
+      label: "Period",
+      type: "custom",
+      render: (row) => {
+        const start = new Date(row.startDate);
+        const end = new Date(row.endDate);
+        return (
+          <div className="flex flex-col font-barlow">
+            <div className="flex items-center gap-2">
+               <span className="font-semibold text-gray-700">{start.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
+               <ArrowRightLeft className="w-3 h-3 text-gray-400" />
+               <span className="font-semibold text-gray-700">{end.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+            </div>
+            <span className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">
+               {Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))} Days
+            </span>
+          </div>
+        )
+      }
     }
   ];
 
@@ -198,6 +199,8 @@ export default function SubscriptionManagement() {
   ];
 
   const filteredData = subscriptions;
+
+  if (loading && subscriptions.length === 0) return <SimpleLoader text="Loading Subscriptions" />;
 
   return (
     <div className="bg-gray-50/50 min-h-screen">

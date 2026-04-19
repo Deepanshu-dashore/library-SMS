@@ -188,7 +188,7 @@ export default function SeatCalendar() {
                 <path fill="none" d="M0 0h36v36H0z"></path>
               </svg>
            </div>
-           <div className=" h-11 border-r-3" style={{ borderColor: color+"40"}}>
+           <div className=" h-11 border-r-3" style={{ borderColor: color+"30"}}>
            </div>
            <div>
               <h2 className="text-xl font-public-sans font-bold text-gray-900 leading-none group cursor-default">

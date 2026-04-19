@@ -17,7 +17,13 @@ export async function GET(req: Request) {
     }
     return ApiResponse(
       200,
-      { ...user, logo: user.logo ? getUrls.getUrl(user.logo, "image") : "" },
+      {
+        ...user,
+        logo: user.logo ? getUrls.getUrl(user.logo, "image") : "",
+        signature: user.signature
+          ? getUrls.getUrl(user.signature, "image")
+          : "",
+      },
       "User verified successfully",
     );
   } catch (error: any) {

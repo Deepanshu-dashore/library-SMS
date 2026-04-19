@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, ColumnDef, TabDef } from "@/components/shared/DataTable";
 import { Button } from "@/components/shared/Button";
+import { SimpleLoader } from "@/components/shared/SimpleLoader";
 import { FilterChips, FilterBadge } from "@/components/shared/FilterChips";
 
 interface User {
@@ -142,6 +143,8 @@ export default function UserManagement() {
     { label: "Inactive", value: "Inactive", count: stats.inactive, color: "error" },
     { label: "Unverify", value: "Unverify", count: stats.unverify, color: "warning" },
   ];
+
+  if (loading && users.length === 0) return <SimpleLoader text="Loading Members" />;
 
   return (
     <div className="bg-gray-50/50 min-h-screen">
