@@ -89,13 +89,13 @@ export default function SettingsProfilePage() {
               <div 
                 className="absolute inset-0 opacity-90 transition-all duration-1000"
                 style={{ 
-                   background: `linear-gradient(135deg, ${color}cc, #0f172a), url('https://images.unsplash.com/photo-1512486130939-2c4f79935e4f?q=80&w=2080&auto=format&fit=crop')`,
+                   background: `url('/Banner.webp')`,
                    backgroundSize: 'cover',
                    backgroundPosition: 'center',
                    backgroundBlendMode: 'overlay'
                 }}
               />
-              <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
            </div>
 
            {/* User Info Bar */}
