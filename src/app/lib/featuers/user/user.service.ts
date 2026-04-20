@@ -45,7 +45,7 @@ export class UserService {
 
     // Perform queries in parallel for better performance
     // Individual countDocuments on indexed fields is often faster than aggregation for simple totals
-    const [users, total, activeCount, inactiveCount, unverifyCount] =
+    const [users, total, activeCount, inactiveCount, unverifyCount, withoutSeatCount] =
       await Promise.all([
         User.find(finalFilter)
           .select("name email number category status course photo createdAt")
@@ -57,16 +57,71 @@ export class UserService {
         User.countDocuments({ status: "Active", isDeleted: { $ne: true } }),
         User.countDocuments({ status: "Inactive", isDeleted: { $ne: true } }),
         User.countDocuments({ status: "Unverify", isDeleted: { $ne: true } }),
+        User.aggregate([
+          { $match: { isDeleted: { $ne: true } } },
+          {
+            $lookup: {
+              from: "subscriptions",
+              let: { userId: "$_id" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: { $eq: ["$userId", "$$userId"] },
+                    status: "active",
+                    endDate: { $gte: new Date() },
+                  },
+                },
+              ],
+              as: "activeSubscriptions",
+            },
+          },
+          { $match: { activeSubscriptions: { $size: 0 } } },
+          { $count: "count" }
+        ]).then(res => res[0]?.count || 0)
       ]);
 
+    let finalUsers = users;
+    let finalTotal = total;
+
+    // If "WithoutSeat" filter is active, we use aggregation for the list too
+    if (filter.status === "WithoutSeat") {
+      const aggResult = await User.aggregate([
+        { $match: { isDeleted: { $ne: true } } },
+        {
+          $lookup: {
+            from: "subscriptions",
+            let: { userId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $eq: ["$userId", "$$userId"] },
+                  status: "active",
+                  endDate: { $gte: new Date() },
+                },
+              },
+            ],
+            as: "activeSubscriptions",
+          },
+        },
+        { $match: { activeSubscriptions: { $size: 0 } } },
+        { $sort: { createdAt: -1 } },
+        { $skip: (page - 1) * limit },
+        { $limit: limit },
+        { $project: { name: 1, email: 1, number: 1, category: 1, status: 1, course: 1, photo: 1, createdAt: 1 } }
+      ]);
+      finalUsers = aggResult;
+      finalTotal = withoutSeatCount;
+    }
+
     return {
-      users,
-      total,
+      users: finalUsers,
+      total: finalTotal,
       stats: {
         total: activeCount + inactiveCount + unverifyCount,
         active: activeCount,
         inactive: inactiveCount,
         unverify: unverifyCount,
+        withoutSeat: withoutSeatCount
       },
     };
   }

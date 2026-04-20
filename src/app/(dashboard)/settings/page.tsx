@@ -80,7 +80,7 @@ export default function SettingsProfilePage() {
 
   return (
     <div className="bg-gray-50/50 min-h-screen font-public-sans pb-20">
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         
         {/* ─── Premium Profile Header Section ─── */}
         <div className="bg-white rounded-[24px] overflow-hidden border border-gray-100 shadow-sm">
@@ -95,7 +95,7 @@ export default function SettingsProfilePage() {
                    backgroundBlendMode: 'overlay'
                 }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
            </div>
 
            {/* User Info Bar */}

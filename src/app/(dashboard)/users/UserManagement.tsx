@@ -31,7 +31,7 @@ export default function UserManagement() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [stats, setStats] = useState({ total: 0, active: 0, inactive: 0, unverify: 0 });
+  const [stats, setStats] = useState({ total: 0, active: 0, inactive: 0, unverify: 0, withoutSeat: 0 });
   const [total, setTotal] = useState(0);
 
   const fetchUsers = async () => {
@@ -142,6 +142,7 @@ export default function UserManagement() {
     { label: "Active", value: "Active", count: stats.active, color: "success" },
     { label: "Inactive", value: "Inactive", count: stats.inactive, color: "error" },
     { label: "Unverify", value: "Unverify", count: stats.unverify, color: "warning" },
+    { label: "Without Seat", value: "WithoutSeat", count: stats.withoutSeat, color: "default" },
   ];
 
   if (loading && users.length === 0) return <SimpleLoader text="Loading Members" />;

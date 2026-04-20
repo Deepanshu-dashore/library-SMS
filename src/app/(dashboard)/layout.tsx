@@ -4,6 +4,7 @@ import { Sidebar } from "@/components/Sidebar";
 import Header from "@/components/Header";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useSelector } from "react-redux";
+import { usePathname } from "next/navigation";
 
 export default function DashboardLayout({
   children,
@@ -11,6 +12,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { activeNavStyle } = useSelector((state: any) => state.theme);
+  const currentPath = usePathname();
 
   const isTopNav = activeNavStyle === "nav-top";
 
@@ -27,7 +29,7 @@ export default function DashboardLayout({
         <div className="flex-1 flex flex-col overflow-hidden">
           <Header />
           <main className="flex-1 overflow-y-auto bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.05))] via-transparent to-transparent">
-            <div className="px-10 py-10 max-w-[1200px] mx-auto relative z-0">
+            <div className={`px-10 py-10 mx-auto relative z-0 ${currentPath !== "/" ? "max-w-[1200px]" : ""}`}>
                 {children}
             </div>
           </main>
