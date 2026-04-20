@@ -79,11 +79,11 @@ export default function SettingsProfilePage() {
   ];
 
   return (
-    <div className="bg-gray-50/50 min-h-screen font-public-sans pb-20">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="bg-gray-50/50 min-h-screen font-public-sans">
+      <div className="max-w-7xl mx-auto space-y-6">
         
         {/* ─── Premium Profile Header Section ─── */}
-        <div className="bg-white rounded-[24px] overflow-hidden border border-gray-100 shadow-sm">
+        <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
            {/* Banner */}
            <div className="h-44 w-full relative">
               <div 
@@ -118,12 +118,12 @@ export default function SettingsProfilePage() {
                  </div>
 
                  {/* Names */}
-                 <div className="pb-4">
-                    <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none group flex items-center gap-3">
+                 <div className="pb-4 flex gap-2">
+                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-none group flex items-center gap-3">
                         {profile.name}
-                        <Icon icon="solar:verified-check-bold" width={22} className="text-blue-500" />
+                        {/* <Icon icon="solar:verified-check-bold" width={22} className="text-blue-500" /> */}
                     </h1>
-                    <p className="text-sm font-bold text-slate-400 mt-2 uppercase tracking-widest">{profile.email.split('@')[0]} Admin</p>
+                    <p className="text-sm font-semibold text-slate-600 mt-2 capitalize">({profile.email.split('@')[0]} Admin)</p>
                  </div>
               </div>
 
@@ -132,6 +132,7 @@ export default function SettingsProfilePage() {
                  <Button
                     onClick={() => router.push("/settings/edit")}
                     variant="edit"
+                    size="sm"
                     className="rounded-2xl px-6 py-2.5 font-bold text-sm shadow-xl"
                  >
                     Edit Profile
@@ -170,7 +171,7 @@ export default function SettingsProfilePage() {
               <>
                  {/* Left: About / Contact */}
                  <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
                        <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
                              <Icon icon="solar:info-square-bold-duotone" width={22} className="text-indigo-600" />
@@ -191,7 +192,7 @@ export default function SettingsProfilePage() {
 
                  {/* Right: Support Desk */}
                  <div className="lg:col-span-1">
-                    <div className="bg-slate-900 rounded-[24px] p-8 text-white relative overflow-hidden h-fit shadow-lg shadow-slate-200">
+                    <div className="bg-slate-900 rounded-2xl p-8 text-white relative overflow-hidden h-fit shadow-lg shadow-slate-200">
                        <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-2xl" />
                        
                        <div className="flex items-center gap-3 mb-6">
@@ -253,7 +254,7 @@ export default function SettingsProfilePage() {
            {activeTab === 'branding' && (
               <div className="col-span-1 lg:col-span-3 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                  {/* Identity Assets */}
-                 <div className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm">
+                 <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
                     <div className="flex items-center gap-3 mb-8">
                        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
                           <Icon icon="solar:globus-bold-duotone" width={22} className="text-emerald-600" />
@@ -313,7 +314,7 @@ export default function SettingsProfilePage() {
 
            {activeTab === 'personalization' && (
               <div className="col-span-1 lg:col-span-3">
-                 <div className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                 <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <div className="flex items-center gap-3">
                        <div className="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center">
                           <Icon icon="solar:palette-bold-duotone" width={22} className="text-pink-600" />
@@ -370,7 +371,7 @@ export default function SettingsProfilePage() {
 
            {activeTab === 'security' && (
               <div className="col-span-1 lg:col-span-3">
-                 <div className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                 <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <div className="flex items-center gap-3">
                        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
                           <Icon icon="solar:shield-keyhole-bold-duotone" width={22} className="text-emerald-600" />
