@@ -194,7 +194,7 @@ export default function EditProfilePage() {
     }));
   };
 
-  const handleHolidaysChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleHolidaysChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const value = e.target.value;
     const holidays = value.split(",").map((s) => s.trim()).filter(Boolean);
     setFormData((prev) => ({
