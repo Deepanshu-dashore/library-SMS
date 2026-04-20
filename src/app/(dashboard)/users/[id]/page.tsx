@@ -25,6 +25,7 @@ import {
   Hash,
 } from "lucide-react";
 import axios from "axios";
+import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/shared/Button";
@@ -170,6 +171,7 @@ export default function ViewUserPage() {
   const params  = useParams();
   const router  = useRouter();
   const id      = params.id as string;
+  const { currentUser } = useSelector((state: any) => state.user);
 
   const [user,         setUser]         = useState<UserDetails | null>(null);
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
@@ -223,7 +225,7 @@ export default function ViewUserPage() {
       },
     });
     try {
-      await generateAdmissionPDF(user, subscription);
+      await generateAdmissionPDF(user, subscription, currentUser);
       toast.success("Ready for Download!", { id: t });
     } catch (error) {
       console.error(error);
