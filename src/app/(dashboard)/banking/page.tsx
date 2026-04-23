@@ -66,6 +66,11 @@ const YEARS = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR - 5 + i);
 function fmt(v: number) {
   return "₹" + v.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
+const formatCurrency = (val: number) => {
+  if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
+  if (val >= 1000) return `${(val / 1000).toFixed(1)}k`;
+  return val.toString();
+};
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
@@ -476,20 +481,20 @@ export default function BankingPage() {
                 </div>
 
                 <div className="flex gap-10 mt-6 mb-8">
-                   <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
-                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: themeColor }} />
-                        Total Income
-                      </div>
-                      <p className="text-xl font-medium text-gray-900">{totals.totalIncome > 1000 ? `${(totals.totalIncome/1000).toFixed(2)}k` : totals.totalIncome}</p>
-                   </div>
-                   <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
-                        <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-                        Total Expenses
-                      </div>
-                      <p className="text-xl font-medium text-gray-900">{totals.totalExpense > 1000 ? `${(totals.totalExpense/1000).toFixed(2)}k` : totals.totalExpense}</p>
-                   </div>
+                    <div className="flex flex-col gap-1">
+                       <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+                         <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: themeColor }} />
+                         Total Income
+                       </div>
+                       <p className="text-xl font-medium text-gray-900">{formatCurrency(totals.totalIncome)}</p>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                       <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+                         <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                         Total Expenses
+                       </div>
+                       <p className="text-xl font-medium text-gray-900">{formatCurrency(totals.totalExpense)}</p>
+                    </div>
                 </div>
 
                 <ResponsiveContainer width="100%" className="-ml-6" height={250}>
@@ -500,7 +505,7 @@ export default function BankingPage() {
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
                       <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#9ca3af", fontWeight: 700 }} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#9ca3af", fontWeight: 700 }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#9ca3af", fontWeight: 700 }} tickFormatter={formatCurrency} />
                       <Tooltip content={<CustomTooltip />} />
                       <Area type="monotone" name="Total income" dataKey="income" stroke={themeColor} strokeWidth={3} fillOpacity={1} fill="url(#colorIncome)" />
                       <Area type="monotone" name="Total expenses" dataKey="expense" stroke="#fbbf24" strokeWidth={3} fillOpacity={1} fill="url(#colorExpense)" />

@@ -14,6 +14,11 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const fmt = (val: any) => `₹${Number(val).toLocaleString("en-IN")}`;
+const formatYAxis = (val: number) => {
+  if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
+  if (val >= 1000) return `${(val / 1000).toFixed(0)}k`;
+  return val.toString();
+};
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -456,7 +461,7 @@ export default function DashboardPage() {
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
               <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#9ca3af", fontWeight: 700 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#9ca3af", fontWeight: 700 }} tickFormatter={(val: any) => `${val/1000}k`} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#9ca3af", fontWeight: 700 }} tickFormatter={formatYAxis} />
               <Tooltip content={<CustomTooltip />} />
               <Area type="monotone" name="Total income" dataKey="income" stroke={color || "#10b981"} strokeWidth={3} fillOpacity={1} fill="url(#colorIncome)" />
               <Area type="monotone" name="Total expenses" dataKey="expense" stroke="#fbbf24" strokeWidth={3} fillOpacity={1} fill="url(#colorExpense)" />
