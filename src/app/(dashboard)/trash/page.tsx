@@ -32,7 +32,7 @@ export default function TrashPage() {
       const seats = seatResult.success ? seatResult.data : [];
       
       setStats({
-        members: users.length,
+        members: userResult.success ? (userResult.data?.total || 0) : 0,
         seats: seats.length
       });
 
@@ -98,9 +98,9 @@ export default function TrashPage() {
       key: "name",
       label: "Member",
       type: "user",
-      getTitle: (row) => row.name,
+      getTitle: (row) => row.name || "Unknown",
       getSubtitle: (row) => row.email || "No email",
-      getAvatar: (row) => row.photo || row.name.charAt(0),
+      getAvatar: (row) => row.photo || (row.name ? row.name.charAt(0) : "?"),
       sortable: true
     },
     { key: "number", label: "Contact", type: "text" },

@@ -108,9 +108,9 @@ export default function UserManagement() {
       key: "name",
       label: "Member",
       type: "user",
-      getTitle: (row) => row.name,
+      getTitle: (row) => row.name || "Unknown",
       getSubtitle: (row) => row.course || "General Member",
-      getAvatar: (row) => row.photo || row.name.charAt(0),
+      getAvatar: (row) => row.photo || (row.name ? row.name.charAt(0) : "?"),
       sortable: true
     },
     {

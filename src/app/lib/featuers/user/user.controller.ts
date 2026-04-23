@@ -345,10 +345,7 @@ export class UserController {
     try {
       const { id } = await params;
 
-      // Fetch before soft-delete to retrieve image paths
-      const existing = await UserService.getUserByIdService(id);
       const user = await UserService.softDeleteUserService(id);
-      await UserController.deleteUserImages(existing); // remove Cloudinary assets
 
       return ApiResponse(200, user, "User moved to trash successfully");
     } catch (error: any) {
@@ -384,8 +381,8 @@ export class UserController {
     try {
       const { page, limit } = await query;
       const users = await UserService.getTrashUserService(
-        Number(page),
-        Number(limit),
+        Number(page || 1),
+        Number(limit || 100),
       );
       if (users && users.users) {
         users.users = users.users.map((u: any) => {
