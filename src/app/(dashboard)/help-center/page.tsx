@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Icon } from "@iconify/react";
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 
-// Structure for modules
+// Structure for modules with features and procedural guides
 const helpModules = [
   {
     id: "dashboard",
@@ -12,11 +14,17 @@ const helpModules = [
     icon: "solar:widget-5-bold-duotone",
     color: "text-blue-500",
     bg: "bg-blue-500/10",
+    link: "/",
     description: "The central hub for real-time library operations, occupancy, and revenue metrics.",
-    tabs: [
+    features: [
       { name: "Live Insights", desc: "Displays current seat occupancy, daily revenue, active members, and quick status metrics." },
       { name: "Quick Actions", desc: "Shortcuts to register members, collect payments, and allocate seats swiftly right from the top." },
       { name: "Trends & Charts", desc: "Visual representations of joining ratios and cash flow over different time periods." }
+    ],
+    manual: [
+      { step: 1, title: "Monitor Live Occupancy", desc: "Check the top grid to see real-time seat status. Green indicates available seats, while blue shows occupied spots." },
+      { step: 2, title: "Track Revenue Trends", desc: "Scroll to the 'Balance Statistics' chart to view monthly income vs expenses. Use the range filter to see year-to-date data." },
+      { step: 3, title: "Use Quick Actions", desc: "Locate the horizontal toolbar at the top for one-click access to member registration and payment modules." }
     ]
   },
   {
@@ -25,10 +33,16 @@ const helpModules = [
     icon: "solar:user-id-bold-duotone",
     color: "text-cyan-500",
     bg: "bg-cyan-500/10",
+    link: "/registration",
     description: "Comprehensive portal for member onboarding and status inquiry.",
-    tabs: [
-      { name: "Member Registration", desc: "A multi-step, split-screen form to capture member details, required documents, photo, and initial subscription plan." },
-      { name: "Status Tracker", desc: "Allows new members or staff to quickly verify the onboarding status, assigned seat, and payment verification via phone or ID." },
+    features: [
+      { name: "Member Registration", desc: "A multi-step, split-screen form to capture member details, documents, photo, and initial plans." },
+      { name: "Status Tracker", desc: "Allows members or staff to quickly verify onboarding status, assigned seat, and payment status." }
+    ],
+    manual: [
+      { step: 1, title: "Enter Personal Details", desc: "Fill out the multi-step form with member name, contact info, and identity proof." },
+      { step: 2, title: "Capture Profile Photo", desc: "Use the integrated camera module to take a live photo or upload a file for the ID card." },
+      { step: 3, title: "Select Subscription Plan", desc: "Choose the starting plan and assign a seat before finalizing the registration." }
     ]
   },
   {
@@ -37,12 +51,16 @@ const helpModules = [
     icon: "solar:sofa-bold-duotone",
     color: "text-indigo-500",
     bg: "bg-indigo-500/10",
+    link: "/seats",
     description: "Manage physical seating infrastructure across multiple floors.",
-    tabs: [
+    features: [
       { name: "Seat Layout Grid", desc: "A detailed visual view of all seats with their occupancy statuses (Occupied, Available, Maintenance)." },
-      { name: "Bulk Addition", desc: "Quickly generate and assign multiple seats configured sequentially to a selected floor or study zone." },
-      { name: "Maintenance Mode", desc: "Temporarily block seats that are damaged or unavailable for subscription." },
-      { name: "Seat Calendar", desc: "A timeline module visualizing bookings over weeks/months to manage future conflicts and availability." }
+      { name: "Bulk Addition", desc: "Quickly generate and assign multiple seats configured sequentially." },
+      { name: "Seat Calendar", desc: "A timeline module visualizing bookings over weeks/months to manage future availability." }
+    ],
+    manual: [
+      { step: 1, title: "Define Study Zones", desc: "Create floors and zones to group seats for visual navigation." },
+      { step: 2, title: "Generate Seats in Bulk", desc: "Use the sequential generator to add multiple seats at once by specifying Prefix and Range." }
     ]
   },
   {
@@ -51,11 +69,15 @@ const helpModules = [
     icon: "solar:users-group-rounded-bold-duotone",
     color: "text-teal-500",
     bg: "bg-teal-500/10",
+    link: "/users",
     description: "A centralized directory for maintaining, searching, and updating all library member records.",
-    tabs: [
+    features: [
       { name: "Member Directory", desc: "Data grid of all members with deep filtering by Active, Expired, or Pending states." },
-      { name: "Member Profile", desc: "Detailed page displaying user information, their payment histories, active seat, and past logs." },
-      { name: "Edit Profile", desc: "Staff portal to update identity documents, change user photos, or update emergency contact." }
+      { name: "Member Profile", desc: "Detailed page displaying user information, payment history, and active seat logs." }
+    ],
+    manual: [
+      { step: 1, title: "Filter Member Status", desc: "Use the top tabs to quickly isolate members based on their subscriptions." },
+      { step: 2, title: "Detailed Profile Audit", desc: "Click on any member row to view their entire history and uploaded documents." }
     ]
   },
   {
@@ -64,11 +86,15 @@ const helpModules = [
     icon: "solar:card-2-bold-duotone",
     color: "text-purple-500",
     bg: "bg-purple-500/10",
+    link: "/subscriptions",
     description: "Handle the lifecycle of member plans, handling shift lengths, expiry notices, and seat transfers.",
-    tabs: [
+    features: [
       { name: "Active Plans", desc: "Database of all ongoing subscriptions, mapping when users will require renewals." },
-      { name: "Renewals", desc: "One-click processing for monthly/yearly renewals keeping the selected seat uninterrupted." },
-      { name: "Seat Transfers", desc: "Module to shift a user from one seat or floor to another, seamlessly transferring the plan balance." }
+      { name: "Renewals & Transfers", desc: "One-click processing for renewals or shifting a user from one seat to another." }
+    ],
+    manual: [
+      { step: 1, title: "Initiate Renewal", desc: "Locate an expired member and click 'Renew'. Confirm the duration and payment mode." },
+      { step: 2, title: "Process Seat Transfer", desc: "Move a member to a different seat without resetting their existing period." }
     ]
   },
   {
@@ -77,11 +103,15 @@ const helpModules = [
     icon: "solar:wallet-money-bold-duotone",
     color: "text-green-500",
     bg: "bg-green-500/10",
+    link: "/payments",
     description: "Core accounting center tracking inwards revenue from plans, penalties, and registrations.",
-    tabs: [
-      { name: "Transaction History", desc: "Comprehensive chronological ledger of all generated payments and their associated modes (Cash, UPI, Card)." },
-      { name: "Digital Receipts", desc: "Download high-fidelity, A4-friendly invoices combining the library logo with verified digital signatures." },
-      { name: "Revenue Filtering", desc: "Search financial records by custom date ranges or lookup by receipt IDs to quickly resolve disputes." }
+    features: [
+      { name: "Transaction History", desc: "Chronological ledger of all payments associated with UPI, Cash, or Card modes." },
+      { name: "Digital Receipts", desc: "Download professional A4-friendly invoices with verified digital signatures." }
+    ],
+    manual: [
+      { step: 1, title: "Review Daily Ledger", desc: "Check the transaction list for daily revenue reconciliations." },
+      { step: 2, title: "Generate Digital Invoices", desc: "Click 'Download Invoice' on any payment record for member records." }
     ]
   },
   {
@@ -90,10 +120,15 @@ const helpModules = [
     icon: "solar:banknote-2-bold-duotone",
     color: "text-yellow-500",
     bg: "bg-yellow-500/10",
+    link: "/banking",
     description: "Maintain cash outflows, categorized operation costs, and review aggregate bank deposits.",
-    tabs: [
-      { name: "Expense Tracker", desc: "Log physical or digital library overheads (electricity, rent, cleaning) to offset total profit." },
-      { name: "Banking Summaries", desc: "Top-level overview showing net margins, actual deposits, and cash in hand vs digital balance." }
+    features: [
+      { name: "Expense Tracking", desc: "Log operation overheads (electricity, rent) to offset total profit." },
+      { name: "Banking Overview", desc: "Review margins, deposits, and digital vs cash balances." }
+    ],
+    manual: [
+      { step: 1, title: "Log System Expense", desc: "Navigate to the Expense section, select a category, and enter the amount spent." },
+      { step: 2, title: "Analyze Profit Margins", desc: "Use the Banking summary to see net profit after deducting expenses from revenue." }
     ]
   },
   {
@@ -102,11 +137,15 @@ const helpModules = [
     icon: "solar:settings-bold-duotone",
     color: "text-emerald-500",
     bg: "bg-emerald-500/10",
+    link: "/settings",
     description: "Global module configuring application appearance, organization branding, and essential support data.",
-    tabs: [
-      { name: "Organization Profile", desc: "Adjust official library name, import logos and signatures, configure physical address details." },
-      { name: "Help Desk Config", desc: "Register hotline numbers, support emails, operational hours, and holiday listings for members." },
-      { name: "Personalization", desc: "Tweak structural layouts, sidebar orientation, and adapt standard styling logic to enterprise brand guidelines." }
+    features: [
+      { name: "Organization Branding", desc: "Configure library name, logo, and digital signatures for automated receipts." },
+      { name: "Personalization", desc: "Switch themes, adjust sidebar orientation, and manage system preferences." }
+    ],
+    manual: [
+      { step: 1, title: "Update Library Logo", desc: "Upload your official logo in the Branding tab of Settings to personalize all PDFs." },
+      { step: 2, title: "Configure Support Info", desc: "Add your library hotline and email to appear on member dashboard footers." }
     ]
   },
   {
@@ -115,124 +154,222 @@ const helpModules = [
     icon: "solar:trash-bin-trash-bold-duotone",
     color: "text-red-500",
     bg: "bg-red-500/10",
+    link: "/trash",
     description: "Protection layer ensuring accidentally deleted infrastructure isn't permanently lost.",
-    tabs: [
-      { name: "Recovery Portal", desc: "View inactive or soft-deleted members, seats, and system records to restore them instantly without data loss." },
-      { name: "Permanent Clean", desc: "Option to hard delete records beyond necessity, permanently clearing up database capacity." }
+    features: [
+      { name: "Soft Deletion", desc: "Safely move members or seats to the trash instead of permanent hard deletion." },
+      { name: "Instant Recovery", desc: "Restore deleted records with one click, preserving all historical data and photos." }
+    ],
+    manual: [
+      { step: 1, title: "Recover a Member", desc: "Find the deleted member in the Recycle Bin and click the 'Restore' icon." },
+      { step: 2, title: "Purge Database", desc: "Use the 'Hard Delete' option to permanently remove records and clear storage." }
     ]
   }
 ];
 
 export default function HelpCenterPage() {
   const [activeModule, setActiveModule] = useState(helpModules[0].id);
+  const [activeTab, setActiveTab] = useState<"features" | "guide">("features");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredModules = useMemo(() => {
+    if (!searchQuery) return helpModules;
+    const query = searchQuery.toLowerCase();
+    return helpModules.filter(mod => 
+      mod.title.toLowerCase().includes(query) || 
+      mod.description.toLowerCase().includes(query)
+    );
+  }, [searchQuery]);
+
+  const activeModuleData = useMemo(() => 
+    helpModules.find(m => m.id === activeModule) || helpModules[0]
+  , [activeModule]);
 
   return (
-    <div className="bg-gray-50/50 min-h-screen font-public-sans pb-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="font-public-sans relative bg-[#fcfdfe] min-h-screen">
+      <div className="">
         <PageHeader
-          title="Module Documentation Home"
+          title="Module Documentation"
           breadcrumbs={[
             { label: "Dashboard", href: "/" },
             { label: "Help Center" },
           ]}
         />
 
-        <div className="mt-8 flex flex-col xl:flex-row gap-8">
-          {/* Navigation Sidebar */}
-          <div className="xl:w-1/3 flex-shrink-0 space-y-4">
-            <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 mb-6 relative overflow-hidden">
-               <div className="relative z-10">
-                 <h3 className="text-2xl font-black text-slate-800 mb-3 tracking-tight">How can we help?</h3>
-                 <p className="text-sm font-medium text-slate-500 mb-2 leading-relaxed">Browse the modules below to understand the capabilities, tabs, and workflows of your Library Management System.</p>
-               </div>
-               <Icon icon="solar:round-alt-arrow-right-bold-duotone" className="absolute -bottom-10 -right-10 text-slate-100 opacity-50 block xl:hidden 2xl:block" width={160} />
-            </div>
+        <div className="mt-6 flex flex-col xl:flex-row gap-8 text-[13px]">
+          {/* Sidebar */}
+          <div className="xl:w-80 shrink-0">
+            <div className="sticky top-8 space-y-4">
+              <div className="bg-white rounded-xl p-5 border border-slate-200">
+                 <h3 className="text-lg font-bold text-slate-800 mb-1 tracking-tight">System Manual</h3>
+                 <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-4">Select Module</p>
+                 
+                 <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                       <Icon icon="solar:magnifer-linear" width={16} />
+                    </div>
+                    <input 
+                       type="text" 
+                       placeholder="Find a module..."
+                       value={searchQuery}
+                       onChange={(e) => setSearchQuery(e.target.value)}
+                       className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all shadow-inner"
+                    />
+                 </div>
+              </div>
 
-            <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden flex flex-col p-3 space-y-1">
-              {helpModules.map((mod) => (
-                <button
-                  key={mod.id}
-                  onClick={() => setActiveModule(mod.id)}
-                  className={`flex items-center gap-5 w-full p-4 rounded-[24px] transition-all duration-300 text-left group ${
-                    activeModule === mod.id
-                      ? "bg-slate-900 text-white shadow-xl shadow-slate-900/10 scale-[1.02] z-10"
-                      : "text-slate-600 hover:bg-slate-50 hover:scale-[1.01]"
-                  }`}
-                >
-                  <div className={`w-12 h-12 rounded-[20px] flex items-center justify-center shrink-0 transition-colors ${
-                    activeModule === mod.id ? "bg-white/10 text-white" : `${mod.bg} ${mod.color}`
-                  }`}>
-                    <Icon icon={mod.icon} width={26} />
-                  </div>
-                  <div>
-                    <h4 className={`font-bold text-[15px] mb-0.5 ${activeModule === mod.id ? "text-white" : "text-slate-900 group-hover:text-indigo-600 transition-colors"}`}>{mod.title}</h4>
-                    <p className={`text-[13px] ${activeModule === mod.id ? "text-slate-300" : "text-slate-400"} line-clamp-1 pr-2`}>{mod.description}</p>
-                  </div>
-                </button>
-              ))}
+              <div className="bg-white rounded-xl border border-slate-200 overflow-hidden p-1.5 space-y-0.5">
+                {filteredModules.map((mod) => (
+                  <button
+                    key={mod.id}
+                    onClick={() => {
+                        setActiveModule(mod.id);
+                        setActiveTab("features");
+                    }}
+                    className={`flex items-center gap-3 w-full p-2.5 rounded-lg transition-all duration-200 text-left group cursor-pointer ${
+                      activeModule === mod.id
+                        ? "bg-slate-900 text-white shadow-md z-10"
+                        : "text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                      activeModule === mod.id ? "bg-white/10 text-white" : `${mod.bg} ${mod.color}`
+                    }`}>
+                      <Icon icon={mod.icon} width={18} />
+                    </div>
+                    <span className="font-semibold">{mod.title}</span>
+                    {activeModule === mod.id && <Icon icon="solar:alt-arrow-right-linear" width={14} className="ml-auto text-indigo-400" />}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Main Content Area */}
-          <div className="xl:w-2/3 relative">
-            {helpModules.map((mod) => (
-              <div
-                key={mod.id}
-                className={`transition-all duration-500 ease-out origin-top transform ${
-                  activeModule === mod.id 
-                  ? "opacity-100 scale-100 relative mb-8 z-10" 
-                  : "opacity-0 scale-95 h-0 overflow-hidden absolute top-0 left-0"
-                }`}
-              >
-                <div className="bg-white rounded-[40px] shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_24px_48px_-8px_rgba(145,158,171,0.12)] border border-gray-100 p-8 sm:p-10 md:p-14">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-10 pb-10 border-b border-slate-100">
-                    <div className={`w-[88px] h-[88px] rounded-[32px] ${mod.bg} ${mod.color} flex items-center justify-center shrink-0 shadow-inner`}>
-                      <Icon icon={mod.icon} width={48} />
+          {/* Main Content */}
+          <div className="flex-1 min-h-[600px]">
+            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col h-full">
+                {/* Header */}
+                <div className="p-8 sm:p-10 bg-slate-50/30">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-center gap-5">
+                      <div className={`w-14 h-14 rounded-xl ${activeModuleData.bg} ${activeModuleData.color} flex items-center justify-center shrink-0`}>
+                        <Icon icon={activeModuleData.icon} width={32} />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-slate-900 mb-1">{activeModuleData.title}</h2>
+                        <p className="text-slate-500 font-medium max-w-xl">{activeModuleData.description}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-none mb-3">{mod.title}</h2>
-                      <p className="text-slate-500 font-medium leading-relaxed max-w-2xl text-[15px]">{mod.description}</p>
-                    </div>
+                    <Link 
+                      href={activeModuleData.link}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-all shrink-0 self-start md:self-center"
+                    >
+                      Open Module 
+                      <Icon icon="solar:arrow-right-up-linear" width={16} />
+                    </Link>
                   </div>
 
-                  <div className="space-y-8">
-                    <h3 className="text-[14px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-3">
-                       <span className="w-8 h-[2px] bg-slate-200 rounded-full"></span>
-                       Tabs & Features Breakdown
-                    </h3>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {mod.tabs.map((tab, idx) => (
-                        <div key={idx} className="bg-slate-50 border border-slate-100 rounded-[28px] p-7 hover:bg-white hover:shadow-[0_12px_24px_-4px_rgba(145,158,171,0.12)] hover:border-indigo-100 transition-all duration-300 group">
-                           <div className="flex items-center gap-4 mb-4">
-                              <div className="w-10 h-10 rounded-[16px] bg-white text-slate-400 font-black text-[15px] flex items-center justify-center shadow-sm group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-                                0{idx + 1}
-                              </div>
-                              <h4 className="font-bold text-slate-900 text-[17px] group-hover:text-indigo-600 transition-colors tracking-tight">{tab.name}</h4>
-                           </div>
-                           <p className="text-[14px] text-slate-500 leading-relaxed font-medium pl-14">
-                             {tab.desc}
-                           </p>
-                        </div>
-                      ))}
-                    </div>
+                  {/* Tab Switcher */}
+                  <div className="flex items-center gap-2 mt-8 border-b border-slate-100">
+                    <button 
+                      onClick={() => setActiveTab("features")}
+                      className={`px-5 py-3 font-bold transition-all relative ${
+                        activeTab === "features" ? "text-indigo-600" : "text-slate-400 hover:text-slate-600 cursor-pointer"
+                      }`}
+                    >
+                      Features Overview
+                      {activeTab === "features" && (
+                        <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
+                      )}
+                    </button>
+                    <button 
+                      onClick={() => setActiveTab("guide")}
+                      className={`px-5 py-3 font-bold transition-all relative ${
+                        activeTab === "guide" ? "text-indigo-600" : "text-slate-400 hover:text-slate-600 cursor-pointer"
+                      }`}
+                    >
+                      Operational Guide
+                      {activeTab === "guide" && (
+                        <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
+                      )}
+                    </button>
                   </div>
-
-                  {/* Contextual Support Banner */}
-                  <div className="mt-14 bg-slate-900 text-white rounded-[32px] p-8 md:p-10 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between group">
-                     <div className="relative z-10 md:w-2/3 mb-6 md:mb-0">
-                        <h4 className="font-black text-2xl mb-2 tracking-tight">Requires technical assistance?</h4>
-                        <p className="text-slate-400 text-[15px] font-medium leading-relaxed pr-4">If you face persistent issues navigating the {mod.title} module, navigate to Settings &gt; Edit Profile to reach our primary Helpdesk.</p>
-                     </div>
-                     <div className="relative z-10 w-16 h-16 rounded-[24px] bg-white/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all shrink-0 cursor-pointer backdrop-blur-md">
-                        <Icon icon="solar:chat-round-check-bold-duotone" width={32} className="text-indigo-400" />
-                     </div>
-                     <Icon icon={mod.icon} width={240} className="absolute -right-12 -bottom-10 opacity-[0.03] text-white transform -rotate-12 pointer-events-none" />
-                  </div>
-
                 </div>
-              </div>
-            ))}
+
+                {/* Content Area */}
+                <div className="p-8 sm:p-10 flex-1 overflow-visible">
+                   <div className="relative h-full">
+                      <AnimatePresence mode="wait">
+                        {activeTab === "features" ? (
+                          <motion.div 
+                            key={`features-${activeModule}`}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                          >
+                             {activeModuleData.features?.map((feature, idx) => (
+                                <div key={idx} className="bg-slate-50 border border-slate-100 rounded-xl p-5 hover:bg-white hover:border-indigo-100 transition-all duration-200">
+                                   <h4 className="font-bold text-slate-800 mb-1.5 flex items-center gap-2 text-sm">
+                                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                                      {feature.name}
+                                   </h4>
+                                   <p className="text-slate-500 font-medium leading-relaxed">
+                                      {feature.desc}
+                                   </p>
+                                </div>
+                             )) || (
+                                <div className="col-span-full py-16 text-center">
+                                   <Icon icon="solar:document-add-linear" width={48} className="mx-auto text-slate-200 mb-4" />
+                                   <p className="text-slate-400 italic">No feature breakdown available.</p>
+                                </div>
+                             )}
+                          </motion.div>
+                        ) : (
+                          <motion.div 
+                            key={`guide-${activeModule}`}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                            className="space-y-10"
+                          >
+                             {activeModuleData.manual?.map((step) => (
+                                <div key={step.step} className="group flex gap-6">
+                                   <div className="flex flex-col items-center shrink-0">
+                                      <div className="w-9 h-9 rounded-full border-2 border-slate-200 flex items-center justify-center font-bold text-slate-400 text-xs group-hover:border-indigo-500 group-hover:text-indigo-600 transition-all">
+                                         {step.step}
+                                      </div>
+                                      <div className="w-px h-full bg-slate-100 mt-4 group-last:hidden" />
+                                   </div>
+                                   <div className="pb-4">
+                                      <h4 className="font-bold text-slate-900 mb-1 group-hover:text-indigo-600 transition-colors text-sm">
+                                         {step.title}
+                                      </h4>
+                                      <p className="font-medium text-slate-500 leading-relaxed mb-4">
+                                         {step.desc}
+                                      </p>
+                                   </div>
+                                </div>
+                             )) || (
+                                <div className="py-16 text-center">
+                                   <Icon icon="solar:document-add-linear" width={48} className="mx-auto text-slate-200 mb-4" />
+                                   <p className="text-slate-400 italic">Procedural steps are currently under review.</p>
+                                </div>
+                             )}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                   </div>
+                </div>
+
+                {/* Footer */}
+                <div className="px-8 py-5 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                    <span className="font-bold text-slate-400 text-[11px] uppercase tracking-wider">LMS Management System v2.0</span>
+                    <button className="text-xs font-bold text-indigo-600 hover:underline">Support Ticket</button>
+                </div>
+            </div>
           </div>
         </div>
       </div>
