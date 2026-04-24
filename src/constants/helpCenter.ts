@@ -62,24 +62,21 @@ export const helpModules = [
     manual: [
       {
         step: 1,
-        title: "Enter Personal Details",
-        desc: "Fill out the multi-step form with member name, contact info, and identity proof.",
-        image:
-          "https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?auto=format&fit=crop&q=80&w=800",
+        title: "Registration Form Analytics",
+        desc: "Complete the 4-step onboarding form. Required: Full Name, Mobile (10 digits), and Aadhar Number (12 digits).",
+        image: "https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?auto=format&fit=crop&q=80&w=800",
       },
       {
         step: 2,
-        title: "Capture Profile Photo",
-        desc: "Use the integrated camera module to take a live photo or upload a file for the ID card.",
-        image:
-          "https://images.unsplash.com/photo-1493612276216-ee3925520721?auto=format&fit=crop&q=80&w=800",
+        title: "Media Verification",
+        desc: "Upload a clear profile photo (JPG/PNG). This is mandatory for generating the member ID card.",
+        image: "https://images.unsplash.com/photo-1493612276216-ee3925520721?auto=format&fit=crop&q=80&w=800",
       },
       {
         step: 3,
-        title: "Select Subscription Plan",
-        desc: "Choose the starting plan and assign a seat before finalizing the registration.",
-        image:
-          "https://images.unsplash.com/photo-1434626881859-194d67b2b86f?auto=format&fit=crop&q=80&w=800",
+        title: "Guardian & Address Details",
+        desc: "Provide father's name and contact number along with a complete residential address for safety verification.",
+        image: "https://images.unsplash.com/photo-1434626881859-194d67b2b86f?auto=format&fit=crop&q=80&w=800",
       },
     ],
   },
@@ -188,17 +185,21 @@ export const helpModules = [
     manual: [
       {
         step: 1,
-        title: "Filter Member Status",
-        desc: "Use the top tabs to quickly isolate members based on their subscriptions.",
-        image:
-          "https://images.unsplash.com/photo-1554224155-1696413565d3?auto=format&fit=crop&q=80&w=800",
+        title: "Create Member Profile",
+        desc: "Navigate to 'Create Member'. Required: Name, DOB, Email, 10-digit Mobile, and 12-digit Aadhar Number.",
+        image: "https://images.unsplash.com/photo-1554224155-1696413565d3?auto=format&fit=crop&q=80&w=800",
       },
       {
         step: 2,
-        title: "Detailed Profile Audit",
-        desc: "Click on any member row to view their entire history and uploaded documents.",
-        image:
-          "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=80&w=800",
+        title: "Document Verification",
+        desc: "Mandatory: Upload both Member Photo and Digital Signature for profile activation and automated invoices.",
+        image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=80&w=800",
+      },
+      {
+        step: 3,
+        title: "Address Validation",
+        desc: "Ensure Pin Code, District, and State are accurately filled to maintain clean demographic records.",
+        image: "https://images.unsplash.com/photo-1523217582562-09d0def993a6?auto=format&fit=crop&q=80&w=800",
       },
     ],
   },
@@ -224,17 +225,21 @@ export const helpModules = [
     manual: [
       {
         step: 1,
-        title: "Initiate Renewal",
-        desc: "Locate an expired member and click 'Renew'. Confirm the duration and payment mode.",
-        image:
-          "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=800",
+        title: "Add New Subscription",
+        desc: "Select Member and Seat. Required: Duration (Days), Start Date, and Payment Mode (Cash/UPI/Card).",
+        image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=800",
       },
       {
         step: 2,
-        title: "Process Seat Transfer",
-        desc: "Move a member to a different seat without resetting their existing period.",
-        image:
-          "https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&q=80&w=800",
+        title: "Seat Assignment Logic",
+        desc: "Only available seats are shown. Selecting a seat automatically calculates the estimated amount based on price.",
+        image: "https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&q=80&w=800",
+      },
+      {
+        step: 3,
+        title: "Renewal & Transfers",
+        desc: "Easily renew expired plans or transfer a member to another seat while preserving their current timeline.",
+        image: "https://images.unsplash.com/photo-1434626881859-194d67b2b86f?auto=format&fit=crop&q=80&w=800",
       },
     ],
   },
@@ -296,17 +301,15 @@ export const helpModules = [
     manual: [
       {
         step: 1,
-        title: "Log System Expense",
-        desc: "Navigate to the Expense section, select a category, and enter the amount spent.",
-        image:
-          "https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&q=80&w=800",
+        title: "Add New Expense",
+        desc: "Required: Expense Title, Amount (₹), Category (Rent/Electric/etc.), and Date. Optional: Digital Receipt upload.",
+        image: "https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&q=80&w=800",
       },
       {
         step: 2,
-        title: "Analyze Profit Margins",
-        desc: "Use the Banking summary to see net profit after deducting expenses from revenue.",
-        image:
-          "https://images.unsplash.com/photo-1543286386-2e659306cd6c?auto=format&fit=crop&q=80&w=800",
+        title: "Expense Categories",
+        desc: "Ensure every expense is categorized correctly to generate accurate Profit & Loss reports in Banking.",
+        image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=800",
       },
     ],
   },
