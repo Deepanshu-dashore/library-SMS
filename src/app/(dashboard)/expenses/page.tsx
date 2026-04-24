@@ -8,6 +8,8 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/shared/Button";
+import * as XLSX from "xlsx";
+import { Icon } from "@iconify/react";
 
 interface ExpenseData {
   _id: string;
@@ -76,6 +78,42 @@ export default function ManageExpensesPage() {
     router.push(`/expenses/view/${row._id}`);
   };
 
+  const handleDownloadExcel = () => {
+    if (expenses.length === 0) {
+      toast.error("No expenses to export");
+      return;
+    }
+
+    const wb = XLSX.utils.book_new();
+    const now = new Date();
+    const formalDate = now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }).replace(/\s/g, "-");
+    const formalTime = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true }).replace(/[:\s]/g, "-");
+    const filename = `Expenses_${formalDate}_${formalTime}.xlsx`;
+
+    const rows = [
+      ["MANAGE EXPENSES REPORT"],
+      [],
+      ["Property", "Value"],
+      ["Total Amount", `₹${totalAmount.toLocaleString()}`],
+      ["Generated At", now.toLocaleString()],
+      [],
+      ["Title", "Amount", "Category", "Date", "Note"],
+      ...expenses.map(e => [
+        e.title, 
+        e.amount, 
+        e.category.charAt(0).toUpperCase() + e.category.slice(1), 
+        new Date(e.date).toLocaleDateString("en-IN"), 
+        e.note || "-"
+      ])
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws["!cols"] = [{ wch: 30 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 40 }];
+    XLSX.utils.book_append_sheet(wb, ws, "Expenses");
+    XLSX.writeFile(wb, filename);
+    toast.success("Expenses exported successfully");
+  };
+
   const columns: ColumnDef<ExpenseData>[] = [
     {
       key: "title",
@@ -131,6 +169,15 @@ export default function ManageExpensesPage() {
         ]}
         actionNode={
           <div className="flex items-center gap-4">
+            <Button
+               variant="outline"
+               size="md"
+               icon="vscode-icons:file-type-excel"
+               onClick={handleDownloadExcel}
+               className="font-bold text-emerald-600 font-medium border-emerald-100 hover:bg-emerald-50"
+             >
+               Export Excel
+            </Button>
              <Button variant="edit" hideIcon className="font-medium">
                  Total Expenses
                 <span className="font-semibold text-base tracking-tight font-barlow">₹{totalAmount.toLocaleString()}</span>

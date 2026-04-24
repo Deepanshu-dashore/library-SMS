@@ -17,6 +17,8 @@ import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SimpleLoader } from "@/components/shared/SimpleLoader";
 import { DataTable, ColumnDef, TabDef } from "@/components/shared/DataTable";
+import * as XLSX from "xlsx";
+import { Button } from "@/components/shared/Button";
 
 const CircularProgress = ({ value, icon, color1, color2, id }: { value: number; icon: string; color1: string; color2: string; id: string }) => {
   const radius = 24;
@@ -159,6 +161,43 @@ export default function PaymentManagement() {
     }
   ];
 
+  const handleDownloadExcel = () => {
+    if (payments.length === 0) {
+      toast.error("No payments to export");
+      return;
+    }
+
+    const wb = XLSX.utils.book_new();
+    const now = new Date();
+    const formalDate = now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }).replace(/\s/g, "-");
+    const formalTime = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true }).replace(/[:\s]/g, "-");
+    const filename = `Payments_${formalDate}_${formalTime}.xlsx`;
+
+    const rows = [
+      ["PAYMENT RECORDS REPORT"],
+      [],
+      ["Property", "Value"],
+      ["Total Revenue", `₹${stats?.total?.toLocaleString() || 0}`],
+      ["Total Transactions", stats?.count || 0],
+      ["Generated At", now.toLocaleString()],
+      [],
+      ["Member", "Amount", "Mode", "Receipt No.", "Date"],
+      ...payments.map(p => [
+        p.userId?.name || "Deleted User",
+        p.amount,
+        p.paymentMode.toUpperCase(),
+        p.receiptNumber,
+        new Date(p.createdAt).toLocaleDateString("en-IN")
+      ])
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws["!cols"] = [{ wch: 30 }, { wch: 15 }, { wch: 15 }, { wch: 20 }, { wch: 15 }];
+    XLSX.utils.book_append_sheet(wb, ws, "Payments");
+    XLSX.writeFile(wb, filename);
+    toast.success("Payments exported successfully");
+  };
+
   const tabs: TabDef[] = [
     { label: "All Payments", value: "All", count: stats?.count || 0, color: "default" },
     { label: "Cash", value: "cash", count: stats?.cash?.count || 0, color: "success" },
@@ -180,6 +219,17 @@ export default function PaymentManagement() {
             { label: "Dashboard", href: "/" },
             { label: "Payments" }
           ]}
+          actionNode={
+            <Button
+              variant="outline"
+              size="md"
+              icon="vscode-icons:file-type-excel"
+              onClick={handleDownloadExcel}
+              className="font-bold text-emerald-600 font-medium border-emerald-100 hover:bg-emerald-50"
+            >
+              Export Excel
+            </Button>
+          }
         />
 
         {/* Financial Summary */}

@@ -11,10 +11,12 @@ import {
 } from "recharts";
 import toast from "react-hot-toast";
 import { Icon } from "@iconify/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { DataTable, ColumnDef, TabDef } from "@/components/shared/DataTable";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 interface Transaction {
@@ -144,6 +146,7 @@ export default function BankingPage() {
   const [selectedYear, setSelectedYear] = useState<number>(CURRENT_YEAR);
   const [selectedMonth, setSelectedMonth] = useState<number>(0);
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -252,7 +255,14 @@ export default function BankingPage() {
 
     const doc = new jsPDF();
     const libraryName = currentUser?.libraryName || currentUser?.name || "My Library";
-    const dateStr = new Date().toLocaleString("en-IN", { 
+    
+    // Format filename: Banking_CurrentDateFormalFormat_TimeCurrent
+    const now = new Date();
+    const formalDate = now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }).replace(/\s/g, "-");
+    const formalTime = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true }).replace(/[:\s]/g, "-");
+    const filename = `Banking_${formalDate}_${formalTime}.pdf`;
+
+    const dateStr = now.toLocaleString("en-IN", { 
       day: "2-digit", month: "short", year: "numeric", 
       hour: "2-digit", minute: "2-digit" 
     });
@@ -352,8 +362,64 @@ export default function BankingPage() {
       });
     }
 
-    doc.save(`Banking_Report_${libraryName.replace(/\s+/g, '_')}_${dateStr.split(',')[0]}.pdf`);
-    toast.success("Financial report generated successfully");
+    doc.save(filename);
+    toast.success("PDF Financial report generated successfully");
+    setShowExportMenu(false);
+  };
+
+  const handleDownloadExcel = () => {
+    if (!data) return;
+
+    const wb = XLSX.utils.book_new();
+    const now = new Date();
+    const formalDate = now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }).replace(/\s/g, "-");
+    const formalTime = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true }).replace(/[:\s]/g, "-");
+    const filename = `Banking_${formalDate}_${formalTime}.xlsx`;
+
+    // 1. Summary Sheet
+    const summaryRows = [
+      ["FINANCIAL SUMMARY REPORT"],
+      [],
+      ["Property", "Value"],
+      ["Report Period", `${selectedYear} ${selectedMonth > 0 ? MONTHS[selectedMonth] : "(Yearly)"}`],
+      ["Generated At", now.toLocaleString()],
+      [],
+      ["Category", "Amount"],
+      ["Total Balance", totals.balance],
+      ["Total Income", totals.totalIncome],
+      ["Total Expenses", totals.totalExpense],
+    ];
+    const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
+    wsSummary["!cols"] = [{ wch: 25 }, { wch: 25 }];
+    XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
+
+    // 2. Payment Sheet
+    const incomeTx = data.transactions.filter(t => t.type === "income");
+    const incomeRows = [
+      ["PAYMENT TRANSACTIONS"],
+      [],
+      ["Date", "Description", "Amount", "Status"],
+      ...incomeTx.map(t => [fmtDate(t.date), t.title, t.amount, t.status])
+    ];
+    const wsIncome = XLSX.utils.aoa_to_sheet(incomeRows);
+    wsIncome["!cols"] = [{ wch: 15 }, { wch: 40 }, { wch: 15 }, { wch: 15 }];
+    XLSX.utils.book_append_sheet(wb, wsIncome, "Payment");
+
+    // 3. Expenses Sheet
+    const expenseTx = data.transactions.filter(t => t.type === "expense");
+    const expenseRows = [
+      ["EXPENSE TRANSACTIONS"],
+      [],
+      ["Date", "Description", "Category", "Amount", "Status"],
+      ...expenseTx.map(t => [fmtDate(t.date), t.title, t.category, t.amount, t.status])
+    ];
+    const wsExpenses = XLSX.utils.aoa_to_sheet(expenseRows);
+    wsExpenses["!cols"] = [{ wch: 15 }, { wch: 40 }, { wch: 15 }, { wch: 15 }, { wch: 15 }];
+    XLSX.utils.book_append_sheet(wb, wsExpenses, "Expenses");
+
+    XLSX.writeFile(wb, filename);
+    toast.success("Excel Financial report generated successfully");
+    setShowExportMenu(false);
   };
 
   return (
@@ -377,14 +443,48 @@ export default function BankingPage() {
             >
               {MONTHS.map((m, i) => <option key={m} value={i}>{m}</option>)}
             </select>
-            <Button
-              variant="outline"
-              size="sm"
-              icon="solar:download-bold"
-              onClick={handleDownloadReport}
-            >
-              Download Report
-            </Button>
+            <div className="relative">
+              <Button
+                variant="outline"
+                size="sm"
+                icon="solar:download-bold"
+                onClick={() => setShowExportMenu(!showExportMenu)}
+              >
+                Download Report
+              </Button>
+              <AnimatePresence>
+                {showExportMenu && (
+                  <>
+                    <motion.div 
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                      className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)} 
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-2xl z-50 overflow-hidden"
+                    >
+                      <button
+                        onClick={handleDownloadReport}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-700 hover:bg-slate-50 transition-colors"
+                      >
+                        <Icon icon="solar:document-text-bold" className="text-indigo-500 text-lg" />
+                        Export as PDF
+                      </button>
+                      <div className="h-px bg-gray-50" />
+                      <button
+                        onClick={handleDownloadExcel}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-700 hover:bg-slate-50 transition-colors"
+                      >
+                        <Icon icon="solar:file-text-bold" className="text-emerald-500 text-lg" />
+                        Export as Excel
+                      </button>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         }
       />

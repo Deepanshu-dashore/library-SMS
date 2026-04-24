@@ -21,6 +21,8 @@ import { Button } from "@/components/shared/Button";
 import { StatsCard } from "@/components/shared/StatsCard";
 import { SimpleLoader } from "@/components/shared/SimpleLoader";
 import SeatCalendar from "./SeatCalendar";
+import * as XLSX from "xlsx";
+import { Icon } from "@iconify/react";
 
 interface Subscription {
   _id: string;
@@ -169,6 +171,44 @@ export default function SubscriptionManagement() {
     }
   ];
 
+  const handleDownloadExcel = () => {
+    if (subscriptions.length === 0) {
+      toast.error("No subscriptions to export");
+      return;
+    }
+
+    const wb = XLSX.utils.book_new();
+    const now = new Date();
+    const formalDate = now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }).replace(/\s/g, "-");
+    const formalTime = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true }).replace(/[:\s]/g, "-");
+    const filename = `Subscriptions_${formalDate}_${formalTime}.xlsx`;
+
+    const rows = [
+      ["SUBSCRIPTION MANAGEMENT REPORT"],
+      [],
+      ["Property", "Value"],
+      ["Total Subscriptions", stats.totalSub],
+      ["Active Subscriptions", stats.totalActive],
+      ["Generated At", now.toLocaleString()],
+      [],
+      ["Member", "Email", "Seat Number", "Start Date", "End Date", "Status"],
+      ...subscriptions.map(s => [
+        s.userId?.name || "Unknown",
+        s.userId?.email || "No email",
+        s.seatId?.seatNumber || "-",
+        new Date(s.startDate).toLocaleDateString("en-IN"),
+        new Date(s.endDate).toLocaleDateString("en-IN"),
+        s.status.toUpperCase()
+      ])
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws["!cols"] = [{ wch: 25 }, { wch: 30 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }];
+    XLSX.utils.book_append_sheet(wb, ws, "Subscriptions");
+    XLSX.writeFile(wb, filename);
+    toast.success("Subscriptions exported successfully");
+  };
+
   const additionalActions: ActionDef<Subscription>[] = [
     {
       label: "Renew",
@@ -213,14 +253,25 @@ export default function SubscriptionManagement() {
             { label: "Subscriptions" }
           ]}
           actionNode={
-            <Button
-               onClick={() => router.push("/subscriptions/add")}
-               variant="primary"
-               className="bg-indigo-600 hover:bg-indigo-700 font-medium rounded-2xl px-6 py-3 shadow-xl shadow-indigo-100"
-            >
-               <Plus className="text-xl" />
-               Add Subscription
-            </Button>
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="md"
+                icon="vscode-icons:file-type-excel"
+                onClick={handleDownloadExcel}
+                className="font-bold text-emerald-600 font-medium border-emerald-100 hover:bg-emerald-50"
+              >
+                Export Excel
+              </Button>
+              <Button
+                 onClick={() => router.push("/subscriptions/add")}
+                 variant="primary"
+                 className="bg-indigo-600 hover:bg-indigo-700 font-medium rounded-2xl px-6 py-3 shadow-xl shadow-indigo-100"
+              >
+                 <Plus className="text-xl" />
+                 Add Subscription
+              </Button>
+            </div>
           }
         />
 
