@@ -6,7 +6,9 @@ export function proxy(request: NextRequest) {
 
   // Define public paths that don't require authentication
   const isPublicPath =
-    path === "/login" || path === "/register" || path.startsWith("/status/");
+    path === "/login" ||
+    path === "/registration" ||
+    path.startsWith("/status/");
 
   // Get token from cookies
   const token = request.cookies.get("__lms_token")?.value || "";
@@ -17,7 +19,7 @@ export function proxy(request: NextRequest) {
   }
 
   // If trying to access login/register while already logged in
-  if ((path === "/login" || path === "/register") && token) {
+  if ((path === "/login" || path === "/registration") && token) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 

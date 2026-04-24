@@ -161,7 +161,7 @@ export default function UserManagement() {
             <div className="flex gap-4">
                <Button
                   onClick={() => {
-                    const url = `${window.location.origin}/register`;
+                    const url = `${window.location.origin}/registration`;
                     navigator.clipboard.writeText(url);
                     toast.success("Registration link copied!");
                   }}
