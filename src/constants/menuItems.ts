@@ -16,6 +16,19 @@ export const MENU_ITEMS = [
     ],
   },
 
+  // CORE BUSINESS
+  {
+    title: "Subscriptions",
+    path: "/subscriptions",
+    icon: "solar:ticket-bold-duotone",
+    subItems: [
+      { name: "Manage Subscriptions", path: "/subscriptions" },
+      { name: "Seat Calendar", path: "/seat-calendar" },
+      { name: "Add Subscription", path: "/subscriptions/add" },
+    ],
+  },
+
+
   // RESOURCE
   {
     title: "Seat Management",
@@ -28,17 +41,6 @@ export const MENU_ITEMS = [
     ],
   },
 
-  // CORE BUSINESS
-  {
-    title: "Subscriptions",
-    path: "/subscriptions",
-    icon: "solar:ticket-bold-duotone",
-    subItems: [
-      { name: "Manage Subscriptions", path: "/subscriptions" },
-      { name: "Seat Calendar", path: "/seat-calendar" },
-      { name: "Add Subscription", path: "/subscriptions/add" },
-    ],
-  },
 
   // MONEY FLOW
   {
@@ -64,13 +66,14 @@ export const MENU_ITEMS = [
     icon: "duo-icons:bank",
   },
 
-  // LOW PRIORITY
+  // SUPPORT
   {
-    title: "Recycle Bin",
-    path: "/trash",
-    icon: "solar:trash-bin-trash-bold-duotone",
+    title: "User Guide",
+    path: "/help-center",
+    icon: "solar:document-bold-duotone",
   },
 
+  // SYSTEM
   {
     title: "Settings",
     path: "/settings",
@@ -79,5 +82,12 @@ export const MENU_ITEMS = [
       { name: "Profile", path: "/settings" },
       { name: "Personalization", path: "/settings/personalization" },
     ],
+  },
+
+  // MAINTENANCE
+  {
+    title: "Recycle Bin",
+    path: "/trash",
+    icon: "solar:trash-bin-trash-bold-duotone",
   },
 ];
