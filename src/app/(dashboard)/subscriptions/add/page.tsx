@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -45,6 +45,15 @@ export default function AddSubscriptionPage() {
 
   const [memberSearch, setMemberSearch] = useState("");
   const [showMemberDropdown, setShowMemberDropdown] = useState(false);
+  const searchParams = useSearchParams();
+  const memberIdParam = searchParams.get("memberId");
+
+  // Handle pre-selected member from query param
+  useEffect(() => {
+    if (memberIdParam) {
+      setFormData(prev => ({ ...prev, userId: memberIdParam }));
+    }
+  }, [memberIdParam]);
 
   useEffect(() => {
     const fetchData = async () => {

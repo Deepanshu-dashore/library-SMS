@@ -238,7 +238,7 @@ export default function CreateUserPage() {
 
       if (data.success) {
         toast.success("Member created successfully!", { id: loadingToast });
-        router.push("/users");
+        router.push(`/subscriptions/add?memberId=${data.data._id}`);
       } else {
         toast.error(data.message || "Failed to create user", { id: loadingToast });
       }
