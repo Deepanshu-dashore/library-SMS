@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
 import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 import { Button } from "@/components/shared/Button";
 import { FEATURE_SLIDES } from "@/constants/dashboard";
 import DashbordFigur from "@/components/shared/DashbordFigur";
@@ -121,6 +122,26 @@ export default function DashboardPage() {
 
   const nextSlide = () => setActiveSlide((prev) => (prev + 1) % FEATURE_SLIDES.length);
   const prevSlide = () => setActiveSlide((prev) => (prev - 1 + FEATURE_SLIDES.length) % FEATURE_SLIDES.length);
+
+  const handleShareRegistration = async () => {
+    const url = `${window.location.origin}/registration`;
+    const shareText = `📚 *Library Member Registration*\n\nWelcome to our Library Management System! Please register your membership using the official portal link below:\n\n🔗 ${url}\n\n*Note:* After registration, please visit the library desk with your physical Aadhar card for biometric verification and seat allocation.`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Library Registration Portal',
+          text: shareText,
+        });
+      } catch (error) {
+        navigator.clipboard.writeText(shareText);
+        toast.success("Shareable message copied!");
+      }
+    } else {
+      navigator.clipboard.writeText(shareText);
+      toast.success("Shareable message copied!");
+    }
+  };
 
   return (
     <div className="space-y-10 font-public-sans animate-in fade-in duration-1000">
@@ -254,16 +275,24 @@ export default function DashboardPage() {
           </div>
           <div className="flex flex-wrap items-center gap-3 flex-1 justify-end">
             {[
+              { label: "Share Form", icon: "solar:share-bold-duotone", onClick: handleShareRegistration, color: " text-indigo-600 border-indigo-200" },
               { label: "Add Member", icon: "solar:user-plus-bold-duotone", href: "/users/create", color: " text-emerald-600 border-emerald-200" },
               { label: "Assign Seat", icon: "solar:armchair-bold-duotone", href: "/seat-management/add", color: " text-blue-600 border-blue-200" },
               { label: "Add Subscription", icon: "solar:ticket-bold-duotone", href: "/subscriptions/add", color: " text-purple-600 border-purple-200" },
               { label: "Payment", icon: "solar:card-bold-duotone", href: "/payments", color: " text-amber-600 border-amber-200" },
               { label: "Add Expense", icon: "solar:bill-list-bold-duotone", href: "/expenses/add", color: " text-rose-600 border-rose-200" },
             ].map((action, i) => (
-              <a key={i} href={action.href} className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg border ${action.color} hover:scale-105 transition-all group backdrop-blur-sm`}>
-                <Icon icon={action.icon} width={18} className="group-hover:rotate-12 transition-transform"/>
-                <span className="text-sm font-medium truncate">{action.label}</span>
-              </a>
+              action.href ? (
+                <a key={i} href={action.href} className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg border ${action.color} hover:scale-105 transition-all group backdrop-blur-sm`}>
+                  <Icon icon={action.icon} width={18} className="group-hover:rotate-12 transition-transform"/>
+                  <span className="text-sm font-medium truncate">{action.label}</span>
+                </a>
+              ) : (
+                <button key={i} onClick={action.onClick} className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg border cursor-pointer ${action.color} hover:scale-105 transition-all group backdrop-blur-sm`}>
+                  <Icon icon={action.icon} width={18} className="group-hover:rotate-12 transition-transform"/>
+                  <span className="text-sm font-medium truncate">{action.label}</span>
+                </button>
+              )
             ))}
           </div>
         </div>

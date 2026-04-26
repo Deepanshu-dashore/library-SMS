@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Link as LinkIcon, Users, UserCheck, UserX, Clock, Trash2 } from "lucide-react";
+import { Plus, Share2, Users, UserCheck, UserX, Clock, Trash2 } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -160,16 +160,31 @@ export default function UserManagement() {
           actionNode={
             <div className="flex gap-4">
                <Button
-                  onClick={() => {
+                  onClick={async () => {
                     const url = `${window.location.origin}/registration`;
-                    navigator.clipboard.writeText(url);
-                    toast.success("Registration link copied!");
+                    const shareText = `📚 *Library Member Registration*\n\nWelcome to our Library Management System! Please register your membership using the official portal link below:\n\n🔗 ${url}\n\n*Note:* After registration, please visit the library desk with your physical Aadhar card for biometric verification and seat allocation.`;
+
+                    if (navigator.share) {
+                      try {
+                        await navigator.share({
+                          title: 'Library Registration Portal',
+                          text: shareText,
+                        });
+                      } catch (error) {
+                        // User cancelled or share failed, fallback to copy
+                        navigator.clipboard.writeText(shareText);
+                        toast.success("Shareable message copied!");
+                      }
+                    } else {
+                      navigator.clipboard.writeText(shareText);
+                      toast.success("Shareable message copied!");
+                    }
                   }}
                   variant="outline"
-                  className="rounded-2xl px-4 py-1 font-medium"
+                  className="rounded-2xl px-4 py-1 font-medium text-indigo-600 border-indigo-100 hover:bg-indigo-50"
                >
-                  <LinkIcon className="w-4 h-4" />
-                  Copy Link
+                  <Share2 className="w-4 h-4" />
+                  Share Link
                </Button>
                <Button
                   onClick={() => router.push("/users/create")}

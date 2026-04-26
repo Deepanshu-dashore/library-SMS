@@ -216,16 +216,8 @@ export class SubscriptionService {
       }
       if (durationDays <= 0) throw Error("Invalid duration");
 
-      let baseDate;
-
-      if (subscription.endDate >= today) {
-        // still active, extend from current end date
-        baseDate = new Date(subscription.endDate);
-      } else {
-        // expired, start from today
-        baseDate = today;
-        subscription.startDate = today;
-      }
+      // Always extend from current end date to maintain continuity, as per user requirement
+      const baseDate = new Date(subscription.endDate);
 
       const validModes = ["cash", "upi", "card"];
       if (!validModes.includes(paymentMode)) {
