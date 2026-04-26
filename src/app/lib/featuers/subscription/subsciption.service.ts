@@ -18,7 +18,8 @@ export class SubscriptionService {
     session.startTransaction();
     try {
       const endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + durationDays);
+      endDate.setDate(endDate.getDate() + durationDays - 1); // -1 because start day is inclusive
+      endDate.setHours(23, 59, 59, 999);
       const seat = await Seat.findById(seatId).session(session);
       if (!seat) {
         throw new Error("Seat not found");
@@ -233,6 +234,7 @@ export class SubscriptionService {
 
       const newEndDate = new Date(baseDate);
       newEndDate.setDate(newEndDate.getDate() + durationDays);
+      newEndDate.setHours(23, 59, 59, 999);
 
       subscription.endDate = newEndDate;
       subscription.status = "active";
@@ -309,6 +311,7 @@ export class SubscriptionService {
   static async getAllSubscription(filterQuery?: any) {
     await connectDB();
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     // Base stats calculation
     const totalActive = await Subscription.countDocuments({

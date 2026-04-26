@@ -43,6 +43,9 @@ export default function AddSubscriptionPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 18; // Show 18 seats per set (3x6 or similar)
 
+  const [memberSearch, setMemberSearch] = useState("");
+  const [showMemberDropdown, setShowMemberDropdown] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -110,6 +113,13 @@ export default function AddSubscriptionPage() {
     setCurrentPage(1);
   }, [selectedFloor]);
 
+  const filteredUsers = users.filter(user => 
+    user.name.toLowerCase().includes(memberSearch.toLowerCase()) || 
+    user.number.includes(memberSearch)
+  );
+
+  const selectedMember = users.find(u => u._id === formData.userId);
+
   return (
     <div className="bg-gray-50/50 min-h-screen">
       <div className="max-w-6xl">
@@ -140,29 +150,84 @@ export default function AddSubscriptionPage() {
                   </div>
                 </div>
 
-                {/* Section 1: Member Selection */}
-                <div className="space-y-2">
+                {/* Section 1: Member Selection (Searchable) */}
+                <div className="space-y-2 relative">
                   <div>
                     <label className="block text-[15px] font-public-sans font-bold text-gray-900">Member</label>
                     <p className="text-[13px] font-public-sans text-gray-500 mt-0.5 mb-2">Search and select an active member account.</p>
                   </div>
-                  <div className="relative">
-                    <select
-                      required
-                      value={formData.userId}
-                      onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
-                      className="w-full px-4 py-4 bg-white border border-gray-300/60 rounded-xl text-[15px] font-public-sans text-gray-900 outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 hover:border-gray-400 transition-all appearance-none cursor-pointer"
+                  
+                  <div className="relative group">
+                    <div 
+                      onClick={() => setShowMemberDropdown(!showMemberDropdown)}
+                      className={`w-full px-4 py-4 bg-white border rounded-xl text-[15px] font-public-sans text-gray-900 outline-none transition-all cursor-pointer flex items-center justify-between ${
+                        showMemberDropdown ? "border-indigo-600 ring-1 ring-indigo-600" : "border-gray-300/60 hover:border-gray-400"
+                      }`}
                     >
-                      <option value="">Choose a member...</option>
-                      {users.map((user) => (
-                        <option key={user._id} value={user._id}>
-                          {user.name} ({user.number})
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                      <Icon icon="solar:alt-arrow-down-linear" width={20} height={20} />
+                      <div className="flex items-center gap-3">
+                        <Icon icon="solar:user-circle-bold-duotone" width={22} height={22} className={selectedMember ? "text-indigo-600" : "text-gray-400"} />
+                        <span className={selectedMember ? "text-gray-900 font-medium" : "text-gray-400"}>
+                          {selectedMember ? `${selectedMember.name} (${selectedMember.number})` : "Choose a member..."}
+                        </span>
+                      </div>
+                      <Icon icon={showMemberDropdown ? "solar:alt-arrow-up-linear" : "solar:alt-arrow-down-linear"} width={20} height={20} className="text-gray-500" />
                     </div>
+
+                    {showMemberDropdown && (
+                      <div className="absolute z-50 left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="p-3 border-b border-gray-100 bg-gray-50/50">
+                          <div className="relative">
+                            <Icon icon="solar:magnifer-linear" width={18} height={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <input
+                              type="text"
+                              autoFocus
+                              placeholder="Search by name or number..."
+                              value={memberSearch}
+                              onChange={(e) => setMemberSearch(e.target.value)}
+                              className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-indigo-500 transition-all"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="max-h-[280px] overflow-y-auto custom-scrollbar">
+                          {filteredUsers.length === 0 ? (
+                            <div className="p-8 text-center">
+                              <Icon icon="solar:user-block-outline" width={40} height={40} className="mx-auto text-gray-300 mb-2" />
+                              <p className="text-sm text-gray-500 font-medium">No members found</p>
+                            </div>
+                          ) : (
+                            filteredUsers.map((user) => (
+                              <div
+                                key={user._id}
+                                onClick={() => {
+                                  setFormData({ ...formData, userId: user._id });
+                                  setShowMemberDropdown(false);
+                                  setMemberSearch("");
+                                }}
+                                className={`px-4 py-2 border-t border-dashed border-gray-200 hover:bg-indigo-50 cursor-pointer transition-colors flex items-center justify-between group/item ${
+                                  formData.userId === user._id ? "bg-indigo-50/50" : ""
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-8 h-8 rounded-sm flex items-center justify-center text-xs font-bold ${
+                                    formData.userId === user._id ? "bg-indigo-600/70 text-gray-50" : "bg-gray-100 text-gray-500 group-hover/item:bg-indigo-100 group-hover/item:text-indigo-600"
+                                  }`}>
+                                    {user.name.charAt(0)}
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <p className={`text-[14px] capitalize font-semibold ${formData.userId === user._id ? "text-indigo-600" : "text-gray-900"}`}>{user.name}</p>
+                                    <p className="text-[12px] font-barlow font-semibold text-gray-600">({user.number})</p>
+                                  </div>
+                                </div>
+                                {formData.userId === user._id && (
+                                  <Icon icon="solar:check-circle-bold" width={20} height={20} className="text-indigo-600" />
+                                )}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

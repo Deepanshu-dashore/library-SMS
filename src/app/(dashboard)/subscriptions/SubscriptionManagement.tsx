@@ -141,6 +141,7 @@ export default function SubscriptionManagement() {
        type: "status",
        getStatus: (row) => {
           const today = new Date();
+          today.setHours(0, 0, 0, 0);
           const end = new Date(row.endDate);
           if (row.status === "cancelled") return "Cancelled";
           if (end < today) return "Expired";
@@ -168,7 +169,37 @@ export default function SubscriptionManagement() {
           </div>
         )
       }
-    }
+    },{
+      key: "daysLeft",
+      label: "Days Left",
+      type: "custom",
+      render: (row) => {
+        const today = new Date();
+        const end = new Date(row.endDate);
+        const diff = end.getTime() - today.getTime();
+        const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+        
+        if (row.status === "cancelled") return <span className="text-gray-400 font-medium">-</span>;
+        
+        if (days < 0) return (
+          <div className="flex items-center font-barlow gap-1.5 text-rose-600 font-medium text-sm">
+            Expired
+          </div>
+        );
+        
+        if (days <= 5) return (
+          <div className="flex items-center font-barlow gap-1.5 text-amber-600 font-medium text-sm">
+            {days} Days Left
+          </div>
+        );
+        
+        return (
+          <div className="flex items-center font-barlow gap-1.5 text-gray-800 font-medium text-sm">
+            {days} Days Left
+          </div>
+        );
+      }
+    },
   ];
 
   const handleDownloadExcel = () => {
