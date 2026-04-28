@@ -286,33 +286,74 @@ export default function ViewPaymentPage() {
     }
   };
 
+  const [sendingEmail, setSendingEmail] = useState(false);
+
+  const handleSendEmail = async () => {
+    if (!payment?.userId?.email) {
+      toast.error("User doesn't have an email address");
+      return;
+    }
+
+    setSendingEmail(true);
+    try {
+      const res = await fetch(`/api/payment/${id}/send-email`, {
+        method: "POST",
+      });
+      const result = await res.json();
+      if (result.success) {
+        toast.success("Receipt sent to email successfully!");
+      } else {
+        toast.error(result.message || "Failed to send email");
+      }
+    } catch (error) {
+      toast.error("An error occurred while sending email");
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   if (loading) return <SimpleLoader text="Generating Receipt" />;
-  if (!payment) return <div className="p-10 text-center font-black text-rose-500 bg-rose-50 rounded-2xl mx-10 mt-10">Receipt record not found</div>;
+  if (!payment)
+    return (
+      <div className="p-10 text-center font-black text-rose-500 bg-rose-50 rounded-2xl mx-10 mt-10">
+        Receipt record not found
+      </div>
+    );
 
   return (
     <div className="selection:bg-gray-100 selection:text-gray-900">
       <div className="max-w-6xl">
-        <PageHeader 
+        <PageHeader
           title="Payment Details"
           breadcrumbs={[
             { label: "Dashboard", href: "/" },
             { label: "Payments", href: "/payments" },
-            { label: `Receipt #${payment.receiptNumber}` }
+            { label: `Receipt #${payment.receiptNumber}` },
           ]}
           backLink="/payments"
           actionNode={
             <div className="flex gap-2">
-               <Button
-                  onClick={handleDownloadPDF}
-                  variant="primary"
-                  size="sm"
-                  icon="solar:printer-line-duotone"
-                  // color="#111827"
-                  className="px-6 py-2.5 font-medium flex items-center gap-2"
-               >
-                  {/* <Printer size={16} /> */}
-                  Print Receipt
-               </Button>
+              <Button
+                onClick={handleSendEmail}
+                variant="secondary"
+                size="sm"
+                loading={sendingEmail}
+                icon="solar:letter-line-duotone"
+                className="px-6 py-2.5 font-medium flex items-center gap-2"
+              >
+                Email Receipt
+              </Button>
+              <Button
+                onClick={handleDownloadPDF}
+                variant="primary"
+                size="sm"
+                icon="solar:printer-line-duotone"
+                // color="#111827"
+                className="px-6 py-2.5 font-medium flex items-center gap-2"
+              >
+                {/* <Printer size={16} /> */}
+                Print Receipt
+              </Button>
             </div>
           }
         />

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { connectDB } from "../../db/connectDB";
 import { User } from "./user.model";
 
@@ -45,40 +46,46 @@ export class UserService {
 
     // Perform queries in parallel for better performance
     // Individual countDocuments on indexed fields is often faster than aggregation for simple totals
-    const [users, total, activeCount, inactiveCount, unverifyCount, withoutSeatCount] =
-      await Promise.all([
-        User.find(finalFilter)
-          .select("name email number category status course photo createdAt")
-          .sort({ createdAt: -1 })
-          .skip((page - 1) * limit)
-          .limit(limit)
-          .lean(),
-        User.countDocuments(finalFilter),
-        User.countDocuments({ status: "Active", isDeleted: { $ne: true } }),
-        User.countDocuments({ status: "Inactive", isDeleted: { $ne: true } }),
-        User.countDocuments({ status: "Unverify", isDeleted: { $ne: true } }),
-        User.aggregate([
-          { $match: { isDeleted: { $ne: true } } },
-          {
-            $lookup: {
-              from: "subscriptions",
-              let: { userId: "$_id" },
-              pipeline: [
-                {
-                  $match: {
-                    $expr: { $eq: ["$userId", "$$userId"] },
-                    status: "active",
-                    endDate: { $gte: new Date() },
-                  },
+    const [
+      users,
+      total,
+      activeCount,
+      inactiveCount,
+      unverifyCount,
+      withoutSeatCount,
+    ] = await Promise.all([
+      User.find(finalFilter)
+        .select("name email number category status course photo createdAt")
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+      User.countDocuments(finalFilter),
+      User.countDocuments({ status: "Active", isDeleted: { $ne: true } }),
+      User.countDocuments({ status: "Inactive", isDeleted: { $ne: true } }),
+      User.countDocuments({ status: "Unverify", isDeleted: { $ne: true } }),
+      User.aggregate([
+        { $match: { isDeleted: { $ne: true } } },
+        {
+          $lookup: {
+            from: "subscriptions",
+            let: { userId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $eq: ["$userId", "$$userId"] },
+                  status: "active",
+                  endDate: { $gte: new Date() },
                 },
-              ],
-              as: "activeSubscriptions",
-            },
+              },
+            ],
+            as: "activeSubscriptions",
           },
-          { $match: { activeSubscriptions: { $size: 0 } } },
-          { $count: "count" }
-        ]).then(res => res[0]?.count || 0)
-      ]);
+        },
+        { $match: { activeSubscriptions: { $size: 0 } } },
+        { $count: "count" },
+      ]).then((res) => res[0]?.count || 0),
+    ]);
 
     let finalUsers = users;
     let finalTotal = total;
@@ -107,7 +114,18 @@ export class UserService {
         { $sort: { createdAt: -1 } },
         { $skip: (page - 1) * limit },
         { $limit: limit },
-        { $project: { name: 1, email: 1, number: 1, category: 1, status: 1, course: 1, photo: 1, createdAt: 1 } }
+        {
+          $project: {
+            name: 1,
+            email: 1,
+            number: 1,
+            category: 1,
+            status: 1,
+            course: 1,
+            photo: 1,
+            createdAt: 1,
+          },
+        },
       ]);
       finalUsers = aggResult;
       finalTotal = withoutSeatCount;
@@ -121,7 +139,7 @@ export class UserService {
         active: activeCount,
         inactive: inactiveCount,
         unverify: unverifyCount,
-        withoutSeat: withoutSeatCount
+        withoutSeat: withoutSeatCount,
       },
     };
   }
@@ -146,20 +164,44 @@ export class UserService {
 
   static async deleteUserService(id: string) {
     await connectDB();
-    // Check for active subscriptions
-    const activeSubscription = await Subscription.findOne({
-      userId: id,
-      status: "active",
-      endDate: { $gte: new Date() },
-    }).populate("seatId");
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      // Find active subscriptions for the user to free up their currently occupied seats
+      const activeSubscriptions = await Subscription.find({
+        userId: id,
+        status: "active",
+        endDate: { $gte: new Date() },
+      }).session(session);
 
-    if (activeSubscription) {
-      const seat = activeSubscription.seatId as any;
-      throw new Error(
-        `Cannot delete member. They have an active subscription for seat ${seat?.seatNumber || "N/A"}.`,
-      );
+      // Get all seat IDs associated with active subscriptions
+      const seatIds = activeSubscriptions
+        .map((sub: any) => sub.seatId)
+        .filter(Boolean);
+
+      if (seatIds.length > 0) {
+        // Mark only the active seats as available
+        await Seat.updateMany(
+          { _id: { $in: seatIds } },
+          { $set: { status: "available" } },
+          { session },
+        );
+      }
+
+      // Delete all related records
+      await Subscription.deleteMany({ userId: id }, { session });
+      await Payment.deleteMany({ userId: id }, { session });
+
+      // Finally delete the user
+      const user = await User.findByIdAndDelete(id).session(session);
+
+      await session.commitTransaction();
+      return user;
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
     }
-    const user = await User.findByIdAndDelete(id);
-    return user;
   }
 }

@@ -37,4 +37,19 @@ export class PaymentController {
       return ApiResponse(500, null, "Failed to fetch payment");
     }
   }
+
+  static async sendReceiptEmail(params: Promise<{ id: string }>) {
+    await connectDB();
+    const library = await verifyJWT();
+    if (!library) {
+      return ApiResponse(401, null, "Unauthorized");
+    }
+    const { id } = await params;
+    try {
+      await PaymentService.sendReceiptEmail(id, library);
+      return ApiResponse(200, null, "Receipt email sent successfully");
+    } catch (error: any) {
+      return ApiResponse(500, null, error.message || "Failed to send receipt email");
+    }
+  }
 }
