@@ -310,7 +310,7 @@ export default function PublicReceiptPage() {
         {/* Central Illustration: Payment.jpg */}
         <div className="flex flex-col items-center mb-8">
            <div className="w-48 h-40 relative mb-0 overflow-hidden rounded-2xl">
-              <img src="/Payment.jpg" className="w-full h-full object-cover" alt="Payment Illustration" />
+              <img src="/Payment.webp" className="w-full h-full object-cover" alt="Payment Illustration" />
            </div>
            <h2 className="text-2xl font-barlow font-bold text-[#036d61] capitalize mb-2">{library.name}</h2>
            <h1 className="text-lg font-semibold text-gray-800 text-center leading-tight tracking-tight">Payment Receipt</h1>
