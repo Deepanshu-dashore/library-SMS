@@ -49,6 +49,7 @@ export default function ViewPaymentPage() {
   const { currentUser } = useSelector((state: any) => state.user);
   const [payment, setPayment] = useState<PaymentDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     const fetchPayment = async () => {
@@ -74,7 +75,8 @@ export default function ViewPaymentPage() {
   };
 
   const handleDownloadPDF = async () => {
-    if (!payment) return;
+    if (!payment || downloading) return;
+    setDownloading(true);
     
     const doc = new jsPDF('p', 'mm', 'a4');
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -283,6 +285,8 @@ export default function ViewPaymentPage() {
     } catch (error) {
       console.error(error);
       toast.error("Failed to generate PDF");
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -398,6 +402,7 @@ export default function ViewPaymentPage() {
                 onClick={handleDownloadPDF}
                 variant="primary"
                 size="sm"
+                isLoading={downloading}
                 icon="solar:printer-line-duotone"
                 // color="#111827"
                 className="px-6 py-2.5 font-medium flex items-center gap-2"

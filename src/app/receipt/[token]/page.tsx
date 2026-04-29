@@ -60,6 +60,7 @@ export default function PublicReceiptPage() {
   
   const [data, setData] = useState<{ payment: PaymentDetails; library: LibraryDetails } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -82,7 +83,8 @@ export default function PublicReceiptPage() {
   }, [token]);
 
   const handleDownloadPDF = async () => {
-    if (!data) return;
+    if (!data || downloading) return;
+    setDownloading(true);
     const { payment, library } = data;
     
     const doc = new jsPDF('p', 'mm', 'a4');
@@ -269,6 +271,8 @@ export default function PublicReceiptPage() {
     } catch (error) {
       console.error(error);
       toast.error("Failed to generate PDF");
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -310,9 +314,9 @@ export default function PublicReceiptPage() {
         {/* Central Illustration: Payment.webp */}
         <div className="flex flex-col items-center mb-8 text-center">
            <div className="w-48 h-40 relative mb-0 overflow-hidden rounded-2xl">
-              <img src="/Payment.webp" className="w-full h-full object-cover" alt="Payment Illustration" />
+              <img src="/PaymentIllu.webp" className="w-full h-full object-cover" alt="Payment Illustration" />
            </div>
-           <h2 className="text-2xl font-barlow font-bold text-[#036d61] capitalize mb-2">{library.name}</h2>
+           <h2 className="md:text-2xl text-xl font-barlow font-bold text-[#036d61] capitalize! mb-2">{library.name}</h2>
            <h1 className="text-lg font-semibold text-gray-800 text-center leading-tight tracking-tight">Payment Receipt</h1>
         </div>
 
@@ -351,6 +355,7 @@ export default function PublicReceiptPage() {
         <div className="mt-auto pt-8 border-t-2 border-dashed border-gray-100 flex flex-col items-center">
            <Button 
              onClick={handleDownloadPDF}
+             isLoading={downloading}
              className="w-full py-3 rounded-2xl bg-gray-900 hover:bg-black text-white flex flex-col items-center justify-center gap-1 shadow-2xl transition-all active:scale-[0.98] group"
            >
               <div className="flex items-center gap-2">
