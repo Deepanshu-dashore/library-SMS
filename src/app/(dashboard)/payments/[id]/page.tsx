@@ -288,6 +288,47 @@ export default function ViewPaymentPage() {
 
   const [sendingEmail, setSendingEmail] = useState(false);
 
+  const [sharing, setSharing] = useState(false);
+
+  const handleShareReceipt = async () => {
+    if (!payment) return;
+    setSharing(true);
+    try {
+      const res = await fetch(`/api/payment/${id}/share-link`);
+      const result = await res.json();
+      
+      if (result.success) {
+        const url = result.link;
+        const capitalizedName = payment.userId.name.replace(/\b\w/g, (l: string) => l.toUpperCase());
+        const shareText = "*Payment Received:* ₹" + payment.amount.toLocaleString('en-IN') + " (Seat " + payment.subscriptionId.seatId.seatNumber + ")\n\n" +
+                         "Hi " + capitalizedName + ", your payment has been successfully received.\n\n" +
+                         "*Download receipt:*\n" + url + "\n\n" +
+                         "Link valid for 24 hrs.";
+
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: 'Payment Receipt',
+              text: shareText,
+            });
+          } catch (error) {
+            navigator.clipboard.writeText(shareText);
+            toast.success("Receipt link copied!");
+          }
+        } else {
+          navigator.clipboard.writeText(shareText);
+          toast.success("Receipt link copied!");
+        }
+      } else {
+        toast.error(result.message || "Failed to generate share link");
+      }
+    } catch (error) {
+      toast.error("An error occurred while sharing");
+    } finally {
+      setSharing(false);
+    }
+  };
+
   const handleSendEmail = async () => {
     if (!payment?.userId?.email) {
       toast.error("User doesn't have an email address");
@@ -333,6 +374,16 @@ export default function ViewPaymentPage() {
           backLink="/payments"
           actionNode={
             <div className="flex gap-2">
+              <Button
+                onClick={handleShareReceipt}
+                variant="outline"
+                size="sm"
+                isLoading={sharing}
+                icon="solar:whatsapp-line-duotone"
+                className="px-6 py-2.5 font-medium flex items-center gap-2 border-emerald-100 text-emerald-600 hover:bg-emerald-50"
+              >
+                Share Link
+              </Button>
               <Button
                 onClick={handleSendEmail}
                 variant="secondary"

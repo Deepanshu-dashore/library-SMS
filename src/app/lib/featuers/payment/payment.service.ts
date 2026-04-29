@@ -1,6 +1,7 @@
 import { mail } from "../../services/mail.service";
 import { Payment } from "./payment.model";
 import { MailTemplates } from "../../templates/mailTemplates";
+import { JWTHelper } from "../../utils/JWTHelper";
 
 export class PaymentService {
   static async getAllPayment(search?: string, mode?: string) {
@@ -98,6 +99,18 @@ export class PaymentService {
         `Payment Receipt - ${payment.receiptNumber}`,
         htmlBody,
       );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async receiptLink(id:string , library:any){
+    try {
+      const payment: any = await this.getPaymentById(id);
+      if (!payment) throw new Error("Payment not found");
+      const linkId = JWTHelper.generateToken({ id, libraryId: library._id }, { expiresIn: '24h' });
+      const link = `/receipt/${linkId}`;
+      return link;
     } catch (error) {
       throw error;
     }

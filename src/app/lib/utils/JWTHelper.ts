@@ -4,15 +4,16 @@ export class JWTHelper {
     /**
      * Generate a JWT token with a given payload
      * @param payload - The data to include in the token
+     * @param options - Optional JWT sign options
      * @returns {string} - The signed JWT token
      */
-    static generateToken(payload: object): string {
+    static generateToken(payload: object, options: SignOptions = {}): string {
         const secret: Secret = (process.env.JWT_SECRET as string) || "default_secret";
-        const options: SignOptions = {
-            expiresIn: (process.env.JWT_EXPIRES_IN as any) || "7d"
+        const signOptions: SignOptions = {
+            expiresIn: options.expiresIn || (process.env.JWT_EXPIRES_IN as any) || "7d"
         };
         // Explicitly use the overload for (payload, secret, options)
-        return jwt.sign(payload, secret, options);
+        return jwt.sign(payload, secret, signOptions);
     }
 
     /**
