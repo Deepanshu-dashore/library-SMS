@@ -2,7 +2,7 @@ export class MailTemplates {
   /**
    * Generates a premium payment receipt email template that matches the A4 Invoice layout
    */
-  static paymentReceipt(payment: any, library: any) {
+  static paymentReceipt(payment: any, library: any, receiptLink?: string) {
     const seat = payment.subscriptionId?.seatId;
     const user = payment.userId;
     const capitalizedName = user?.name?.replace(/\b\w/g, (l: string) => l.toUpperCase());
@@ -42,6 +42,8 @@ export class MailTemplates {
           .footer h4 { margin: 0 0 10px 0; font-size: 13px; color: #1e293b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; display: inline-block; }
           .contact-info { font-size: 12px; color: #64748b; line-height: 1.6; }
           .copyright { text-align: center; padding: 20px; font-size: 11px; color: #94a3b8; }
+          .btn-container { text-align: center; margin: 30px 0; }
+          .btn { background-color: #312c85; color: #ffffff !important; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block; box-shadow: 0 4px 6px rgba(49, 44, 133, 0.2); }
         </style>
       </head>
       <body>
@@ -92,6 +94,12 @@ export class MailTemplates {
                 </tr>
               </table>
             </div>
+
+            ${receiptLink ? `
+            <div class="btn-container">
+              <a href="${receiptLink}" class="btn">Download Official PDF Receipt</a>
+            </div>
+            ` : ''}
 
             <div class="signature-section">
               ${library.signature ? `<img src="${library.signature}" class="signature-img" alt="Authorized Signature">` : '<div style="height: 50px;"></div>'}

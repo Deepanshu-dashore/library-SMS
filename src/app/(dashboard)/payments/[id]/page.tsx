@@ -115,21 +115,21 @@ export default function ViewPaymentPage() {
       if (logoData) {
         // Square logo with amber background simulation
         doc.setFillColor(251, 191, 36); // Amber 400
-        doc.rect(20, 15, 17, 17, 'F');
-        doc.addImage(logoData, 'PNG', 20, 15, 17, 17, undefined, 'FAST');
+        doc.rect(20, 15, 20, 20, 'F');
+        doc.addImage(logoData, 'PNG', 20, 15, 20, 20, undefined, 'FAST');
       }
 
       doc.setFontSize(20);
       doc.setTextColor(17, 24, 39); // Gray 900
-      doc.setFont('helvetica', 'bold');
-      doc.text(currentUser?.name || "Library Management System", 40, 22);
+      doc.setFont('helvetica', 'bold'); // Font: Barlow
+      doc.text(currentUser?.name || "Library Management System", 43, 23);
 
       // Address badge in PDF
       doc.setFillColor(49, 44, 133); // #312c85
-      doc.rect(40, 25, 150, 6, 'F');
+      doc.rect(40, 28, 150, 6, 'F');
       doc.setFontSize(8);
       doc.setTextColor(255);
-      doc.text(currentUser?.address || "Smart Library Management System", 42, 29);
+      doc.text(currentUser?.address || "Smart Library Management System", 42, 32);
 
       // 3. Title
       doc.setFontSize(22);
@@ -174,7 +174,7 @@ export default function ViewPaymentPage() {
       doc.text(capitalizedName, 20, 95);
       
       doc.setDrawColor(245);
-      doc.setLineWidth(1);
+      doc.setLineWidth(0.1);
       doc.line(20, 100, 190, 100);
 
       // 6. Membership Details Title

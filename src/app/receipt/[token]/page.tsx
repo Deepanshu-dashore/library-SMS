@@ -119,20 +119,20 @@ export default function PublicReceiptPage() {
 
       if (logoData) {
         doc.setFillColor(251, 191, 36);
-        doc.rect(20, 15, 17, 17, 'F');
-        doc.addImage(logoData, 'PNG', 20, 15, 17, 17, undefined, 'FAST');
+        doc.rect(20, 15, 20, 20, 'F');
+        doc.addImage(logoData, 'PNG', 20, 15, 20, 20, undefined, 'FAST');
       }
 
       doc.setFontSize(20);
       doc.setTextColor(17, 24, 39);
-      doc.setFont('helvetica', 'bold');
-      doc.text(library?.name || "Library Management System", 40, 22);
+      doc.setFont('helvetica', 'bold'); // Font: Barlow
+      doc.text(library?.name || "Library Management System", 43, 23);
 
       doc.setFillColor(49, 44, 133);
-      doc.rect(40, 25, 150, 6, 'F');
+      doc.rect(40, 28, 150, 6, 'F');
       doc.setFontSize(8);
       doc.setTextColor(255);
-      doc.text(library?.address || "Smart Library Management System", 42, 29);
+      doc.text(library?.address || "Smart Library Management System", 42, 32);
 
       doc.setFontSize(22);
       doc.setTextColor(49, 44, 133);
@@ -173,7 +173,7 @@ export default function PublicReceiptPage() {
       doc.text(capitalizedName, 20, 95);
       
       doc.setDrawColor(245);
-      doc.setLineWidth(1);
+      doc.setLineWidth(0.1);
       doc.line(20, 100, 190, 100);
 
       doc.setFontSize(14);
@@ -276,22 +276,14 @@ export default function PublicReceiptPage() {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 text-center border border-rose-100">
+      <div className="min-h-screen bg-[#00cb96] flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-white rounded-3xl p-8 text-center shadow-2xl">
           <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-6">
             <AlertCircle className="text-rose-500 w-10 h-10" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Invalid or Expired Link</h1>
-          <p className="text-gray-500 mb-8">
-            This receipt link is invalid or has expired after 24 hours. Please contact the library for a new link.
-          </p>
-          <Button 
-            variant="primary" 
-            className="w-full py-4 rounded-2xl font-semibold"
-            onClick={() => window.location.href = '/'}
-          >
-            Go to Homepage
-          </Button>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Invalid Link</h1>
+          <p className="text-gray-500 mb-8">This receipt link is invalid or has expired.</p>
+          <Button variant="primary" className="w-full py-4 rounded-2xl" onClick={() => window.location.href = '/'}>Go to Homepage</Button>
         </div>
       </div>
     );
@@ -300,109 +292,80 @@ export default function PublicReceiptPage() {
   const { payment, library } = data;
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Header Section */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-2xl mb-4 shadow-lg shadow-indigo-200">
-            <CheckCircle2 className="text-white w-8 h-8" />
-          </div>
-          <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-            Payment Successful!
-          </h1>
-          <p className="mt-3 text-lg text-gray-500">
-            Thank you for your payment. Your receipt is ready for download.
-          </p>
+    <div className="min-h-screen bg-[#00cb96] flex items-center justify-center p-4 sm:p-10 font-sans">
+      {/* Wrapper for shadow since clip-path cuts off regular box-shadow */}
+      <div className="w-full max-w-[450px] filter drop-shadow-[0_30px_60px_rgba(0,0,0,0.4)]">
+        <div 
+          className="bg-white flex flex-col pt-16 pb-16 px-8 overflow-hidden"
+          style={{ 
+            clipPath: 'polygon(0% 12px, 2.5% 0px, 5% 12px, 7.5% 0px, 10% 12px, 12.5% 0px, 15% 12px, 17.5% 0px, 20% 12px, 22.5% 0px, 25% 12px, 27.5% 0px, 30% 12px, 32.5% 0px, 35% 12px, 37.5% 0px, 40% 12px, 42.5% 0px, 45% 12px, 47.5% 0px, 50% 12px, 52.5% 0px, 55% 12px, 57.5% 0px, 60% 12px, 62.5% 0px, 65% 12px, 67.5% 0px, 70% 12px, 72.5% 0px, 75% 12px, 77.5% 0px, 80% 12px, 82.5% 0px, 85% 12px, 87.5% 0px, 90% 12px, 92.5% 0px, 95% 12px, 97.5% 0px, 100% 12px, 100% calc(100% - 12px), 97.5% 100%, 95% calc(100% - 12px), 92.5% 100%, 90% calc(100% - 12px), 87.5% 100%, 85% calc(100% - 12px), 82.5% 100%, 80% calc(100% - 12px), 77.5% 100%, 75% calc(100% - 12px), 72.5% 100%, 70% calc(100% - 12px), 67.5% 100%, 65% calc(100% - 12px), 62.5% 100%, 60% calc(100% - 12px), 57.5% 100%, 55% calc(100% - 12px), 52.5% 100%, 50% calc(100% - 12px), 47.5% 100%, 45% calc(100% - 12px), 42.5% 100%, 40% calc(100% - 12px), 37.5% 100%, 35% calc(100% - 12px), 32.5% 100%, 30% calc(100% - 12px), 27.5% 100%, 25% calc(100% - 12px), 22.5% 100%, 20% calc(100% - 12px), 17.5% 100%, 15% calc(100% - 12px), 12.5% 100%, 10% calc(100% - 12px), 7.5% 100%, 5% calc(100% - 12px), 2.5% 100%, 0% calc(100% - 12px))' 
+          }}
+        >
+          {/* Header: ID and Date
+          <div className="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-10">
+            <span>Order: #{payment.receiptNumber}</span>
+           <span>{new Date(payment.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+        </div> */}
+
+        {/* Central Illustration: Payment.jpg */}
+        <div className="flex flex-col items-center mb-8">
+           <div className="w-48 h-40 relative mb-0 overflow-hidden rounded-2xl">
+              <img src="/Payment.jpg" className="w-full h-full object-cover" alt="Payment Illustration" />
+           </div>
+           <h2 className="text-2xl font-barlow font-bold text-[#036d61] capitalize mb-2">{library.name}</h2>
+           <h1 className="text-lg font-semibold text-gray-800 text-center leading-tight tracking-tight">Payment Receipt</h1>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column: Details */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <FileText className="text-indigo-600 w-5 h-5" />
-                Receipt Summary
-              </h2>
-              
-              <div className="space-y-4">
-                <div className="flex justify-between items-center py-3 border-b border-gray-50">
-                  <span className="text-gray-500">Receipt No</span>
-                  <span className="font-bold text-gray-900">#{payment.receiptNumber}</span>
-                </div>
-                <div className="flex justify-between items-center py-3 border-b border-gray-50">
-                  <span className="text-gray-500">Amount Paid</span>
-                  <span className="text-2xl font-black text-indigo-600">₹{payment.amount}</span>
-                </div>
-                <div className="flex justify-between items-center py-3 border-b border-gray-50">
-                  <span className="text-gray-500">Date</span>
-                  <span className="font-medium text-gray-700">{new Date(payment.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
-                </div>
-                <div className="flex justify-between items-center py-3">
-                  <span className="text-gray-500">Status</span>
-                  <span className="px-3 py-1 bg-emerald-50 text-emerald-600 text-xs font-bold rounded-full uppercase tracking-wider">Completed</span>
-                </div>
-              </div>
+        {/* Payment Summary Table */}
+        <div className="">
+           <h3 className="text-[11px] font-bold text-gray-700  border-b border-gray-100 pb-2">Payment Summary</h3>
+           
+           <table className="w-full">
+              <tbody className="divide-y divide-gray-50">
+                 <tr>
+                    <td className="py-2">
+                       <div className="flex items-center gap-1">
+                          <span className="text-sm font-barlow font-bold text-gray-800">Seat {payment.subscriptionId.seatId.seatNumber}</span>
+                          <span className="text-gray-600 font-semibold text-xs uppercase">({payment.subscriptionId.seatId.type})</span>
+                       </div>
+                    </td>
+                    <td className="py-2 text-right font-barlow" colSpan={2}>
+                       <span className="text-xs font-medium text-gray-700">
+                          Subscription: {new Date(payment.subscriptionId.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} - {new Date(payment.subscriptionId.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                       </span>
+                    </td>
+                 </tr>
+              </tbody>
+           </table>
 
-              <Button 
-                onClick={handleDownloadPDF}
-                variant="primary"
-                className="w-full mt-8 py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-indigo-100 group"
-              >
-                <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
-                Download PDF Receipt
-              </Button>
-            </div>
-
-            {/* Security Note */}
-            <div className="bg-indigo-50/50 rounded-2xl p-6 border border-indigo-100 flex gap-4">
-              <div className="flex-shrink-0">
-                <Clock className="w-6 h-6 text-indigo-600" />
+           {/* Total Section */}
+           <div className="mt-1 py-1 border-t border-dashed border-gray-200">
+              <div className="flex justify-between items-center">
+                 <span className="text-sm font-semibold text-gray-900">Amount Paid</span>
+                 <span className="text-xl font-bold font-barlow text-[#0c6b60]">₹{payment.amount}</span>
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-indigo-900">Link Expiration</h3>
-                <p className="text-sm text-indigo-700 mt-1">
-                  For your security, this receipt link will expire in 24 hours. Please download your copy now.
-                </p>
-              </div>
-            </div>
-            
-            <div className="bg-emerald-50/50 rounded-2xl p-6 border border-emerald-100 flex gap-4">
-              <div className="flex-shrink-0">
-                <ShieldCheck className="w-6 h-6 text-emerald-600" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-emerald-900">Secure Payment</h3>
-                <p className="text-sm text-emerald-700 mt-1">
-                  This is an official digital receipt generated by {library.name}.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Preview */}
-          <div className="lg:col-span-7">
-            <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden h-full">
-              <div className="bg-gray-50 px-8 py-4 border-b border-gray-100 flex justify-between items-center">
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Preview</span>
-                <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-gray-200"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-gray-200"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-gray-200"></div>
-                </div>
-              </div>
-              <div className="p-8 scale-[0.85] origin-top">
-                <Invoice payment={payment} owner={library} />
-              </div>
-            </div>
-          </div>
+           </div>
         </div>
 
-        {/* Footer */}
-        <div className="mt-12 text-center text-gray-400 text-sm">
-          <p>© {new Date().getFullYear()} {library.name}. All rights reserved.</p>
-          <p className="mt-1">Powered by Library Management System</p>
+        {/* Bottom Action Area: Replacing Barcode with Button */}
+        <div className="mt-auto pt-8 border-t-2 border-dashed border-gray-100 flex flex-col items-center">
+           <Button 
+             onClick={handleDownloadPDF}
+             className="w-full py-3 rounded-2xl bg-gray-900 hover:bg-black text-white flex flex-col items-center justify-center gap-1 shadow-2xl transition-all active:scale-[0.98] group"
+           >
+              <div className="flex items-center gap-2">
+                 <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
+                 <span className="text-lg font-semibold font-barlow">Download Receipt</span>
+              </div>
+           </Button>
+
+           <div className="mt-5 flex items-center justify-center gap-2 text-gray-500">
+              <Clock className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-bold uppercase">Link valid for 24 hours</span>
+           </div>
         </div>
+
+      </div>
       </div>
     </div>
   );

@@ -91,7 +91,11 @@ export class PaymentService {
         (l: string) => l.toUpperCase(),
       );
 
-      const htmlBody = MailTemplates.paymentReceipt(payment, library);
+      const link = await this.receiptLink(id, library);
+      const baseUrl = process.env.ONLINE_URL?.replace(/\/$/, "") || "";
+      const fullLink = `${baseUrl}${link}`;
+
+      const htmlBody = MailTemplates.paymentReceipt(payment, library, fullLink);
 
       return await mail(
         `"${library.name}" <onboarding@library-sms.vercel.app>`,

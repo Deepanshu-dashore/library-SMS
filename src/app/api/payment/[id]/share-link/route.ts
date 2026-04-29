@@ -23,7 +23,8 @@ export async function GET(
     }
 
     const link = await PaymentService.receiptLink(id, library);
-    const fullLink = `${new URL(req.url).origin}${link}`;
+    const baseUrl = process.env.ONLINE_URL?.replace(/\/$/, "") || new URL(req.url).origin;
+    const fullLink = `${baseUrl}${link}`;
 
     return NextResponse.json({
       success: true,
