@@ -27,7 +27,7 @@ export const Invoice: React.FC<InvoiceProps> = ({ payment, owner }) => {
       </div>
 
       {/* Content Layer */}
-      <div className="relative z-10 w-full h-full p-[15mm] flex flex-col font-public-sans text-gray-800 border-gray-200! outline-none! border">
+      <div className="relative z-10 w-full h-full p-[15mm] flex flex-col font-public-sans text-gray-800 !border-gray-200 !outline-none border">
         
         {/* Header: Logo */}
         <div className="flex justify-start mb-10 px-4">
@@ -41,7 +41,7 @@ export const Invoice: React.FC<InvoiceProps> = ({ payment, owner }) => {
             />
           </div>
                 <div className="flex flex-col ml-2">
-                   <h1 className="text-2xl font-bold text-gray-900 capitalize tracking-]wide leading-none">{owner?.name||"Library Management System"}</h1>
+                   <h1 className="text-2xl font-bold text-gray-900 capitalize tracking-wide leading-none">{owner?.name||"Library Management System"}</h1>
                    <p className="text-xs px-2 font-medium mt-1.5 text-white p-1.5 tracking-wider bg-[#312c85] w-full">{owner?.address||"Smart Library Management System"}</p>
                 </div>
               </div>

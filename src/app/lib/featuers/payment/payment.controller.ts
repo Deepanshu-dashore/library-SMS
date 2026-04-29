@@ -2,12 +2,13 @@ import { ApiResponse } from "../../utils/ApiResponse";
 import { PaymentService } from "./payment.service";
 import { verifyJWT } from "../../middlewares/verifyJWT";
 import { connectDB } from "../../db/connectDB";
+import { Library } from "../library/library.model";
 
 export class PaymentController {
   static async getAllPayments(req: Request) {
     await connectDB();
-    const library = await verifyJWT();
-    if (!library) {
+    const libraryInfo = await verifyJWT();
+    if (!libraryInfo) {
       return ApiResponse(401, null, "Unauthorized");
     }
 
@@ -16,8 +17,15 @@ export class PaymentController {
     const mode = searchParams.get("mode") || "All";
 
     try {
-      const { payments, stats } = await PaymentService.getAllPayment(search, mode);
-      return ApiResponse(200, { payments, stats }, "Payments fetched successfully");
+      const { payments, stats } = await PaymentService.getAllPayment(
+        search,
+        mode,
+      );
+      return ApiResponse(
+        200,
+        { payments, stats },
+        "Payments fetched successfully",
+      );
     } catch (error) {
       return ApiResponse(500, null, "Failed to fetch payments");
     }
@@ -25,8 +33,8 @@ export class PaymentController {
 
   static async getPaymentById(params: Promise<{ id: string }>) {
     await connectDB();
-    const library = await verifyJWT();
-    if (!library) {
+    const libraryInfo = await verifyJWT();
+    if (!libraryInfo) {
       return ApiResponse(401, null, "Unauthorized");
     }
     const { id } = await params;
@@ -40,16 +48,27 @@ export class PaymentController {
 
   static async sendReceiptEmail(params: Promise<{ id: string }>) {
     await connectDB();
-    const library = await verifyJWT();
-    if (!library) {
+    const libraryInfo = await verifyJWT();
+    if (!libraryInfo || !libraryInfo.id) {
       return ApiResponse(401, null, "Unauthorized");
     }
+
+    const fullLibrary = await Library.findById(libraryInfo.id);
+    if (!fullLibrary) {
+      return ApiResponse(404, null, "Library profile not found");
+    }
+
     const { id } = await params;
     try {
-      await PaymentService.sendReceiptEmail(id, library);
+      const res = await PaymentService.sendReceiptEmail(id, fullLibrary);
+      console.log(res);
       return ApiResponse(200, null, "Receipt email sent successfully");
     } catch (error: any) {
-      return ApiResponse(500, null, error.message || "Failed to send receipt email");
+      return ApiResponse(
+        500,
+        null,
+        error.message || "Failed to send receipt email",
+      );
     }
   }
 }

@@ -337,7 +337,7 @@ export default function ViewPaymentPage() {
                 onClick={handleSendEmail}
                 variant="secondary"
                 size="sm"
-                loading={sendingEmail}
+                isLoading={sendingEmail}
                 icon="solar:letter-line-duotone"
                 className="px-6 py-2.5 font-medium flex items-center gap-2"
               >
