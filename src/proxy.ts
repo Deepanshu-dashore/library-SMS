@@ -8,6 +8,7 @@ export function proxy(request: NextRequest) {
   const isPublicPath =
     path === "/login" ||
     path === "/registration" ||
+    path.startsWith("/receipt/") ||
     path.startsWith("/status/");
 
   // Get token from cookies
@@ -19,7 +20,12 @@ export function proxy(request: NextRequest) {
   }
 
   // If trying to access login/register while already logged in
-  if ((path === "/login" || path === "/registration") && token) {
+  if (
+    (path === "/login" ||
+      path === "/registration" ||
+      path.startsWith("/receipt/")) &&
+    token
+  ) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
