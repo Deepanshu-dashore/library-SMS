@@ -307,8 +307,8 @@ export default function PublicReceiptPage() {
            <span>{new Date(payment.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
         </div> */}
 
-        {/* Central Illustration: Payment.jpg */}
-        <div className="flex flex-col items-center mb-8">
+        {/* Central Illustration: Payment.webp */}
+        <div className="flex flex-col items-center mb-8 text-center">
            <div className="w-48 h-40 relative mb-0 overflow-hidden rounded-2xl">
               <img src="/Payment.webp" className="w-full h-full object-cover" alt="Payment Illustration" />
            </div>

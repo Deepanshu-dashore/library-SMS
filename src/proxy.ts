@@ -22,8 +22,7 @@ export function proxy(request: NextRequest) {
   // If trying to access login/register while already logged in
   if (
     (path === "/login" ||
-      path === "/registration" ||
-      path.startsWith("/receipt/")) &&
+      path === "/registration") &&
     token
   ) {
     return NextResponse.redirect(new URL("/", request.url));
