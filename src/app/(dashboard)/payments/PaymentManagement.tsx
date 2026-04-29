@@ -90,6 +90,7 @@ export default function PaymentManagement() {
   const [activeTab, setActiveTab] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [stats, setStats] = useState<any>(null);
+  const [sharingId, setSharingId] = useState<string | null>(null);
 
   const fetchPayments = async () => {
     setLoading(true);
@@ -119,6 +120,44 @@ export default function PaymentManagement() {
     }, 400);
     return () => clearTimeout(timer);
   }, [activeTab, searchTerm]);
+  
+  const handleShareReceipt = async (payment: Payment) => {
+    setSharingId(payment._id);
+    try {
+      const res = await fetch(`/api/payment/${payment._id}/share-link`);
+      const result = await res.json();
+      
+      if (result.success) {
+        const url = result.link;
+        const capitalizedName = payment.userId.name.replace(/\b\w/g, (l: string) => l.toUpperCase());
+        const shareText = `*Payment Received:* ₹${payment.amount.toLocaleString('en-IN')} (Receipt #${payment.receiptNumber})\n\n` +
+                         `Hi ${capitalizedName}, your payment has been successfully received.\n\n` +
+                         `*Download receipt:*\n${url}\n\n` +
+                         `Link valid for 24 hrs.`;
+
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: 'Payment Receipt',
+              text: shareText,
+            });
+          } catch (error) {
+            navigator.clipboard.writeText(shareText);
+            toast.success("Receipt link copied!");
+          }
+        } else {
+          navigator.clipboard.writeText(shareText);
+          toast.success("Receipt link copied!");
+        }
+      } else {
+        toast.error(result.message || "Failed to generate share link");
+      }
+    } catch (error) {
+      toast.error("An error occurred while sharing");
+    } finally {
+      setSharingId(null);
+    }
+  };
 
   const columns: ColumnDef<Payment>[] = [
     {
@@ -158,6 +197,27 @@ export default function PaymentManagement() {
       type: "date",
       getDate: (row) => row.createdAt,
       sortable: true
+    },
+    {
+      key: "share",
+      label: "Share",
+      type: "custom",
+      align: "center",
+      render: (row) => (
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleShareReceipt(row);
+          }}
+          variant="primary"
+          size="sm"
+          isLoading={sharingId === row._id}
+          icon="solar:whatsapp-line-duotone"
+          className="h-8 w-18! font-medium"
+        >
+          Share
+        </Button>
+      )
     }
   ];
 
