@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect, Suspense } from "react";
 import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -138,7 +138,7 @@ const UploadZone = ({
   </div>
 );
 
-export default function RegisterPage() {
+function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [step, setStep] = useState(1);
@@ -1044,5 +1044,13 @@ export default function RegisterPage() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-slate-500 font-medium">Loading Registration...</div>}>
+      <RegisterContent />
+    </Suspense>
   );
 }
