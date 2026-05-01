@@ -39,7 +39,7 @@ export default function Navbar() {
           <Link href="/" className="flex items-center space-x-3 group">
             <div className="w-17 h-12 overflow-hidden flex items-center justify-center group-hover:scale-110 transition-transform">
               <Image
-                src="/SawariyaLogo.png"
+                src="/sawariyaLogo.png"
                 alt="Library Logo"
                 width={100}
                 height={100}

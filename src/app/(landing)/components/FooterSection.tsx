@@ -21,7 +21,7 @@ export default function FooterSection() {
           <div className="footer-column-v2 flex flex-col items-center md:items-start text-center md:text-left">
             <div className="footer-logo-v2 mb-3 justify-center md:justify-start w-full">
               <div className="w-22 h-16 overflow-hidden flex items-center justify-center text-white">
-                <Image src="/SawariyaLogo.png" alt="Logo" width={100} height={100} className="h-22 w-22" />
+                <Image src="/sawariyaLogo.png" alt="Logo" width={100} height={100} className="h-22 w-22" />
               </div>
               <div className="footer-logo-text-v2 -ml-3 text-left">
                 <h3>Shree Sawariya Library</h3>
