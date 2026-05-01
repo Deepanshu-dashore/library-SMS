@@ -21,7 +21,7 @@ export default function LoginPage() {
         const response = await fetch("/api/auth/verify");
         const data = await response.json();
         if (response.ok && data.success) {
-          router.push("/");
+          router.push("/dashboard");
         }
       } catch (error) {
         // Not logged in, stay on login page
@@ -48,7 +48,7 @@ export default function LoginPage() {
       
       if (response.success) {
         toast.success("Welcome back! Login successful.", { id: loadingToast });
-        router.push("/");
+        router.push("/dashboard");
       } else {
         // This part might not be reached if proxy throws on !ok
         toast.error(response.message || "Invalid credentials", { id: loadingToast });

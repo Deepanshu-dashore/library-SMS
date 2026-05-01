@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Cropper from "react-easy-crop";
 import getCroppedImg from "@/utils/cropImage";
 import { motion, AnimatePresence } from "framer-motion";
@@ -140,6 +140,7 @@ const UploadZone = ({
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [registeredId, setRegisteredId] = useState<string | null>(null);
@@ -149,6 +150,13 @@ export default function RegisterPage() {
   // Status Modal States
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [statusIdToSearch, setStatusIdToSearch] = useState("");
+
+  // Auto-open modal if ?status=true is in URL
+  useEffect(() => {
+    if (searchParams.get("status") === "true") {
+      setShowStatusModal(true);
+    }
+  }, [searchParams]);
 
   // Cropper States
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -495,6 +503,11 @@ export default function RegisterPage() {
           </div>
         </Link>
         <div className="login-link flex items-center gap-4">
+          {/* Instruction hint */}
+          <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+            <Icon icon="solar:info-circle-bold" className="text-[#98c156] text-base shrink-0" />
+            <span>To check application status, click &nbsp;<strong className="text-slate-700">"Check Status"</strong>&nbsp; →</span>
+          </div>
           <button
             onClick={() => setShowStatusModal(true)}
             className="border cursor-pointer bg-[#98c156] border-slate-200 group text-white px-3 py-1 rounded-lg text-sm hover:text-gray-700 font-medium hover:bg-slate-50 transition-all flex items-center gap-2 shadow-xs"

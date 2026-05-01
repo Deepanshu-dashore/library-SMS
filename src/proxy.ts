@@ -6,8 +6,11 @@ export function proxy(request: NextRequest) {
 
   // Define public paths that don't require authentication
   const isPublicPath =
+    path === "/" ||
     path === "/login" ||
     path === "/registration" ||
+    path === "/privacy" ||
+    path === "/terms" ||
     path.startsWith("/receipt/") ||
     path.startsWith("/status/");
 
@@ -20,12 +23,8 @@ export function proxy(request: NextRequest) {
   }
 
   // If trying to access login/register while already logged in
-  if (
-    (path === "/login" ||
-      path === "/registration") &&
-    token
-  ) {
-    return NextResponse.redirect(new URL("/", request.url));
+  if ((path === "/login" || path === "/registration") && token) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();

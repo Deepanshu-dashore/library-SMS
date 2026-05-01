@@ -26,8 +26,40 @@ const barlow = Barlow({
 });
 
 export const metadata: Metadata = {
-  title: "Library SMS - Advanced Seat Management System",
-  description: "Next-generation library management solution for efficient seat tracking and academic resource optimization.",
+  title: "Shree Sawariya Library | Best Library & Study Room in Khargone",
+  description: "Join Shree Sawariya Library, the best library in Khargone. A premium, fully air-conditioned reading room with high-speed WiFi, personal desks, and a peaceful environment for students and professionals.",
+  keywords: [
+    "Shree Sawariya Library", 
+    "Library in Khargone", 
+    "Best library in Khargone", 
+    "Reading room Khargone", 
+    "Study room Khargone", 
+    "AC library Khargone", 
+    "Library for competitive exams",
+    "Peaceful study space Khargone"
+  ],
+  authors: [{ name: "Shree Sawariya Library" }],
+  openGraph: {
+    title: "Shree Sawariya Library | Best Library in Khargone",
+    description: "Premium reading and study room in Khargone designed for high productivity and deep work. Facilities include AC, WiFi, and personal desks.",
+    siteName: "Shree Sawariya Library",
+    images: [
+      {
+        url: "/landing/interior/interior.png",
+        width: 1200,
+        height: 630,
+        alt: "Shree Sawariya Library Interior",
+      },
+    ],
+    locale: "en_IN",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Shree Sawariya Library | Best Library in Khargone",
+    description: "Premium reading and study room in Khargone designed for high productivity and deep work.",
+    images: ["/landing/interior/interior.png"],
+  },
 };
 
 export default function RootLayout({

@@ -1,0 +1,149 @@
+{
+  "navbar": {
+    "logo": {
+      "title": "Shree Sawariya Library",
+      "subtitle": "Best Library for Competitive Exams",
+      "icon": "solar:book-bookmark-bold-duotone"
+    },
+    "links": [
+      { "label": "Home", "href": "/" },
+      { "label": "Facilities", "href": "#facilities" },
+      { "label": "Pricing", "href": "#pricing" },
+      { "label": "Gallery", "href": "#gallery" },
+      { "label": "Reviews", "href": "#reviews" },
+      { "label": "Contact Us", "href": "#contact" }
+    ],
+    "cta": { "label": "Register Now", "href": "/registration" }
+  },
+  "hero": {
+    "headline": {
+      "line1": "Welcome to",
+      "line2": "Shree Sawariya Library!",
+      "line3": ""
+    },
+    "subtext": "A community and concept space designed for students and professionals to enhance focus and productivity.",
+    "buttons": [
+      { "label": "Register for Seat", "href": "/registration", "icon": "solar:user-bold", "primary": true },
+      { "label": "Check Application Status", "href": "/registration?status=true", "icon": "solar:clipboard-check-bold", "primary": false }
+    ],
+    "features": [
+      { "icon": "solar:snowflake-bold-duotone", "label": "AC Environment" },
+      { "icon": "ph:wifi-high-bold", "label": "High Speed WiFi" },
+      { "icon": "solar:monitor-bold-duotone", "label": "Personal Study Desk" },
+      { "icon": "solar:shield-check-bold-duotone", "label": "24/7 Security" },
+      { "icon": "solar:battery-charge-bold-duotone", "label": "Power Backup" }
+    ],
+    "image": "/login-bg.png"
+  },
+  "about": {
+    "title": "What does Shree Sawariya Library actually do?",
+    "description": [
+      "SHREE SAWARIYA LIBRARY is a premium Reading and Study Room developed for students and professionals aiming for high productivity and deep work. We provide an inspiring space dedicated to enhanced focus, fostering an experience for like-minded individuals who value silence and undisturbed concentration.",
+      "Our space is elegantly designed for long working hours, equipped with Personal Desks, Charging Points, AC, and High-speed WiFi. We ensure your privacy while making you feel part of a larger, motivated community.",
+      "Whether you're a student preparing for competitive exams or a professional seeking a silent space to concentrate, Shree Sawariya Library offers the perfect environment for your success."
+    ],
+    "images": [
+      "/landing/interior/interior1.png",
+      "/landing/interior/interior2.png",
+      "/landing/interior/interior3.png"
+    ]
+  },
+  "registration": {
+    "title": "Registration Form",
+    "subtitle": "Fill the form and our team will contact you soon.",
+    "checkStatusTitle": "Check Application Status",
+    "checkStatusSubtitle": "Enter your phone number to check your application status.",
+    "steps": [
+      { "title": "1. Register", "desc": "Fill the registration form with your details.", "icon": "solar:document-add-bold-duotone", "color": "#3b82f6" },
+      { "title": "2. We Review", "desc": "Our team will verify your application.", "icon": "solar:eye-bold-duotone", "color": "#f59e0b" },
+      { "title": "3. Get Notified", "desc": "You'll be notified once your seat is confirmed.", "icon": "solar:check-circle-bold-duotone", "color": "#22c55e" }
+    ],
+    "courses": ["UPSC / IAS", "SSC / Railway", "Banking (IBPS/SBI)", "State PCS", "CA / CS", "B.Tech / Engineering", "Medical Entrance", "Other"],
+    "timeSlots": ["6:00 AM – 10:00 AM", "10:00 AM – 2:00 PM", "2:00 PM – 6:00 PM", "6:00 PM – 10:00 PM", "Full Day"]
+  },
+  "facilities": {
+    "title": "Facilities we provide for all of our libraries",
+    "eyebrow": "Facilities",
+    "items": [
+      { "image": "/landing/facilities/wifi.svg", "label": "Free Wifi", "desc": "Free internet to suit your digital need" },
+      { "image": "/landing/facilities/light.svg", "label": "Natural White Lighting", "desc": "Reduced eye strain allows for longer sitting hours" },
+      { "image": "/landing/facilities/foodArea.svg", "label": "Break Area", "desc": "Open Break Area to provide fresh air and breaks" },
+      { "image": "/landing/facilities/seats.svg", "label": "Private Desk", "desc": "Work privately while being inspired by others" },
+      { "image": "/landing/facilities/plug.svg", "label": "Plug Points", "desc": "Plug-in points on every desk for hassle free experience" },
+      { "image": "/landing/facilities/ac.svg", "label": "Air Conditioners", "desc": "Suited to hot and humid environment" },
+      { "image": "/landing/facilities/folder.svg", "label": "Folder Space", "desc": "Keep your reads organized with ease" },
+      { "image": "", "icon": "game-icons:vacuum-cleaner", "label": "Regular Cleaning", "desc": "Daily cleaning and maintenance for a hygienic space", "hasBorder": true }
+    ]
+  },
+  "pricing": {
+    "title": "Affordable Plans for Everyone",
+    "eyebrow": "Our Plans",
+    "plans": [
+      {
+        "name": "General Seat",
+        "tagline": "Comfortable & Flexible",
+        "price": "₹500",
+        "period": "/ Month",
+        "icon": "solar:chair-bold-duotone",
+        "iconColor": "#3b82f6",
+        "iconBg": "bg-blue-500/10",
+        "popular": false,
+        "features": ["AC Environment", "High Speed WiFi", "Standard Seating", "Silent Zone", "RO Water"]
+      },
+      {
+        "name": "Reserved Seat",
+        "tagline": "Your Dedicated Space",
+        "price": "₹600",
+        "period": "/ Month",
+        "icon": "solar:armchair-bold-duotone",
+        "iconColor": "#f59e0b",
+        "iconBg": "bg-yellow-500/10",
+        "popular": true,
+        "features": ["AC Environment", "High Speed WiFi", "Fixed Dedicated Desk", "Locker Facility", "Silent Zone", "Mobile Charging"]
+      }
+    ]
+  },
+  "gallery": {
+    "title": "Our Library Environment",
+    "eyebrow": "Gallery",
+    "images": [
+      "/landing/interior/interior.png",
+      "/landing/interior/interior1.png",
+      "/landing/interior/interior2.png",
+      "/landing/interior/interior3.png"
+    ]
+  },
+  "reviews": {
+    "title": "What Our Students Say",
+    "eyebrow": "Reviews",
+    "items": [
+      { "name": "Rohit Sharma", "role": "Engineering Student", "text": "Great environment and very peaceful. Helps me to focus for long study hours.", "rating": 5, "avatar": "/LogoWithoutBg.png" },
+      { "name": "Priya Mehta", "role": "Medical Student", "text": "WiFi is super fast and the seating is very comfortable. Highly recommended!!", "rating": 5, "avatar": "/LogoWithoutBg.png" },
+      { "name": "Aman Verma", "role": "UPSC Aspirant", "text": "Best library I've found in the city. Silent zone is really helpful for serious study.", "rating": 5, "avatar": "/LogoWithoutBg.png" },
+      { "name": "Sneha Patel", "role": "CA Student", "text": "Clean, spacious and well managed library. Staff is very supportive.", "rating": 5, "avatar": "/LogoWithoutBg.png" }
+    ]
+  },
+  "visitUs": {
+    "title": "Visit Our Library",
+    "eyebrow": "Our Address",
+    "address": "Jyoti Nagar, Behind Petrol Pump Bistan Road District Khargone 451001",
+    "phone": "+91 62610 19407",
+    "email": "info@sawariyalibrary.com",
+    "hours": "Mon - Sun : 7AM To 9PM",
+    "mapImage": "/landing/Bulding.png",
+    "exteriorImage": "/landing/interior/interior1.png"
+  },
+  "footer": {
+    "description": "Empowering students with a premium, focused, and facility-rich environment to excel in their academic journey.",
+    "socialLinks": [
+      { "icon": "solar:facebook-bold", "href": "#" },
+      { "icon": "solar:instagram-bold", "href": "#" },
+      { "icon": "solar:videocamera-record-bold", "href": "#" },
+      { "icon": "solar:link-bold", "href": "#" }
+    ],
+    "bottomLinks": [
+      { "label": "Privacy Policy", "href": "/privacy" },
+      { "label": "Terms & Conditions", "href": "/terms" }
+    ]
+  }
+}

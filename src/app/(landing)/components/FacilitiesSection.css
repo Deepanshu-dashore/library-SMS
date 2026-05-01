@@ -1,0 +1,115 @@
+.facilities-section-dark {
+  background-color: #417967; /* Matching the forest green in the reference */
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  color: #ffffff;
+  padding: 100px 24px;
+  text-align: center;
+}
+
+.facilities-title-v3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.facilities-title-accent {
+  color: #fea690; /* Peach/Coral accent from the image */
+}
+
+.facilities-subtitle-v3 {
+  font-family: 'Public Sans', sans-serif;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 1.5rem;
+  font-size: 1.15rem;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.facilities-grid-custom {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 60px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 1024px) {
+  .facilities-grid-custom {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .facilities-section-dark {
+    padding: 60px 24px;
+  }
+  .facilities-title-v3 {
+    font-size: 1.8rem;
+  }
+  .facilities-subtitle-v3 {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .facilities-grid-custom {
+    grid-template-columns: 1fr;
+  }
+}
+
+.facility-item-custom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.facility-icon-box {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.facility-icon-box.has-border {
+  border: 1.8px solid rgba(255,255,255);
+}
+
+.facility-icon-box:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.8);
+  transform: scale(1.05);
+}
+
+.facility-icon-image {
+   width: 80px;
+  height: 80px;
+  object-fit: contain;
+  filter: brightness(0) invert(1); /* Makes the icons white if they are dark */
+  opacity: 0.9;
+}
+
+.facility-name-serif {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.facility-desc-sans {
+  font-family: 'Public Sans', sans-serif;
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.8);
+  max-width: 240px;
+  line-height: 1.5;
+}

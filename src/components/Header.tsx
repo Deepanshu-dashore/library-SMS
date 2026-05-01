@@ -56,6 +56,7 @@ export default function Header() {
 
     const base = segments[0];
     const moduleMap: Record<string, string> = {
+      "dashboard": "Dashboard",
       "users": "Member",
       "subscriptions": "Subscription",
       "payments": "Payment",

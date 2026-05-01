@@ -1,7 +1,7 @@
 export const MENU_ITEMS = [
   {
     title: "Dashboard",
-    path: "/",
+    path: "/dashboard",
     icon: "solar:widget-bold-duotone",
   },
 

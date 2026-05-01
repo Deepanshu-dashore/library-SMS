@@ -1,0 +1,98 @@
+.hero-grid-bg {
+  background-color: #ffffff;
+  background-image: 
+    linear-gradient(#f0f0f0 1px, transparent 1px),
+    linear-gradient(90deg, #f0f0f0 1px, transparent 1px);
+  background-size: 40px 40px;
+  position: relative;
+}
+
+.hero-title-serif {
+  font-family: 'Playfair Display', serif; /* Falling back to serif if not loaded */
+  font-weight: 900;
+}
+
+.hero-green-text {
+  color: #417967; /* Matching the green in the image */
+}
+
+.image-frame-container {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+}
+
+.main-image-wrapper {
+  position: relative;
+  z-index: 2;
+  border-radius: 4px;
+  overflow: visible;
+}
+
+.main-image-wrapper::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: 20px;
+  bottom: 20px;
+  border: 2px solid #417967;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.main-hero-img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  display: block;
+  box-shadow: 20px 20px 60px rgba(0,0,0,0.05);
+}
+
+.sub-image-wrapper {
+  position: absolute;
+  bottom: -40px;
+  right: -40px;
+  width: 280px;
+  height: 180px;
+  z-index: 5;
+  background: white;
+  padding: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.sub-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.app-button {
+  transition: transform 0.2s;
+}
+
+.app-button:hover {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .sub-image-wrapper {
+    width: 180px;
+    height: 120px;
+    bottom: -15px;
+    right: 0;
+  }
+  .main-hero-img {
+    height: 250px;
+  }
+  .main-image-wrapper::before {
+    top: -10px;
+    left: -10px;
+    right: 10px;
+    bottom: 10px;
+  }
+  .image-frame-container {
+    padding-bottom: 20px;
+    padding-right: 10px;
+  }
+}

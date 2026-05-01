@@ -1,0 +1,145 @@
+.legal-page-wrapper {
+  min-height: 100vh;
+  background-color: #fcfcfc; /* Very light background for the grid */
+  position: relative;
+  font-family: 'Public Sans', sans-serif;
+  color: #1a202c;
+  padding: 80px 20px 100px;
+}
+
+/* Notebook grid background matching the screenshot */
+.legal-page-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(47, 160, 132, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(47, 160, 132, 0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.legal-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.legal-header {
+  text-align: center;
+  margin-bottom: 50px;
+  padding-top: 20px;
+}
+
+.legal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.legal-title .accent {
+  color: #2FA084;
+}
+
+.legal-subtitle {
+  font-size: 1.05rem;
+  color: #333;
+  max-width: 700px;
+  margin: 0 auto;
+  font-weight: 400;
+}
+
+.accordion-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px 30px;
+}
+
+@media (max-width: 768px) {
+  .accordion-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}
+
+.accordion-item {
+  background: white;
+  border: 1px solid #eaeaea;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  align-self: start; /* So it doesn't stretch and break the grid row height */
+}
+
+.accordion-header {
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  background: white;
+  transition: background 0.2s ease;
+  font-weight: 700;
+  color: #1a202c;
+  font-size: 0.95rem;
+}
+
+.accordion-header:hover {
+  background: #fafafa;
+}
+
+.accordion-icon {
+  color: #1a202c;
+  transition: transform 0.3s ease;
+}
+
+.accordion-icon.open {
+  transform: rotate(90deg);
+}
+
+.accordion-content {
+  padding: 0 24px;
+  color: #4a5568;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.accordion-content-inner {
+  padding-bottom: 20px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 15px;
+}
+
+.accordion-content ul {
+  padding-left: 20px;
+  margin-top: 8px;
+}
+
+.accordion-content li {
+  margin-bottom: 6px;
+  list-style-type: disc;
+}
+
+.back-btn-legal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #2FA084;
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 20px;
+  transition: transform 0.3s ease;
+  background: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #eaeaea;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.back-btn-legal:hover {
+  transform: translateX(-5px);
+  background: #fdfdfd;
+}
