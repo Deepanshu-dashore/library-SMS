@@ -26,6 +26,7 @@ const barlow = Barlow({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: "Shree Sawariya Library | Best Library & Study Room in Khargone",
   description: "Join Shree Sawariya Library, the best library in Khargone. A premium, fully air-conditioned reading room with high-speed WiFi, personal desks, and a peaceful environment for students and professionals.",
   keywords: [

@@ -13,6 +13,7 @@ import FooterSection from "./components/FooterSection";
 import "./landing.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: "Shree Sawariya Library | Premium Study Space & Reading Room in Khargone",
   description:
     "Shree Sawariya Library provides a peaceful, AC-equipped, and high-productivity environment for students and professionals in Khargone. Features high-speed WiFi, personal desks, and 24/7 security.",
