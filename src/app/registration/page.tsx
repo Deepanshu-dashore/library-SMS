@@ -505,12 +505,12 @@ function RegisterContent() {
         <div className="login-link flex items-center gap-4">
           {/* Instruction hint */}
           <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-            <Icon icon="solar:info-circle-bold" className="text-[#98c156] text-base shrink-0" />
+            <Icon icon="solar:info-circle-bold" className="text-[#417967] text-base shrink-0" />
             <span>To check application status, click &nbsp;<strong className="text-slate-700">"Check Status"</strong>&nbsp; →</span>
           </div>
           <button
             onClick={() => setShowStatusModal(true)}
-            className="border cursor-pointer bg-[#98c156] border-slate-200 group text-white px-3 py-1 rounded-lg text-sm hover:text-gray-700 font-medium hover:bg-slate-50 transition-all flex items-center gap-2 shadow-xs"
+            className="border cursor-pointer bg-[#417967] border-slate-200 group text-white px-3 py-1 rounded-lg text-sm hover:text-gray-700 font-medium hover:bg-slate-50 transition-all flex items-center gap-2 shadow-xs"
           >
             <Icon
               icon="bitcoin-icons:verify-filled"
@@ -840,10 +840,7 @@ function RegisterContent() {
                         <span
                           className={`text-[13px] font-bold leading-relaxed ${declared ? "text-green-700" : "text-slate-500"}`}
                         >
-                          I hereby declare that I have taken admission in Shri
-                          Sanwariya Library and I will pay the monthly fees on
-                          time. I will follow all the rules and regulations of
-                          the library.
+                          I hereby declare that I have taken admission in Shri Sanwariya Library and I will pay the monthly fees on time. I agree to follow the <Link href="/terms" target="_blank" className="underline decoration-2 underline-offset-2 hover:text-indigo-600">Terms and Conditions</Link> and have read the <Link href="/privacy" target="_blank" className="underline decoration-2 underline-offset-2 hover:text-indigo-600">Privacy Policy</Link>.
                         </span>
                       </label>
                     </div>

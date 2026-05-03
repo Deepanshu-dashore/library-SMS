@@ -104,7 +104,7 @@ export default function HeroSection() {
       </div>
 
       {/* Decorative element (optional, like the green line in the reference) */}
-      <div className="absolute bottom-0 right-0 w-1/4 h-1 bg-[#4a7c59] opacity-20" />
+      {/* <div className="absolute bottom-0 right-0 w-1/4 h-1 bg-[#4a7c59] opacity-20" /> */}
     </section>
   );
 }

@@ -13,9 +13,22 @@ import FooterSection from "./components/FooterSection";
 import "./landing.css";
 
 export const metadata: Metadata = {
-  title: "Shree Sawariya Library | Premium Study Space & Reading Room in Khargone",
+  title: "Premium Study Space & Reading Room in Khargone",
   description:
     "Shree Sawariya Library provides a peaceful, AC-equipped, and high-productivity environment for students and professionals in Khargone. Features high-speed WiFi, personal desks, and 24/7 security.",
+  openGraph: {
+    title: "Shree Sawariya Library | Premium Study Space in Khargone",
+    description: "Join the best library in Khargone. Peaceful environment, high-speed WiFi, and personal desks for students.",
+    url: "https://www.sawariyalibrary.in",
+    images: [
+      {
+        url: "/Bulding.webp",
+        width: 1200,
+        height: 630,
+        alt: "Shree Sawariya Library Building",
+      },
+    ],
+  },
 };
 
 export default function LandingPage() {
