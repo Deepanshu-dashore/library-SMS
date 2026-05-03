@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import landingData from "@/data/landingData.json";
 import "./AboutSection.css";
 
@@ -26,14 +27,14 @@ export default function AboutSection() {
             transition={{ duration: 0.8 }}
           >
             <div className="collage-main">
-              <img src={about.images[0]} alt="Library Interior 1" className="collage-img" />
+              <Image src={about.images[0]} alt="Library Interior 1" width={600} height={800} className="collage-img" />
             </div>
             <div className="collage-side">
               <div className="collage-item">
-                <img src={about.images[1]} alt="Library Interior 2" className="collage-img" />
+                <Image src={about.images[1]} alt="Library Interior 2" width={400} height={300} className="collage-img" />
               </div>
               <div className="collage-item">
-                <img src={about.images[2]} alt="Library Interior 3" className="collage-img" />
+                <Image src={about.images[2]} alt="Library Interior 3" width={400} height={300} className="collage-img" />
               </div>
             </div>
           </motion.div>

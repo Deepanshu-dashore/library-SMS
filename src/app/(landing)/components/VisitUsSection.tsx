@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import landingData from "@/data/landingData.json";
 import "./VisitUsSection.css";
@@ -112,9 +113,11 @@ export default function VisitUsSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <img 
+            <Image 
               src={visitUs.exteriorImage} 
               alt="Library Exterior" 
+              width={600}
+              height={800}
               className="exterior-img-v2" 
             />
           </motion.div>

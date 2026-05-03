@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import landingData from "@/data/landingData.json";
@@ -77,10 +78,15 @@ export default function HeroSection() {
               transition={{ duration: 1, ease: "easeOut" }}
             >
               <div className="main-image-wrapper">
-                <img 
+                <Image 
                   src="/landing/interior/interior.png" 
                   alt="Reading Square Interior" 
+                  width={800}
+                  height={600}
+                  priority
+                  quality={90}
                   className="main-hero-img"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
                 
                 {/* Overlapping Sub Image */}
@@ -90,10 +96,15 @@ export default function HeroSection() {
                   animate={{ opacity: 1, y: 0, x: 0 }}
                   transition={{ duration: 0.8, delay: 0.6 }}
                 >
-                  <img 
+                  <Image 
                     src="/landing/hero-sub.png" 
                     alt="Study Detail" 
+                    width={400}
+                    height={300}
+                    priority
+                    quality={85}
                     className="sub-hero-img"
+                    sizes="(max-width: 768px) 200px, 300px"
                   />
                 </motion.div>
               </div>

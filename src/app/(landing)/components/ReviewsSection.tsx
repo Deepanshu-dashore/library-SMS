@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import landingData from "@/data/landingData.json";
 import "./ReviewsSection.css";
@@ -135,9 +136,9 @@ export default function ReviewsSection() {
 
                   {/* Bottom Info */}
                   <div className="flex items-center justify-between pt-6 border-t border-gray-100 mt-auto">
-                      <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm">
-                        <img src={rev.avatar||"/sawariyaLogo.png"} alt={rev.name} className="w-full h-full object-cover" />
-                    {/* <img src="/sawariyaLogo.png" alt="Library Logo" className="h-6 opacity-30 grayscale" /> */}
+                      <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm relative">
+                        <Image src={rev.avatar||"/sawariyaLogo.png"} alt={rev.name} fill className="object-cover" />
+                    {/* <Image src="/sawariyaLogo.png" alt="Library Logo" width={24} height={24} className="opacity-30 grayscale" /> */}
                       </div>
                       <div>
                         <h4 className="font-semibold text-sm text-gray-700 leading-tight">{rev.name}</h4>

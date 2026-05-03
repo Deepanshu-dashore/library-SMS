@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import landingData from "@/data/landingData.json";
 import "./GallerySection.css";
@@ -63,7 +64,7 @@ export default function GallerySection() {
               transition={{ duration: 0.5, delay: i * 0.1 }}
               onClick={() => setSelectedIdx(i)}
             >
-              <img src={src} alt={`Gallery ${i + 1}`} className="gallery-img-v3" />
+              <Image src={src} alt={`Gallery ${i + 1}`} width={600} height={400} className="gallery-img-v3" />
               <div className="gallery-overlay-v3">
                 <Icon icon="solar:magnifer-zoom-in-linear" className="gallery-icon-v3" />
               </div>
@@ -104,7 +105,7 @@ export default function GallerySection() {
               >
                 <Icon icon="solar:close-circle-linear" />
               </button>
-              <img src={gallery.images[selectedIdx]} alt="Zoomed" className="zoom-modal__img" />
+              <Image src={gallery.images[selectedIdx]} alt="Zoomed" width={1200} height={800} className="zoom-modal__img" />
               <div className="absolute bottom-[-40px] left-1/2 -translate-x-1/2 text-white/70 text-sm font-medium">
                 {selectedIdx + 1} / {gallery.images.length}
               </div>

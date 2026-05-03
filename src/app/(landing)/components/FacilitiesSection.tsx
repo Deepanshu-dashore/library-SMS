@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import landingData from "@/data/landingData.json";
 import "./FacilitiesSection.css";
@@ -41,9 +42,11 @@ export default function FacilitiesSection() {
             >
               <div className={`facility-icon-box ${f.hasBorder ? 'has-border' : ''}`}>
                 {f.image ? (
-                  <img 
+                  <Image 
                     src={f.image} 
                     alt={f.label} 
+                    width={64}
+                    height={64}
                     className="facility-icon-image"
                   />
                 ) : (
