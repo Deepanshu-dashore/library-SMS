@@ -13,21 +13,41 @@ import FooterSection from "./components/FooterSection";
 import "./landing.css";
 
 export const metadata: Metadata = {
-  title: "Premium Study Space & Reading Room in Khargone",
+  title: "Shree Sawariya Library | Best Study Room & Library in Khargone, MP",
   description:
-    "Shree Sawariya Library provides a peaceful, AC-equipped, and high-productivity environment for students and professionals in Khargone. Features high-speed WiFi, personal desks, and 24/7 security.",
+    "Shree Sawariya Library is Khargone's top-rated study center. AC-equipped, silent reading rooms with high-speed WiFi, personal desks, CCTV security, and flexible membership plans. Perfect for UPSC, MPPSC, SSC & banking exam preparation.",
+  keywords: [
+    "Sawariya Library",
+    "Saawariya Library",
+    "Shree Sawariya Library",
+    "Khargone library",
+    "Khargone top library",
+    "Best library Khargone",
+    "Library near me Khargone",
+    "Study room Khargone",
+    "Reading room Khargone",
+    "UPSC library Khargone",
+    "MPPSC study center Khargone",
+    "Competitive exam library Khargone",
+    "AC study room Khargone",
+    "Silent library Khargone",
+    "Library membership Khargone",
+  ],
   openGraph: {
-    title: "Shree Sawariya Library | Premium Study Space in Khargone",
-    description: "Join the best library in Khargone. Peaceful environment, high-speed WiFi, and personal desks for students.",
+    title: "Shree Sawariya Library | #1 Study Room in Khargone",
+    description: "Khargone's best library — silent, AC-equipped, WiFi-enabled. Ideal for competitive exam preparation. Join today!",
     url: "https://www.sawariyalibrary.in",
     images: [
       {
         url: "/Bulding.webp",
         width: 1200,
         height: 630,
-        alt: "Shree Sawariya Library Building",
+        alt: "Shree Sawariya Library Building - Best Study Space in Khargone",
       },
     ],
+  },
+  alternates: {
+    canonical: "https://www.sawariyalibrary.in",
   },
 };
 

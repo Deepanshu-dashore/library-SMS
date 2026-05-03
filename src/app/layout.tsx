@@ -31,18 +31,62 @@ export const metadata: Metadata = {
     default: "Shree Sawariya Library | Best Library & Study Room in Khargone",
     template: "%s | Shree Sawariya Library"
   },
-  description: "Join Shree Sawariya Library, the best library in Khargone. A premium, fully air-conditioned reading room with high-speed WiFi, personal desks, and a peaceful environment for students and professionals.",
+  description: "Join Shree Sawariya Library — Khargone's #1 premium study room. Fully AC, high-speed WiFi, personal desks, 24/7 security, and a peaceful environment for competitive exam aspirants and students.",
   keywords: [
-    "Shree Sawariya Library", 
-    "Library in Khargone", 
-    "Best library in Khargone", 
-    "Reading room Khargone", 
-    "Study room Khargone", 
-    "AC library Khargone", 
-    "Library for competitive exams",
-    "Peaceful study space Khargone",
+    // --- Brand Variations ---
+    "Sawariya Library",
+    "Saawariya Library",
+    "Shree Sawariya Library",
+    "Shri Sawariya Library",
+    "Sanwariya Library",
+    "Shri Sanwariya Library",
     "Sawariya Library Khargone",
-    "Student Study Center Khargone"
+    "Saawariya Khargone",
+
+    // --- Location Based ---
+    "Library in Khargone",
+    "Best library in Khargone",
+    "Top library Khargone",
+    "Khargone library",
+    "Khargone top library",
+    "Khargone study center",
+    "Khargone reading room",
+    "Library near me Khargone",
+    "Madhya Pradesh library",
+    "MP library",
+    "Nimar library",
+
+    // --- Service & Facility ---
+    "Study room Khargone",
+    "Reading room Khargone",
+    "AC library Khargone",
+    "WiFi study room Khargone",
+    "Silent study room Khargone",
+    "Premium library Khargone",
+    "24 hour study room Khargone",
+    "Personal desk library Khargone",
+    "Study hall Khargone",
+    "Library with AC and WiFi Khargone",
+
+    // --- Competitive Exam Keywords ---
+    "Library for competitive exams Khargone",
+    "UPSC study room Khargone",
+    "MPPSC library Khargone",
+    "SSC study center Khargone",
+    "Railway exam library Khargone",
+    "Banking exam study room Khargone",
+    "Government exam preparation Khargone",
+    "Competitive exam preparation library MP",
+
+    // --- Student & General Intent ---
+    "Student library Khargone",
+    "Affordable study room Khargone",
+    "Library membership Khargone",
+    "Study space Khargone",
+    "Peaceful study space Khargone",
+    "Productive study environment Khargone",
+    "Best study place in Khargone",
+    "Library near Khargone"
   ],
   authors: [{ name: "Shree Sawariya Library" }],
   creator: "Shree Sawariya Library",
