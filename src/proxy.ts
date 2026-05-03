@@ -11,8 +11,11 @@ export function proxy(request: NextRequest) {
     path === "/registration" ||
     path === "/privacy" ||
     path === "/terms" ||
+    path === "/sitemap.xml" ||
+    path === "/robots.txt" ||
     path.startsWith("/receipt/") ||
     path.startsWith("/status/");
+
 
   // Get token from cookies
   const token = request.cookies.get("__lms_token")?.value || "";
