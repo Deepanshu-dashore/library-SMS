@@ -59,7 +59,7 @@ export default function AddSubscriptionPage() {
     const fetchData = async () => {
       try {
         const [usersRes, seatsRes] = await Promise.all([
-          fetch("/api/user"),
+          fetch("/api/user?status=Active&limit=1000"),
           fetch("/api/seat?status=available&limit=1000")
         ]);
         
@@ -238,6 +238,10 @@ export default function AddSubscriptionPage() {
                       </div>
                     )}
                   </div>
+                  <p className="text-[11px] font-semibold text-amber-600 flex items-center gap-1.5 px-1 mt-1">
+                     <Icon icon="solar:info-circle-bold-duotone" width={14} className="shrink-0" />
+                     Only verified members with an active status are shown in this list.
+                  </p>
                 </div>
 
                 {/* Section 2: Seat Selection */}

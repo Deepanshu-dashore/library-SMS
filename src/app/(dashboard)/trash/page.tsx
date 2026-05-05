@@ -7,36 +7,23 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, ColumnDef, TabDef, ActionDef } from "@/components/shared/DataTable";
 import { Button } from "@/components/shared/Button";
 import { SimpleLoader } from "@/components/shared/SimpleLoader";
-import { Icon } from "@iconify/react";
 
 export default function TrashPage() {
   const [activeTab, setActiveTab] = useState("members");
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [stats, setStats] = useState({ members: 0, seats: 0 });
+  const [stats, setStats] = useState({ members: 0 });
 
   const fetchTrash = async (tab = activeTab) => {
     setLoading(true);
     try {
-      // Fetch both for counts
-      const [userRes, seatRes] = await Promise.all([
-        fetch("/api/user/trash"),
-        fetch("/api/seat/trash")
-      ]);
-      
+      const userRes = await fetch("/api/user/trash");
       const userResult = await userRes.json();
-      const seatResult = await seatRes.json();
-      
       const users = userResult.success ? userResult.data.users : [];
-      const seats = seatResult.success ? seatResult.data : [];
-      
-      setStats({
-        members: userResult.success ? (userResult.data?.total || 0) : 0,
-        seats: seats.length
-      });
 
-      setData(tab === "members" ? users : seats);
+      setStats({ members: userResult.success ? (userResult.data?.total || 0) : 0 });
+      setData(users);
     } catch (error) {
       toast.error("Error fetching trash items");
     } finally {
@@ -52,15 +39,11 @@ export default function TrashPage() {
   const handleRestore = async (item: any) => {
     const loadingToast = toast.loading("Restoring item...");
     try {
-      const endpoint = activeTab === "members" 
-        ? `/api/user/restore/${item._id}` 
-        : `/api/seat/restore/${item._id}`;
-      
-      const res = await fetch(endpoint, { method: "POST" });
+      const res = await fetch(`/api/user/restore/${item._id}`, { method: "POST" });
       const result = await res.json();
-      
+
       if (result.success) {
-        toast.success("Item restored successfully", { id: loadingToast });
+        toast.success("Member restored successfully", { id: loadingToast });
         fetchTrash();
       } else {
         toast.error(result.message || "Failed to restore", { id: loadingToast });
@@ -71,21 +54,18 @@ export default function TrashPage() {
   };
 
   const handleDelete = async (item: any) => {
-    if (!confirm(`Are you sure you want to PERMANENTLY delete this ${activeTab === "members" ? "member" : "seat"}? This action cannot be undone.`)) return;
-    
+    if (!confirm("Are you sure you want to PERMANENTLY delete this member? This action cannot be undone.")) return;
+
     const loadingToast = toast.loading("Deleting permanently...");
     try {
-      const endpoint = activeTab === "members" 
-        ? `/api/user/${item._id}` 
-        : `/api/seat/${item._id}`;
-      
-      const res = await fetch(endpoint, { method: "DELETE" });
+      const res = await fetch(`/api/user/deep-delete/${item._id}`, { method: "DELETE" });
       const result = await res.json();
-      
+
       if (result.success) {
-        toast.success("Item permanently deleted", { id: loadingToast });
+        toast.success("Member permanently deleted", { id: loadingToast });
         fetchTrash();
       } else {
+        // Show specific error (e.g. active subscription conflict)
         toast.error(result.message || "Failed to delete", { id: loadingToast });
       }
     } catch (error) {
@@ -119,37 +99,8 @@ export default function TrashPage() {
     }
   ];
 
-  const seatColumns: ColumnDef<any>[] = [
-    {
-      key: "seatNumber",
-      label: "Seat Info",
-      type: "custom",
-      render: (row) => (
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-700 font-bold font-barlow">
-            {row.seatNumber}
-          </div>
-          <div className="flex flex-col">
-            <span className="font-semibold text-gray-900">Seat {row.seatNumber}</span>
-            <span className="text-xs text-gray-500 font-medium">{row.floor || "General"}</span>
-          </div>
-        </div>
-      ),
-      sortable: true
-    },
-    { key: "type", label: "Type", type: "status", getStatus: (row) => row.type },
-    { 
-        key: "updatedAt", 
-        label: "Deleted At", 
-        type: "date",
-        getDate: (row) => row.updatedAt,
-        sortable: true 
-    },
-  ];
-
   const tabs: TabDef[] = [
     { label: "Members", value: "members", count: stats.members, color: "info" },
-    { label: "Seats", value: "seats", count: stats.seats, color: "warning" },
   ];
 
   const additionalActions: ActionDef<any>[] = [
@@ -170,9 +121,9 @@ export default function TrashPage() {
           breadcrumbs={[{ label: "Dashboard", href: "/" }, { label: "Recycle Bin" }]}
         />
 
-        <DataTable 
+        <DataTable
           data={data}
-          columns={activeTab === "members" ? memberColumns : seatColumns}
+          columns={memberColumns}
           loading={loading}
           rowKey={(row) => row._id}
           tabs={tabs}
@@ -180,7 +131,7 @@ export default function TrashPage() {
           onTabChange={(val) => setActiveTab(val)}
           hiddenActions={["view", "edit"]}
           onDelete={handleDelete}
-          searchPlaceholder={`Search by ${activeTab === "members" ? "member name" : "seat number"}...`}
+          searchPlaceholder="Search by member name..."
           additionalActions={additionalActions}
         />
       </div>
