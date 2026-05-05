@@ -85,6 +85,13 @@ export interface DataTableProps<T> {
   // Custom Filter Chips
   filterChips?: React.ReactNode;
   hideSearch?: boolean;
+
+  // Server-side Pagination
+  currentPage?: number;
+  totalCount?: number;
+  rowsPerPage?: number;
+  onPageChange?: (page: number) => void;
+  onRowsPerPageChange?: (limit: number) => void;
 }
 
 function DropdownMenu<T>({ 
@@ -182,6 +189,11 @@ export function DataTable<T>({
   showCheckBox = false,
   filterChips,
   hideSearch = false,
+  currentPage,
+  totalCount,
+  rowsPerPage: rowsPerPageProp,
+  onPageChange,
+  onRowsPerPageChange,
 }: DataTableProps<T>) {
   
   const [searchInput, setSearchInput] = useState("");
@@ -234,9 +246,15 @@ export function DataTable<T>({
       });
   }
   
-  const totalCount = processedData.length;
-  const totalPages = Math.ceil(totalCount / rowsPerPage) || 1;
-  const currentData = processedData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+  // Determine if we're using server-side or client-side pagination
+  const isServerSide = totalCount !== undefined;
+  
+  const activePage = isServerSide ? (currentPage || 1) : page;
+  const activeRowsPerPage = isServerSide ? (rowsPerPageProp || 10) : rowsPerPage;
+  const activeTotalCount = isServerSide ? totalCount : processedData.length;
+  
+  const totalPages = Math.ceil(activeTotalCount / activeRowsPerPage) || 1;
+  const currentData = isServerSide ? processedData : processedData.slice((activePage - 1) * activeRowsPerPage, activePage * activeRowsPerPage);
 
 
   const handleSort = (key: string) => {
@@ -526,34 +544,52 @@ export function DataTable<T>({
             <div className="flex items-center gap-2">
                <span className="text-[13px] font-medium text-gray-500">Rows per page:</span>
                <select 
-                 value={rowsPerPage} 
+                 value={activeRowsPerPage} 
                  onChange={(e) => {
-                    setRowsPerPage(Number(e.target.value));
-                    setPage(1);
+                    const newLimit = Number(e.target.value);
+                    if (isServerSide) {
+                      onRowsPerPageChange?.(newLimit);
+                    } else {
+                      setRowsPerPage(newLimit);
+                      setPage(1);
+                    }
                  }}
                  className="bg-transparent text-[13px] font-bold text-gray-900 outline-none cursor-pointer"
                >
                   <option value={5}>5</option>
                   <option value={10}>10</option>
                   <option value={20}>20</option>
+                  <option value={50}>50</option>
                </select>
             </div>
 
             <div className="text-[13px] font-medium text-gray-700">
-               {totalCount === 0 ? '0-0' : `${(page-1)*rowsPerPage + 1}-${Math.min(page*rowsPerPage, totalCount)}`} of {totalCount}
+               {activeTotalCount === 0 ? '0-0' : `${(activePage-1)*activeRowsPerPage + 1}-${Math.min(activePage*activeRowsPerPage, activeTotalCount)}`} of {activeTotalCount}
             </div>
 
             <div className="flex items-center gap-1">
                <button 
-                 onClick={() => setPage(p => Math.max(1, p - 1))}
-                 disabled={page <= 1}
+                 onClick={() => {
+                    if (isServerSide) {
+                      onPageChange?.(activePage - 1);
+                    } else {
+                      setPage(p => Math.max(1, p - 1));
+                    }
+                 }}
+                 disabled={activePage <= 1}
                  className="p-1.5 text-gray-500 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
                >
                  <ChevronLeftIcon className="w-5 h-5" />
                </button>
                <button 
-                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                 disabled={page >= totalPages}
+                 onClick={() => {
+                    if (isServerSide) {
+                      onPageChange?.(activePage + 1);
+                    } else {
+                      setPage(p => Math.min(totalPages, p + 1));
+                    }
+                 }}
+                 disabled={activePage >= totalPages}
                  className="p-1.5 text-gray-500 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
                >
                  <ChevronRightIcon className="w-5 h-5" />

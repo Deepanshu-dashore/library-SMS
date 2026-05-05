@@ -396,4 +396,37 @@ export class UserController {
       return ApiResponse(500, null, error.message || error);
     }
   }
+
+  /**
+   * Deep-delete a user permanently from the trash.
+   *
+   * - Requires the user to already be soft-deleted (in trash).
+   * - Returns 409 if an active subscription exists (must be cancelled first).
+   * - On success: subscriptions, payments are deleted; seats are freed;
+   *   Cloudinary images are removed; user is gone from the DB.
+   */
+  static async deepDeleteUserController(
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> },
+  ) {
+    const library = await verifyJWT();
+    if (!library) return ApiResponse(401, null, "Unauthorized");
+
+    try {
+      const { id } = await params;
+
+      // Fetch user images before deletion so we can clean Cloudinary
+      const existing = await UserService.getUserByIdService(id);
+
+      const deleted = await UserService.deepDeleteUserService(id);
+
+      // Remove Cloudinary assets after successful DB deletion
+      await UserController.deleteUserImages(existing?.user);
+
+      return ApiResponse(200, deleted, "User permanently deleted successfully");
+    } catch (error: any) {
+      const status = error.statusCode || 500;
+      return ApiResponse(status, null, error.message || error);
+    }
+  }
 }

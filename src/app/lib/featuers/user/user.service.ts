@@ -204,4 +204,85 @@ export class UserService {
       session.endSession();
     }
   }
+
+  /**
+   * Deep-delete a user that is already in the trash (isDeleted: true).
+   *
+   * Rules:
+   *  - User must exist and be soft-deleted first.
+   *  - If the user still has an ACTIVE subscription (status "active" & endDate
+   *    in the future) the operation is blocked — caller must cancel it first.
+   *  - Otherwise: all expired/cancelled subscriptions and all payments are
+   *    deleted, any seats linked to non-active subscriptions are freed, and
+   *    finally the user document is permanently removed.
+   */
+  static async deepDeleteUserService(id: string) {
+    await connectDB();
+
+    // 1. Confirm the user exists and is in trash
+    const user = await User.findById(id).lean();
+    if (!user) {
+      const err: any = new Error("User not found.");
+      err.statusCode = 404;
+      throw err;
+    }
+    if (!(user as any).isDeleted) {
+      const err: any = new Error(
+        "User is not in trash. Please move the user to trash before deep-deleting.",
+      );
+      err.statusCode = 400;
+      throw err;
+    }
+
+    // 2. Block if there is still an active subscription
+    const activeSubscription = await Subscription.findOne({
+      userId: id,
+      status: "active",
+      endDate: { $gte: new Date() },
+    }).lean();
+
+    if (activeSubscription) {
+      const err: any = new Error(
+        "User has an active subscription. Please cancel the subscription before deleting the user.",
+      );
+      err.statusCode = 409;
+      throw err;
+    }
+
+    // 3. Proceed with transactional deep-delete
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      // Free seats linked to any non-active (expired/cancelled) subscriptions
+      const allSubscriptions = await Subscription.find({ userId: id }).session(
+        session,
+      );
+      const seatIds = allSubscriptions
+        .map((sub: any) => sub.seatId)
+        .filter(Boolean);
+
+      if (seatIds.length > 0) {
+        await Seat.updateMany(
+          { _id: { $in: seatIds } },
+          { $set: { status: "available" } },
+          { session },
+        );
+      }
+
+      // Delete subscriptions and payments
+      await Subscription.deleteMany({ userId: id }, { session });
+      await Payment.deleteMany({ userId: id }, { session });
+
+      // Permanently delete the user
+      const deleted = await User.findByIdAndDelete(id).session(session);
+
+      await session.commitTransaction();
+      return deleted;
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
+  }
 }

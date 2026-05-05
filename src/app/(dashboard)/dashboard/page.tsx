@@ -268,12 +268,12 @@ export default function DashboardPage() {
         <div className="absolute top-0 right-0 opacity-10 pointer-events-none translate-x-1/4 -translate-y-1/4">
           <Icon icon="solar:widget-bold-duotone" width={100}/>
         </div>
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
-          <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 xl:gap-6 relative z-10">
+          <div className="flex flex-col gap-0.5 whitespace-nowrap mb-4 xl:mb-0">
             <h2 className="text-lg font-bold text-gray-800 tracking-tight">Quick Actions</h2>
             <p className="text-[11px] font-semibold text-gray-500 leading-none">Administrative Shortcuts</p>
           </div>
-          <div className="flex flex-wrap items-center gap-3 flex-1 justify-end">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 w-full">
             {[
               { label: "Share Form", icon: "solar:share-bold-duotone", onClick: handleShareRegistration, color: " text-indigo-600 border-indigo-200" },
               { label: "Add Member", icon: "solar:user-plus-bold-duotone", href: "/users/create", color: " text-emerald-600 border-emerald-200" },
@@ -283,14 +283,14 @@ export default function DashboardPage() {
               { label: "Add Expense", icon: "solar:bill-list-bold-duotone", href: "/expenses/add", color: " text-rose-600 border-rose-200" },
             ].map((action, i) => (
               action.href ? (
-                <a key={i} href={action.href} className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg border ${action.color} hover:scale-105 transition-all group backdrop-blur-sm`}>
-                  <Icon icon={action.icon} width={18} className="group-hover:rotate-12 transition-transform"/>
-                  <span className="text-sm font-medium truncate">{action.label}</span>
+                <a key={i} href={action.href} className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border ${action.color} hover:scale-105 transition-all group backdrop-blur-sm`}>
+                  <Icon icon={action.icon} width={14} className="group-hover:rotate-12 transition-transform shrink-0"/>
+                  <span className="text-[10px] sm:text-xs font-semibold truncate">{action.label}</span>
                 </a>
               ) : (
-                <button key={i} onClick={action.onClick} className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg border cursor-pointer ${action.color} hover:scale-105 transition-all group backdrop-blur-sm`}>
-                  <Icon icon={action.icon} width={18} className="group-hover:rotate-12 transition-transform"/>
-                  <span className="text-sm font-medium truncate">{action.label}</span>
+                <button key={i} onClick={action.onClick} className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border cursor-pointer ${action.color} hover:scale-105 transition-all group backdrop-blur-sm`}>
+                  <Icon icon={action.icon} width={14} className="group-hover:rotate-12 transition-transform shrink-0"/>
+                  <span className="text-[10px] sm:text-xs font-semibold truncate">{action.label}</span>
                 </button>
               )
             ))}
