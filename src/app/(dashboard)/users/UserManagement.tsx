@@ -33,13 +33,17 @@ export default function UserManagement() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [stats, setStats] = useState({ total: 0, active: 0, inactive: 0, unverify: 0, withoutSeat: 0 });
   const [total, setTotal] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
       const searchParam = searchTerm ? `search=${searchTerm}` : "";
       const statusParam = statusFilter !== "All" ? `status=${statusFilter}` : "";
-      const query = [searchParam, statusParam].filter(Boolean).join("&");
+      const limitParam = `limit=${rowsPerPage}`;
+      const pageParam = `page=${currentPage}`;
+      const query = [searchParam, statusParam, limitParam, pageParam].filter(Boolean).join("&");
       const { data } = await axios.get(`/api/user${query ? `?${query}` : ""}`);
       if (data.success) {
         setUsers(data.data.users);
@@ -69,6 +73,11 @@ export default function UserManagement() {
       fetchUsers();
     }, 400);
     return () => clearTimeout(timer);
+  }, [searchTerm, statusFilter, currentPage, rowsPerPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
   }, [searchTerm, statusFilter]);
 
   const handleDelete = async (user: User) => {
@@ -208,6 +217,14 @@ export default function UserManagement() {
           tabs={tabs}
           activeTab={statusFilter}
           onTabChange={(val) => setStatusFilter(val)}
+          currentPage={currentPage}
+          totalCount={total}
+          rowsPerPage={rowsPerPage}
+          onPageChange={(p) => setCurrentPage(p)}
+          onRowsPerPageChange={(l) => {
+            setRowsPerPage(l);
+            setCurrentPage(1);
+          }}
           filterChips={
             (searchTerm || statusFilter !== "All") && (
               <FilterChips
