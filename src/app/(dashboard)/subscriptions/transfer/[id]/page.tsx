@@ -21,6 +21,7 @@ interface Seat {
   _id: string;
   seatNumber: string;
   type: string;
+  floor?: string;
 }
 
 export default function TransferSubscriptionPage() {
@@ -36,12 +37,16 @@ export default function TransferSubscriptionPage() {
   
   const [targetSeatId, setTargetSeatId] = useState("");
 
+  const [selectedFloor, setSelectedFloor] = useState<string>("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 18;
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [subRes, seatsRes] = await Promise.all([
           fetch(`/api/subscription/${id}`),
-          fetch("/api/seat?status=available")
+          fetch("/api/seat?status=available&limit=1000")
         ]);
         
         const subResult = await subRes.json();
@@ -57,6 +62,21 @@ export default function TransferSubscriptionPage() {
     };
     fetchData();
   }, [id]);
+
+  // Filter and Pagination logic
+  const floors = ["All", ...Array.from(new Set(availableSeats.map(s => s.floor).filter(Boolean) as string[]))];
+  
+  const filteredSeats = selectedFloor === "All" 
+    ? availableSeats 
+    : availableSeats.filter(s => s.floor === selectedFloor);
+
+  const totalPages = Math.ceil(filteredSeats.length / itemsPerPage);
+  const paginatedSeats = filteredSeats.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  // Reset page when floor changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedFloor]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,39 +184,101 @@ export default function TransferSubscriptionPage() {
                   <h3 className="text-lg font-semibold text-gray-900 leading-tight">Transfer Subscription</h3>
                   <p className="text-sm font-public-sans text-gray-500">Pick an available seat to transfer to</p>
                 </div>
+                <div className="sm:ml-auto px-3 py-1 bg-green-50 rounded-lg border border-green-100 flex items-center gap-2">
+                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                   <span className="text-[12px] font-bold text-green-700 uppercase tracking-wider">{availableSeats.length} Available</span>
+                </div>
               </div>
 
               <div className="space-y-2 pt-2">
-                <div>
-                  <label className="block text-[15px] font-public-sans font-bold text-gray-900">Choose Seat</label>
-                  <p className="text-[13px] font-public-sans text-gray-500 mt-0.5 mb-2">Pick an available seat from the library layout.</p>
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                  <div>
+                    <label className="block text-[15px] font-public-sans font-bold text-gray-900">Choose Seat</label>
+                    <p className="text-[13px] font-public-sans text-gray-500 mt-0.5">Pick an available seat from the library layout.</p>
+                  </div>
                 </div>
                 
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 pt-1">
-                  {availableSeats.length === 0 ? (
-                    <p className="col-span-full text-gray-500 text-[13px] font-public-sans font-semibold">No other seats available.</p>
-                  ) : (
-                    availableSeats.map((seat) => (
+                <div className="space-y-4 mt-2">
+                  {/* Floor Filter */}
+                  <div className="flex flex-wrap gap-2">
+                    {floors.map((floor) => (
                       <button
-                        key={seat._id}
+                        key={floor}
                         type="button"
-                        onClick={() => setTargetSeatId(seat._id)}
-                        className={`group relative p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
-                          targetSeatId === seat._id
-                            ? "bg-indigo-600 border-indigo-600 shadow-lg shadow-indigo-100 scale-105"
-                            : "bg-white cursor-pointer border-gray-100 hover:border-indigo-200 hover:bg-gray-50"
+                        onClick={() => setSelectedFloor(floor)}
+                        className={`px-4 py-1.5 rounded-lg capitalize text-sm font-medium transition-all ${
+                          selectedFloor === floor
+                            ? "bg-indigo-600 text-white shadow-md shadow-indigo-100"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                         }`}
                       >
-                         <Icon icon={seat.type === "ac" ? "solar:armchair-bold-duotone" : "solar:chair-bold-duotone"} width={26} height={26}
-                           className={`transition-colors ${
-                             targetSeatId === seat._id ? "text-white" : "text-gray-400 group-hover:text-indigo-400"
-                           }`} 
-                         />
-                        <span className={`text-[13px] font-public-sans font-bold ${
-                          targetSeatId === seat._id ? "text-white" : "text-gray-900"
-                        }`}>{seat.seatNumber}</span>
+                        {floor === "All" ? "All Floors" : floor}
                       </button>
-                    ))
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 pt-1">
+                    {paginatedSeats.length === 0 ? (
+                      <p className="col-span-full text-gray-500 text-[13px] font-public-sans font-semibold">No seats available in this section.</p>
+                    ) : (
+                      paginatedSeats.map((seat) => (
+                        <button
+                          key={seat._id}
+                          type="button"
+                          onClick={() => setTargetSeatId(seat._id)}
+                          className={`group relative p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
+                            targetSeatId === seat._id
+                              ? "bg-indigo-600 border-indigo-600 shadow-lg shadow-indigo-100 scale-105"
+                              : "bg-white cursor-pointer border-gray-100 hover:border-indigo-200 hover:bg-gray-50"
+                          }`}
+                        >
+                           <Icon icon={seat.type === "ac" ? "solar:armchair-bold-duotone" : "solar:chair-bold-duotone"} width={26} height={26}
+                             className={`transition-colors ${
+                               targetSeatId === seat._id ? "text-white" : "text-gray-400 group-hover:text-indigo-400"
+                             }`} 
+                           />
+                          <span className={`text-[13px] font-public-sans font-bold ${
+                            targetSeatId === seat._id ? "text-white" : "text-gray-900"
+                          }`}>{seat.seatNumber}</span>
+                          {seat.floor && (
+                            <span className={`text-[10px] uppercase tracking-tighter ${
+                              targetSeatId === seat._id ? "text-indigo-200" : "text-gray-400"
+                            }`}>
+                              {seat.floor}
+                            </span>
+                          )}
+                        </button>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Pagination Buttons */}
+                  {totalPages > 1 && (
+                    <div className="flex flex-col sm:flex-row items-center justify-between pt-6 gap-4 border-t border-gray-50">
+                      <p className="text-[13px] font-public-sans text-gray-500">
+                        Showing <span className="font-bold text-gray-900">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * itemsPerPage, filteredSeats.length)}</span> of <span className="font-bold text-gray-900">{filteredSeats.length}</span> seats
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          disabled={currentPage === 1}
+                          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-xs font-bold text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition-all shadow-sm"
+                        >
+                          <Icon icon="solar:alt-arrow-left-linear" width={18} height={18} />
+                          Prev
+                        </button>
+                        <button
+                          type="button"
+                          disabled={currentPage === totalPages}
+                          onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-xs font-bold text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition-all shadow-sm"
+                        >
+                          Next
+                          <Icon icon="solar:alt-arrow-right-linear" width={18} height={18} />
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
