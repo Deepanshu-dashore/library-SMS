@@ -38,6 +38,13 @@ interface PaymentDetails {
   durationDays: number;
   receiptNumber: string;
   createdAt: string;
+  relatedPayments?: {
+    _id: string;
+    amount: number;
+    paymentMode: string;
+    receiptNumber: string;
+    createdAt: string;
+  }[];
 }
 
 interface LibraryDetails {
@@ -185,17 +192,29 @@ export default function ReceiptContent() {
       doc.text("Membership Details", 20, 115);
 
       const seat = payment.subscriptionId.seatId;
+      const isSplit = (payment.relatedPayments?.length || 0) > 1;
+      const totalAmount = (payment.relatedPayments?.reduce((sum: number, p: any) => sum + p.amount, 0) || payment.amount) as number;
+
+      const tableBody: any[] = [
+        ["Seat Number (Type)", ":", `${seat?.seatNumber} (${seat?.type?.toUpperCase()})`],
+        ["Floor", ":", `${seat?.floor || "Ground"}`],
+        ["Payment Method", ":", isSplit ? "Split Payment" : `${payment.paymentMode.toUpperCase()}`],
+        ["Payment Date", ":", `${new Date(payment.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`],
+        ["Subscription Period", ":", `${new Date(payment.subscriptionId.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} To ${new Date(payment.subscriptionId.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`]
+      ];
+
+      if (isSplit && payment.relatedPayments) {
+        const breakdown = payment.relatedPayments
+          .map((p: any) => `${p.paymentMode.toUpperCase()}: ${p.amount} RS`)
+          .join("  |  ");
+        tableBody.push(["Payment Breakdown", ":", breakdown]);
+      }
+
       autoTable(doc, {
         startY: 125,
         margin: { left: 20 },
         tableWidth: 160,
-        body: [
-          ["Seat Number (Type)", ":", `${seat?.seatNumber} (${seat?.type?.toUpperCase()})`],
-          ["Floor", ":", `${seat?.floor || "Ground"}`],
-          ["Payment Method", ":", `${payment.paymentMode.toUpperCase()}`],
-          ["Payment Date", ":", `${new Date(payment.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`],
-          ["Subscription Period", ":", `${new Date(payment.subscriptionId.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} To ${new Date(payment.subscriptionId.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`]
-        ],
+        body: tableBody,
         theme: 'plain',
         styles: {
           fontSize: 11,
@@ -217,11 +236,11 @@ export default function ReceiptContent() {
       doc.setFontSize(14);
       doc.setTextColor(0);
       doc.setFont('helvetica', 'bold');
-      doc.text("Amount Paid :", 20, amountY);
+      doc.text(isSplit ? "Total Subscription Price :" : "Amount Paid :", 20, amountY);
       
       doc.setFontSize(18);
       doc.setTextColor(30, 27, 75);
-      doc.text(`${payment.amount} RS`, 60, amountY);
+      doc.text(`${totalAmount} RS`, 85, amountY);
       
       doc.setDrawColor(245);
       doc.line(20, amountY + 5, 190, amountY + 5);
@@ -338,14 +357,37 @@ export default function ReceiptContent() {
                 </tbody>
              </table>
 
-             {/* Total Section */}
-             <div className="mt-1 py-1 border-t border-dashed border-gray-200">
-                <div className="flex justify-between items-center">
-                   <span className="text-sm font-semibold text-gray-900">Amount Paid</span>
-                   <span className="text-xl font-bold font-barlow text-[#0c6b60]">₹{payment.amount}</span>
+              {/* Total Section */}
+              <div className="mt-1 py-1 border-t border-dashed border-gray-200">
+                 <div className="flex justify-between items-center">
+                    <span className="text-sm font-semibold text-gray-900">
+                      {payment.relatedPayments && payment.relatedPayments.length > 1 ? "Total Amount" : "Amount Paid"}
+                    </span>
+                    <span className="text-xl font-bold font-barlow text-[#0c6b60]">
+                      ₹{payment.relatedPayments && payment.relatedPayments.length > 1 
+                        ? payment.relatedPayments.reduce((s, p) => s + p.amount, 0)
+                        : payment.amount}
+                    </span>
+                 </div>
+              </div>
+
+              {/* Split Breakdown */}
+              {payment.relatedPayments && payment.relatedPayments.length > 1 && (
+                <div className="mt-4 pt-4 border-t border-gray-100 bg-gray-50/50 rounded-xl p-3">
+                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                      <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Breakdown :</h4>
+                      {payment.relatedPayments.map((p, i) => (
+                         <div key={i} className="flex items-center gap-1.5 text-[12px]">
+                            <span className="text-gray-600 font-medium capitalize">{p.paymentMode}</span>
+                            <span className="text-gray-400">:</span>
+                            <span className="font-barlow font-bold text-gray-800">₹{p.amount}</span>
+                            {i < payment.relatedPayments.length - 1 && <span className="text-gray-300 ml-1">|</span>}
+                         </div>
+                      ))}
+                   </div>
                 </div>
-             </div>
-          </div>
+              )}
+           </div>
 
           {/* Bottom Action Area: Replacing Barcode with Button */}
           <div className="mt-auto pt-8 border-t-2 border-dashed border-gray-100 flex flex-col items-center">

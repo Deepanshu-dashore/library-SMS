@@ -69,7 +69,7 @@ export class SubscriptionController {
     if (!library) {
       return ApiResponse(401, null, "Unauthorized");
     }
-    const { userId, seatId, durationDays, startDate, paymentMode } =
+    const { userId, seatId, durationDays, startDate, paymentMode, splitPayments } =
       await req.json();
     try {
       const subscription = await SubscriptionService.createSubscription(
@@ -78,6 +78,7 @@ export class SubscriptionController {
         durationDays,
         startDate,
         paymentMode,
+        splitPayments,
       );
       return ApiResponse(
         200,

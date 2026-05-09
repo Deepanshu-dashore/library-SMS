@@ -10,8 +10,10 @@ interface InvoiceProps {
 export const Invoice: React.FC<InvoiceProps> = ({ payment, owner }) => {
   if (!payment) return null;
 
-  const { userId, subscriptionId, amount, paymentMode, receiptNumber, createdAt } = payment;
+  const { userId, subscriptionId, amount, paymentMode, receiptNumber, createdAt, relatedPayments } = payment;
   const seat = subscriptionId?.seatId;
+  const isSplit = (relatedPayments?.length || 0) > 1;
+  const totalAmount = relatedPayments?.reduce((sum: number, p: any) => sum + p.amount, 0) || amount;
 
   return (
     <div className="invoice-container w-[210mm] h-[297mm] bg-white relative overflow-hidden shadow-sm mx-auto print:shadow-none print:m-0" id="invoice-capture">
@@ -101,7 +103,7 @@ export const Invoice: React.FC<InvoiceProps> = ({ payment, owner }) => {
             <div className="grid grid-cols-[200px_min-content_1fr] items-center gap-4">
               <span className="font-bold text-gray-800">Payment Method</span>
               <span>:</span>
-              <span className="text-gray-700 capitalize">{paymentMode}</span>
+              <span className="text-gray-700 capitalize">{isSplit ? "Split Payment" : paymentMode}</span>
             </div>
 
             <div className="grid grid-cols-[200px_min-content_1fr] items-center gap-4">
@@ -117,13 +119,31 @@ export const Invoice: React.FC<InvoiceProps> = ({ payment, owner }) => {
                 {format(new Date(subscriptionId?.startDate), "dd MMM yyyy")} To {format(new Date(subscriptionId?.endDate), "dd MMM yyyy")}
               </span>
             </div>
+
+            {isSplit && relatedPayments && (
+               <div className="mt-4 pt-4 border-t border-dashed border-gray-200">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Payment Breakdown :</p>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                       {relatedPayments.map((p: any, i: number) => (
+                          <div key={i} className="flex items-center gap-1.5 text-sm">
+                             <span className="font-medium text-gray-600 capitalize">{p.paymentMode}</span>
+                             <span className="text-gray-400">:</span>
+                             <span className="font-bold text-gray-800">₹{p.amount}</span>
+                             {i < relatedPayments.length - 1 && <span className="text-gray-300 ml-2">|</span>}
+                          </div>
+                       ))}
+                    </div>
+                  </div>
+               </div>
+            )}
           </div>
         </div>
 
         {/* Amount Section */}
         <div className="px-4 py-4 border-y border-gray-200/90 flex items-end gap-8">
-          <span className="text-xl font-bold text-gray-900">Amount Paid :</span>
-          <span className="text-3xl font-bold font-barlow text-indigo-900 uppercase">{amount} rs</span>
+          <span className="text-xl font-bold text-gray-900">{isSplit ? "Total Subscription Price :" : "Amount Paid :"}</span>
+          <span className="text-3xl font-bold font-barlow text-indigo-900 uppercase">{totalAmount} rs</span>
         </div>
 
         {/* Signature Section */}

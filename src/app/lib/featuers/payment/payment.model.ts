@@ -27,7 +27,6 @@ const paymentSchema = new Schema(
     },
     receiptNumber: {
       type: String,
-      unique: true,
     },
   },
   { timestamps: true },

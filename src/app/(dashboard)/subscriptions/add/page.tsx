@@ -39,6 +39,9 @@ export default function AddSubscriptionPage() {
     paymentMode: "cash"
   });
 
+  const [isSplitPayment, setIsSplitPayment] = useState(false);
+  const [splitPayments, setSplitPayments] = useState<{ mode: string; amount: number }[]>([]);
+
   const [selectedFloor, setSelectedFloor] = useState<string>("All");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 18; // Show 18 seats per set (3x6 or similar)
@@ -82,13 +85,31 @@ export default function AddSubscriptionPage() {
       return;
     }
 
+    if (isSplitPayment) {
+      const total = splitPayments.reduce((s, p) => s + (p.amount || 0), 0);
+      if (total > estimatedAmount) {
+        toast.error("Split payments cannot exceed the total amount");
+        return;
+      }
+      if (total <= 0) {
+        toast.error("Please enter a valid payment amount");
+        return;
+      }
+    }
+
     setLoading(true);
     const loadingToast = toast.loading("Creating subscription...");
     try {
+      const payload = {
+        ...formData,
+        splitPayments: isSplitPayment ? splitPayments : undefined,
+        paymentMode: isSplitPayment ? undefined : formData.paymentMode
+      };
+
       const res = await fetch("/api/subscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (data.success) {
@@ -382,26 +403,119 @@ export default function AddSubscriptionPage() {
                 </div>
 
                 {/* Section 5: Payment Mode */}
-                <div className="space-y-2 pt-2">
-                  <div>
-                    <label className="block text-[15px] font-public-sans font-bold text-gray-900">Payment Mode</label>
-                    <p className="text-[13px] font-public-sans text-gray-500 mt-0.5 mb-2">Select how the user paid for this subscription.</p>
-                  </div>
-                  <div className="relative">
-                    <select
-                      required
-                      value={formData.paymentMode}
-                      onChange={(e) => setFormData({ ...formData, paymentMode: e.target.value })}
-                      className="w-full px-4 py-4 bg-white border border-gray-300/60 rounded-xl text-[15px] font-public-sans text-gray-900 outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 hover:border-gray-400 transition-all appearance-none cursor-pointer"
-                    >
-                      <option value="cash">Cash</option>
-                      <option value="upi">UPI</option>
-                      <option value="card">Card</option>
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                      <Icon icon="solar:alt-arrow-down-linear" width={20} height={20} />
+                <div className="space-y-4 pt-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <label className="block text-[15px] font-public-sans font-bold text-gray-900">Payment Details</label>
+                      <p className="text-[13px] font-public-sans text-gray-500 mt-0.5 mb-2">Select payment mode or split between multiple modes.</p>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSplitPayment(!isSplitPayment);
+                        if (!isSplitPayment && splitPayments.length === 0) {
+                          setSplitPayments([{ mode: "cash", amount: estimatedAmount }]);
+                        }
+                      }}
+                      className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all border flex items-center gap-2 ${
+                        isSplitPayment 
+                          ? "bg-amber-50 text-amber-600 border-amber-200" 
+                          : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
+                      }`}
+                    >
+                      <Icon icon={isSplitPayment ? "solar:close-circle-bold" : "solar:bill-list-bold"} width={16} />
+                      {isSplitPayment ? "Cancel Split Payment" : "Enable Split Payment"}
+                    </button>
                   </div>
+
+                  {!isSplitPayment ? (
+                    <div className="relative">
+                      <select
+                        required
+                        value={formData.paymentMode}
+                        onChange={(e) => setFormData({ ...formData, paymentMode: e.target.value })}
+                        className="w-full px-4 py-4 bg-white border border-gray-300/60 rounded-xl text-[15px] font-public-sans text-gray-900 outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 hover:border-gray-400 transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="cash">Cash</option>
+                        <option value="upi">UPI</option>
+                        <option value="card">Card</option>
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                        <Icon icon="solar:alt-arrow-down-linear" width={20} height={20} />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 bg-gray-50/50 p-4 rounded-xl border border-gray-200/60">
+                      {splitPayments.map((payment, index) => (
+                        <div key={index} className="flex flex-col sm:flex-row gap-3 items-end">
+                          <div className="flex-1 w-full">
+                            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block px-1">Mode</label>
+                            <div className="relative">
+                              <select
+                                value={payment.mode}
+                                onChange={(e) => {
+                                  const newPayments = [...splitPayments];
+                                  newPayments[index].mode = e.target.value;
+                                  setSplitPayments(newPayments);
+                                }}
+                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:border-indigo-500 transition-all appearance-none"
+                              >
+                                <option value="cash">Cash</option>
+                                <option value="upi">UPI</option>
+                                <option value="card">Card</option>
+                              </select>
+                              <Icon icon="solar:alt-arrow-down-linear" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            </div>
+                          </div>
+                          <div className="flex-1 w-full">
+                            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block px-1">Amount</label>
+                            <input
+                              type="number"
+                              placeholder="0"
+                              value={payment.amount}
+                              onChange={(e) => {
+                                const newPayments = [...splitPayments];
+                                newPayments[index].amount = parseInt(e.target.value) || 0;
+                                setSplitPayments(newPayments);
+                              }}
+                              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:border-indigo-500 transition-all font-mono"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newPayments = splitPayments.filter((_, i) => i !== index);
+                              setSplitPayments(newPayments);
+                              if (newPayments.length === 0) setIsSplitPayment(false);
+                            }}
+                            className="p-3 bg-white border border-red-100 text-red-500 rounded-lg hover:bg-red-50 transition-all shrink-0"
+                          >
+                            <Icon icon="solar:trash-bin-trash-bold" width={20} />
+                          </button>
+                        </div>
+                      ))}
+                      
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 mt-3 border-t border-dashed border-gray-200">
+                        <button
+                          type="button"
+                          onClick={() => setSplitPayments([...splitPayments, { mode: "cash", amount: 0 }])}
+                          className="flex items-center gap-2 px-3 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors border border-indigo-100"
+                        >
+                          <Icon icon="solar:add-circle-bold" width={18} />
+                          Add Payment Row
+                        </button>
+                        
+                        <div className="flex items-center gap-3 bg-amber-100 px-4 py-1">
+                           <span className="text-[11px] font-barlow font-semibold text-gray-600 uppercase ">Total Split:</span>
+                           <span className={`text-sm  ${
+                             splitPayments.reduce((s, p) => s + p.amount, 0) > estimatedAmount ? "text-red-500" : "text-emerald-700"
+                           }`}>
+                             ₹{splitPayments.reduce((s, p) => s + p.amount, 0)} / ₹{estimatedAmount}
+                           </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <Button
@@ -439,6 +553,20 @@ export default function AddSubscriptionPage() {
                     <span className="text-lg font-barlow font-bold text-indigo-600">₹{estimatedAmount}</span>
                   </div>
                 </div>
+
+                {isSplitPayment && splitPayments.length > 0 && (
+                  <div className="p-4 bg-gray-50 rounded-xl space-y-3 border border-gray-100">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Payment Breakdown</p>
+                    <div className="space-y-2">
+                      {splitPayments.map((p, i) => (
+                        <div key={i} className="flex justify-between items-center text-xs font-public-sans px-1">
+                          <span className="text-gray-500 font-medium capitalize">{p.mode}</span>
+                          <span className="text-gray-900 font-bold font-mono">₹{p.amount}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="p-2 bg-amber-50/80 rounded-xl border border-amber-100/50 flex gap-4 items-center">
                    <div className="w-10 h-10 rounded-xl bg-amber-100/90 text-amber-600 flex items-center justify-center shrink-0">

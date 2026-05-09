@@ -72,6 +72,19 @@ export class PaymentService {
           },
         })
         .select("-__v");
+
+      if (payment && payment.subscriptionId) {
+        const relatedPayments = await Payment.find({
+          subscriptionId: payment.subscriptionId._id,
+        })
+          .select("-__v")
+          .sort({ createdAt: 1 });
+        return {
+          ...payment.toObject(),
+          relatedPayments: relatedPayments.map((p) => p.toObject()),
+        };
+      }
+
       return payment;
     } catch (error) {
       throw error;
