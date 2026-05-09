@@ -116,7 +116,7 @@ const UploadZone = ({
       </div>
     ) : (
       <div
-        className={`upload-zone ${disabled ? "opacity-50 pointer-events-none" : ""}`}
+        className={`upload-zone ${field === "signature" ? "signature" : ""} ${disabled ? "opacity-50 pointer-events-none" : ""}`}
         onClick={() => !disabled && inputRef.current?.click()}
       >
         <div className="upload-icon-box">
@@ -164,6 +164,7 @@ function RegisterContent() {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [isCropping, setIsCropping] = useState(false);
+  const [croppingField, setCroppingField] = useState<"photo" | "signature" | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -295,21 +296,27 @@ function RegisterContent() {
   );
 
   const handleApplyCrop = async () => {
-    if (!imageSrc || !croppedAreaPixels) return;
+    if (!imageSrc || !croppedAreaPixels || !croppingField) return;
     try {
       const croppedImageBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
       if (croppedImageBlob) {
-        const file = new File([croppedImageBlob], "photo.jpg", {
+        const fileName = croppingField === "photo" ? "photo.jpg" : "signature.jpg";
+        const file = new File([croppedImageBlob], fileName, {
           type: "image/jpeg",
         });
-        setFormData({ ...formData, photo: file });
+
+        setFormData({ ...formData, [croppingField]: file });
         setPreviews({
           ...previews,
-          photo: URL.createObjectURL(croppedImageBlob),
+          [croppingField]: URL.createObjectURL(croppedImageBlob),
         });
+
         setIsCropping(false);
+        setCroppingField(null);
         setImageSrc(null);
-        toast.success("Photo cropped perfectly!");
+        toast.success(
+          `${croppingField === "photo" ? "Photo" : "Signature"} cropped perfectly!`,
+        );
       }
     } catch (e) {
       toast.error("Failed to crop image");
@@ -322,18 +329,13 @@ function RegisterContent() {
   ) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (field === "photo") {
-        const reader = new FileReader();
-        reader.addEventListener("load", () => {
-          setImageSrc(reader.result as string);
-          setIsCropping(true);
-        });
-        reader.readAsDataURL(file);
-      } else {
-        setFormData({ ...formData, signature: file });
-        setPreviews({ ...previews, signature: URL.createObjectURL(file) });
-        toast.success("Signature uploaded!");
-      }
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        setImageSrc(reader.result as string);
+        setCroppingField(field);
+        setIsCropping(true);
+      });
+      reader.readAsDataURL(file);
     }
   };
 
@@ -821,42 +823,89 @@ function RegisterContent() {
                     />
                     
                     {/* Upload Instructions Section */}
-                    <div className="col-span-full mt-4 p-3 bg-indigo-50/50 rounded-2xl border border-indigo-100/50">
-                      <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
-                          <Icon icon="solar:info-circle-bold-duotone" width={24} className="text-indigo-600" />
+                    <div className="col-span-full mt-6 mb-4">
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className="h-px flex-1 bg-linear-to-r from-transparent to-amber-100"></div>
+                        <div className="flex items-center gap-2 px-4 py-1 bg-red-100 rounded-sm shadow-xs">
+                          <Icon icon="solar:info-circle-bold" width={14} className="text-red-600" />
+                          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-red-700">Upload Requirements</span>
                         </div>
+                        <div className="h-px flex-1 bg-linear-to-l from-transparent to-amber-100"></div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-8">
                         <div className="space-y-4">
-                          <div>
-                            <h4 className="text-[15px] font-bold text-indigo-900 leading-tight">Important Upload Instructions</h4>
-                            <p className="text-[13px] text-indigo-600/70 mt-1">Please follow these guidelines to ensure your application is processed quickly.</p>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2 -ml-5">
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2 text-indigo-700">
-                                <Icon icon="solar:user-circle-bold-duotone" width={18} />
-                                <span className="text-[12px] font-bold uppercase tracking-wider">Passport Photo</span>
-                              </div>
-                              <ul className="text-[13px] text-indigo-800/80 space-y-1.5 list-disc pl-4 leading-relaxed font-medium">
-                                <li>Photo must be clear, sharp and in focus.</li>
-                                <li>Face the camera directly with a neutral expression.</li>
-                                <li>Use a plain white or very light-colored background.</li>
-                                <li>Ensure proper lighting to avoid shadows on the face.</li>
-                              </ul>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-sm">
+                              <Icon icon="solar:user-circle-bold" width={24} />
                             </div>
-                            
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2 text-indigo-700">
-                                <Icon icon="streamline-freehand:cash-payment-pen-signature" width={18} />
-                                <span className="text-[12px] font-bold uppercase tracking-wider">E-Signature</span>
+                            <div>
+                              <h4 className="text-[13px] font-black text-slate-800 uppercase tracking-tight">Passport Photo</h4>
+                              <p className="text-[11px] text-slate-400 font-bold">Standard portrait guidelines</p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col sm:flex-row gap-6 items-start">
+                            <ul className="space-y-3 flex-1">
+                              {[
+                                "Ensure face is clear and in sharp focus",
+                                "Use a plain white or light background",
+                                "Direct gaze with a neutral expression"
+                              ].map((text, i) => (
+                                <li key={i} className="flex items-start gap-3 group">
+                                  <div className="mt-1 w-1.5 h-1.5 rounded-full bg-indigo-400 group-hover:scale-125 transition-transform shrink-0" />
+                                  <span className="text-[13px] text-slate-600 font-medium leading-tight">{text}</span>
+                                </li>
+                              ))}
+                            </ul>
+                            <div className="w-32 h-40 sm:w-28 sm:h-36 md:w-32 md:h-40 shrink-0 rounded-lg overflow-hidden border-2 border-green-200 shadow-lg relative group bg-white self-center sm:self-start transition-all hover:border-green-400 hover:scale-105 duration-300">
+                              <Image 
+                                src="/idelImg.png" 
+                                alt="Ideal Example" 
+                                fill 
+                                sizes="(max-width: 768px) 128px, 150px"
+                                className="object-cover" 
+                              />
+                              <div className="absolute bottom-0 inset-x-0 bg-green-600/90 py-1.5 flex justify-center backdrop-blur-[2px]">
+                                <span className="text-[9px] font-black uppercase text-white tracking-wider">Correct Photo</span>
                               </div>
-                              <ul className="text-[13px] text-indigo-800/80 space-y-1.5 list-disc pl-4 leading-relaxed font-medium">
-                                <li>Sign on a clean, plain white paper.</li>
-                                <li>Use a dark blue or black ink pen for best contrast.</li>
-                                <li>Avoid using lined or patterned paper.</li>
-                                <li>Capture the photo from directly above to avoid distortion.</li>
-                              </ul>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-sm">
+                              <Icon icon="solar:pen-new-square-bold" width={24} />
+                            </div>
+                            <div>
+                              <h4 className="text-[13px] font-black text-slate-800 uppercase tracking-tight">E-Signature</h4>
+                              <p className="text-[11px] text-slate-400 font-bold">Digital signature quality</p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col sm:flex-row gap-6 items-start">
+                            <ul className="space-y-3 flex-1">
+                              {[
+                                "Sign on plain white paper (no lines)",
+                                "Use dark blue or black ink only",
+                                "Capture from directly above (no shadows)"
+                              ].map((text, i) => (
+                                <li key={i} className="flex items-start gap-3 group">
+                                  <div className="mt-1 w-1.5 h-1.5 rounded-full bg-blue-400 group-hover:scale-125 transition-transform shrink-0" />
+                                  <span className="text-[13px] text-slate-600 font-medium leading-tight">{text}</span>
+                                </li>
+                              ))}
+                            </ul>
+                            <div className="w-full sm:w-36 h-24 sm:h-20 shrink-0 rounded-lg overflow-hidden border-2 border-green-200 shadow-lg relative group bg-white transition-all hover:border-green-400 hover:scale-105 duration-300">
+                              <Image 
+                                src="/idelSign.png" 
+                                alt="Ideal Signature" 
+                                fill 
+                                sizes="(max-width: 768px) 150px, 200px"
+                                className="object-contain p-2" 
+                              />
+                              <div className="absolute bottom-0 inset-x-0 bg-green-600/90 py-1.5 flex justify-center backdrop-blur-[2px]">
+                                <span className="text-[9px] font-black uppercase text-white tracking-wider">Correct Sign</span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1084,7 +1133,7 @@ function RegisterContent() {
                 image={imageSrc || ""}
                 crop={crop}
                 zoom={zoom}
-                aspect={4 / 5}
+                aspect={croppingField === "signature" ? 3 / 1 : 4 / 5}
                 onCropChange={setCrop}
                 onCropComplete={onCropComplete}
                 onZoomChange={setZoom}
@@ -1111,9 +1160,10 @@ function RegisterContent() {
                 <button
                   onClick={() => {
                     setIsCropping(false);
+                    setCroppingField(null);
                     setImageSrc(null);
                   }}
-                  className="flex-1 py-4 bg-white/5 rounded-2xl text-white font-bold hover:bg-white/10 transition-all"
+                  className="flex-1 py-3 px-6 bg-slate-700 text-white rounded-xl font-bold hover:bg-slate-600 transition-colors"
                 >
                   Cancel
                 </button>
