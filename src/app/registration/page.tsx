@@ -774,6 +774,49 @@ function RegisterContent() {
                       removeFile={removeFile}
                       handleFileChange={handleFileChange}
                     />
+                    
+                    {/* Upload Instructions Section */}
+                    <div className="col-span-full mt-4 p-5 bg-indigo-50/50 rounded-2xl border border-indigo-100/50">
+                      <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
+                          <Icon icon="solar:info-circle-bold-duotone" width={24} className="text-indigo-600" />
+                        </div>
+                        <div className="space-y-4">
+                          <div>
+                            <h4 className="text-[15px] font-bold text-indigo-900 leading-tight">Important Upload Instructions</h4>
+                            <p className="text-[13px] text-indigo-600/70 mt-1">Please follow these guidelines to ensure your application is processed quickly.</p>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 text-indigo-700">
+                                <Icon icon="solar:user-circle-bold-duotone" width={18} />
+                                <span className="text-[12px] font-bold uppercase tracking-wider">Passport Photo</span>
+                              </div>
+                              <ul className="text-[13px] text-indigo-800/80 space-y-1.5 list-disc pl-4 leading-relaxed font-medium">
+                                <li>Photo must be clear, sharp and in focus.</li>
+                                <li>Face the camera directly with a neutral expression.</li>
+                                <li>Use a plain white or very light-colored background.</li>
+                                <li>Ensure proper lighting to avoid shadows on the face.</li>
+                              </ul>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 text-indigo-700">
+                                <Icon icon="streamline-freehand:cash-payment-pen-signature" width={18} />
+                                <span className="text-[12px] font-bold uppercase tracking-wider">E-Signature</span>
+                              </div>
+                              <ul className="text-[13px] text-indigo-800/80 space-y-1.5 list-disc pl-4 leading-relaxed font-medium">
+                                <li>Sign on a clean, plain white paper.</li>
+                                <li>Use a dark blue or black ink pen for best contrast.</li>
+                                <li>Avoid using lined or patterned paper.</li>
+                                <li>Capture the photo from directly above to avoid distortion.</li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </motion.div>
                 )}
 
