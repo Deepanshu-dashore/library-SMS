@@ -2,6 +2,7 @@ import { mail } from "../../services/mail.service";
 import { Payment } from "./payment.model";
 import { MailTemplates } from "../../templates/mailTemplates";
 import { JWTHelper } from "../../utils/JWTHelper";
+import { getUrls } from "../../utils/geturl";
 
 export class PaymentService {
   static async getAllPayment(search?: string, mode?: string) {
@@ -95,10 +96,19 @@ export class PaymentService {
       const baseUrl = process.env.ONLINE_URL?.replace(/\/$/, "") || "";
       const fullLink = `${baseUrl}${link}`;
 
-      const htmlBody = MailTemplates.paymentReceipt(payment, library, fullLink);
+      const logo = library.logo ? getUrls.getUrl(library.logo) : "";
+      const signature = library.signature ? getUrls.getUrl(library.signature) : "";
+
+      const htmlBody = MailTemplates.paymentReceipt(
+        payment,
+        { ...library._doc, logo, signature },
+        fullLink,
+      );
+
+      const fromEmail = process.env.ACCOUNTS_MAIL || "accounts@sawariyalibrary.in";
 
       return await mail(
-        `"${library.name}" <onboarding@library-sms.vercel.app>`,
+        `"${library.name}" <${fromEmail}>`,
         userEmail,
         `Payment Receipt - ${payment.receiptNumber}`,
         htmlBody,
