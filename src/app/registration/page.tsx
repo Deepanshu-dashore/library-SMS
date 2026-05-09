@@ -198,6 +198,48 @@ function RegisterContent() {
   const photoInputRef = useRef<HTMLInputElement>(null);
   const signatureInputRef = useRef<HTMLInputElement>(null);
 
+  // --- Session Storage Persistence ---
+
+  // Load data from sessionStorage on mount
+  useEffect(() => {
+    const savedData = sessionStorage.getItem("registration_form_data");
+    const savedStep = sessionStorage.getItem("registration_step");
+
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        setFormData((prev) => ({
+          ...prev,
+          ...parsedData,
+          // Ensure files are not overwritten (they can't be serialized anyway)
+          photo: prev.photo,
+          signature: prev.signature,
+        }));
+      } catch (e) {
+        console.error("Error loading form data from session storage:", e);
+      }
+    }
+
+    if (savedStep) {
+      const stepNum = parseInt(savedStep);
+      if (!isNaN(stepNum) && stepNum >= 1 && stepNum <= 4) {
+        setStep(stepNum);
+      }
+    }
+  }, []);
+
+  // Save data to sessionStorage whenever it changes
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { photo, signature, ...serializableData } = formData;
+    sessionStorage.setItem("registration_form_data", JSON.stringify(serializableData));
+  }, [formData]);
+
+  // Save step to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem("registration_step", step.toString());
+  }, [step]);
+
   // --- Validation Logic ---
 
   const validateStep = (currentStep: number) => {
@@ -340,6 +382,9 @@ function RegisterContent() {
         );
         setRegisteredId(data.data._id);
         setSubmitted(true);
+        // Clear session storage on successful submission
+        sessionStorage.removeItem("registration_form_data");
+        sessionStorage.removeItem("registration_step");
       } else {
         let errorMessage =
           data.message || "Registration failed. Please try again.";
@@ -776,7 +821,7 @@ function RegisterContent() {
                     />
                     
                     {/* Upload Instructions Section */}
-                    <div className="col-span-full mt-4 p-5 bg-indigo-50/50 rounded-2xl border border-indigo-100/50">
+                    <div className="col-span-full mt-4 p-3 bg-indigo-50/50 rounded-2xl border border-indigo-100/50">
                       <div className="flex items-start gap-4">
                         <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
                           <Icon icon="solar:info-circle-bold-duotone" width={24} className="text-indigo-600" />
@@ -787,7 +832,7 @@ function RegisterContent() {
                             <p className="text-[13px] text-indigo-600/70 mt-1">Please follow these guidelines to ensure your application is processed quickly.</p>
                           </div>
                           
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2 -ml-5">
                             <div className="space-y-2">
                               <div className="flex items-center gap-2 text-indigo-700">
                                 <Icon icon="solar:user-circle-bold-duotone" width={18} />
