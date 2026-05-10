@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { StatusBadge } from "@/components/shared/StatusBadge";
 import { 
   CreditCard, 
   Receipt, 
@@ -181,8 +182,25 @@ export default function PaymentManagement() {
     {
       key: "paymentMode",
       label: "Mode",
-      type: "status",
-      getStatus: (row) => row.paymentMode,
+      type: "custom",
+      render: (row: any) => {
+        if (row.paymentMode === "split") {
+          return (
+            <div className="flex flex-col gap-1 group relative">
+               <StatusBadge status="split" size="xs" />
+               <div className="hidden group-hover:block absolute left-0 top-full mt-2 z-50 bg-white shadow-xl border border-gray-100 rounded-lg p-2 min-w-[120px]">
+                  {row.splitDetails?.map((d: any, i: number) => (
+                    <div key={i} className="flex justify-between gap-4 text-[10px] font-medium py-0.5 border-b border-gray-50 last:border-0">
+                      <span className="capitalize text-gray-500">{d.paymentMode}</span>
+                      <span className="text-gray-900 font-bold font-barlow">₹{d.amount}</span>
+                    </div>
+                  ))}
+               </div>
+            </div>
+          );
+        }
+        return <StatusBadge status={row.paymentMode} size="xs" />;
+      },
       sortable: true
     },
     {

@@ -191,21 +191,26 @@ export default function ReceiptContent() {
       doc.setFont('helvetica', 'bold');
       doc.text("Membership Details", 20, 115);
 
-      const seat = payment.subscriptionId.seatId;
+      const seat = payment.subscriptionId?.seatId;
       const isSplit = (payment.relatedPayments?.length || 0) > 1;
-      const totalAmount = (payment.relatedPayments?.reduce((sum: number, p: any) => sum + p.amount, 0) || payment.amount) as number;
+      
+      const totalAmount = (payment.relatedPayments && payment.relatedPayments.length > 0)
+        ? payment.relatedPayments.reduce((sum: number, p: any) => sum + (p.amount || 0), 0)
+        : (payment.amount || 0);
 
       const tableBody: any[] = [
-        ["Seat Number (Type)", ":", `${seat?.seatNumber} (${seat?.type?.toUpperCase()})`],
+        ["Seat Number (Type)", ":", `${seat?.seatNumber || "N/A"} (${seat?.type?.toUpperCase() || "N/A"})`],
         ["Floor", ":", `${seat?.floor || "Ground"}`],
-        ["Payment Method", ":", isSplit ? "Split Payment" : `${payment.paymentMode.toUpperCase()}`],
-        ["Payment Date", ":", `${new Date(payment.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`],
-        ["Subscription Period", ":", `${new Date(payment.subscriptionId.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} To ${new Date(payment.subscriptionId.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`]
+        ["Payment Method", ":", isSplit ? "Split Payment" : `${(payment.paymentMode || "N/A").toUpperCase()}`],
+        ["Payment Date", ":", payment.createdAt ? new Date(payment.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : "N/A"],
+        ["Subscription Period", ":", (payment.subscriptionId?.startDate && payment.subscriptionId?.endDate) 
+          ? `${new Date(payment.subscriptionId.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} To ${new Date(payment.subscriptionId.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`
+          : "N/A"]
       ];
 
       if (isSplit && payment.relatedPayments) {
         const breakdown = payment.relatedPayments
-          .map((p: any) => `${p.paymentMode.toUpperCase()}: ${p.amount} RS`)
+          .map((p: any) => `${(p.paymentMode || "").toUpperCase()}: ${p.amount || 0} RS`)
           .join("  |  ");
         tableBody.push(["Payment Breakdown", ":", breakdown]);
       }
@@ -376,12 +381,12 @@ export default function ReceiptContent() {
                 <div className="mt-4 pt-4 border-t border-gray-100 bg-gray-50/50 rounded-xl p-3">
                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                       <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Breakdown :</h4>
-                      {payment.relatedPayments.map((p, i) => (
+                      {payment.relatedPayments.map((p, i, arr) => (
                          <div key={i} className="flex items-center gap-1.5 text-[12px]">
                             <span className="text-gray-600 font-medium capitalize">{p.paymentMode}</span>
                             <span className="text-gray-400">:</span>
                             <span className="font-barlow font-bold text-gray-800">₹{p.amount}</span>
-                            {i < payment.relatedPayments.length - 1 && <span className="text-gray-300 ml-1">|</span>}
+                            {i < arr.length - 1 && <span className="text-gray-300 ml-1">|</span>}
                          </div>
                       ))}
                    </div>

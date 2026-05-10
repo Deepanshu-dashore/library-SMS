@@ -92,6 +92,10 @@ export const STATUS_STYLES: Record<string, StatusStyle> = {
     label: "Expense",
     color: "bg-rose-100/80 text-rose-700",
   },
+  split: {
+    label: "Split Payment",
+    color: "bg-indigo-50 text-indigo-600 border border-indigo-100",
+  },
 };
 
 export const getStatusStyle = (status: string): StatusStyle => {

@@ -52,8 +52,27 @@ export class PaymentService {
         .select("-__v")
         .sort({ createdAt: -1 });
 
+      const filteredPayments = search ? payments.filter((p) => p.userId) : payments;
+
+      // Group payments by receiptNumber for better display in reports
+      const grouped = new Map();
+      filteredPayments.forEach((p) => {
+        const key = p.receiptNumber;
+        if (!grouped.has(key)) {
+          grouped.set(key, {
+            ...p.toObject(),
+            splitDetails: [p.toObject()],
+          });
+        } else {
+          const existing = grouped.get(key);
+          existing.amount += p.amount;
+          existing.paymentMode = "split";
+          existing.splitDetails.push(p.toObject());
+        }
+      });
+
       return {
-        payments: search ? payments.filter((p) => p.userId) : payments,
+        payments: Array.from(grouped.values()),
         stats,
       };
     } catch (error) {
