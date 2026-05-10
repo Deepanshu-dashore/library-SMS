@@ -29,6 +29,8 @@ export default function Header() {
           document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
         });
 
+        
+
         dispatch(logoutUser());
         toast.success("Logged out successfully");
         router.push("/login");
