@@ -8,11 +8,6 @@ import { Payment } from "./payment.model";
 export class PaymentController {
   static async getAllPayments(req: Request) {
     await connectDB();
-    await Payment.collection.dropIndex("receiptNumber_1").catch((err) => {
-      console.log(err);
-    });
-    const res = await Payment.collection.getIndexes();
-    console.log(" indexes ->", res);
     const libraryInfo = await verifyJWT();
     if (!libraryInfo) {
       return ApiResponse(401, null, "Unauthorized");
