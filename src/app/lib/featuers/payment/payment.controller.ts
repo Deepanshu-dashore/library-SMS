@@ -3,7 +3,6 @@ import { PaymentService } from "./payment.service";
 import { verifyJWT } from "../../middlewares/verifyJWT";
 import { connectDB } from "../../db/connectDB";
 import { Library } from "../library/library.model";
-import { Payment } from "./payment.model";
 
 export class PaymentController {
   static async getAllPayments(req: Request) {
