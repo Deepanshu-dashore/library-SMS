@@ -33,7 +33,7 @@ export default function HeroSection() {
 
             {/* App Store / Play Store Buttons */}
                 <motion.div 
-              className="flex flex-wrap gap-3 justify-center md:justify-start"
+              className="flex flex-nowrap gap-2 justify-center md:justify-start overflow-visible"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
@@ -47,18 +47,18 @@ export default function HeroSection() {
                   <Link
                     key={i}
                     href={btn.href}
-                    className="app-button"
+                    className="app-button flex-1 max-w-[155px] md:max-w-none"
                   >
-                    <div className="bg-[#0f172a] text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg flex items-center space-x-2 md:space-x-3 shadow-md hover:bg-black transition-all border border-gray-800">
+                    <div className="bg-[#0f172a] text-white px-1.5 py-2 md:px-4 md:py-2.5 rounded-lg flex items-center space-x-1 md:space-x-3 shadow-md hover:bg-black transition-all border border-gray-800 h-full">
                       <Icon 
                         icon={btn.icon} 
-                        className="text-2xl md:text-3xl text-white" 
+                        className="text-lg md:text-3xl text-white shrink-0" 
                       />
-                      <div className="flex flex-col items-start justify-center">
-                        <span className="text-[7px] md:text-[9px] uppercase font-medium text-gray-300 leading-none mb-0.5 md:mb-1 tracking-wider">
+                      <div className="flex flex-col items-start justify-center min-w-0">
+                        <span className="text-[6px] md:text-[9px] uppercase font-medium text-gray-300 leading-none mb-0.5 md:mb-1 tracking-wider whitespace-nowrap">
                           {topText}
                         </span>
-                        <span className="text-[12px] md:text-[17px] font-bold leading-none tracking-tight">
+                        <span className="text-[9px] sm:text-[10px] md:text-[17px] font-bold leading-none tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
                           {mainText}
                         </span>
                       </div>

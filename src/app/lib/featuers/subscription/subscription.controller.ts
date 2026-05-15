@@ -153,4 +153,29 @@ export class SubscriptionController {
       return ApiResponse(500, null, "Failed to renew subscription");
     }
   }
+
+  static async updateLastTransaction(req: Request) {
+    const library = await verifyJWT();
+    if (!library) {
+      return ApiResponse(401, null, "Unauthorized");
+    }
+    const { subscriptionId, updateData } = await req.json();
+    try {
+      const result = await SubscriptionService.updateLastTransaction(
+        subscriptionId,
+        updateData,
+      );
+      return ApiResponse(
+        200,
+        result,
+        "Transaction updated successfully",
+      );
+    } catch (error: any) {
+      return ApiResponse(
+        400,
+        null,
+        error.message || "Failed to update transaction",
+      );
+    }
+  }
 }

@@ -46,13 +46,17 @@ export class PaymentService {
       const payments = await Payment.find(query)
         .populate({
           path: "userId",
-          match: search ? { name: { $regex: search, $options: "i" } } : {},
           select: "name email",
         })
         .select("-__v")
         .sort({ createdAt: -1 });
 
-      const filteredPayments = search ? payments.filter((p) => p.userId) : payments;
+      const filteredPayments = search 
+        ? payments.filter((p: any) => 
+            (p.userId && p.userId.name.toLowerCase().includes(search.toLowerCase())) ||
+            (p.receiptNumber && p.receiptNumber.toLowerCase().includes(search.toLowerCase()))
+          ) 
+        : payments;
 
       // Group payments by receiptNumber for better display in reports
       const grouped = new Map();

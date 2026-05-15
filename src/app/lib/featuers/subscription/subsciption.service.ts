@@ -394,4 +394,84 @@ export class SubscriptionService {
     const deleted = await Subscription.findByIdAndDelete(subscriptionId);
     return deleted;
   }
+  static async updateLastTransaction(
+    subscriptionId: string,
+    updateData: {
+      splitPayments: { _id?: string; amount: number; paymentMode: string }[];
+    },
+  ) {
+    await connectDB();
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      const subscription =
+        await Subscription.findById(subscriptionId).session(session);
+      if (!subscription) {
+        throw new Error("Subscription not found");
+      }
+
+      // Find the latest payment to get the current receipt number and duration
+      const latestPayment = await Payment.findOne({ subscriptionId })
+        .sort({ createdAt: -1 })
+        .session(session);
+
+      if (!latestPayment) {
+        throw new Error("No transactions found for this subscription");
+      }
+
+      const currentReceiptNumber = latestPayment.receiptNumber;
+      const currentDuration = latestPayment.durationDays;
+
+      // Handle split payments
+      // Delete existing payments for this receipt that are not in the new list
+      const keepIds = updateData.splitPayments
+        .map((p) => p._id)
+        .filter(Boolean);
+      await Payment.deleteMany(
+        {
+          receiptNumber: currentReceiptNumber,
+          _id: { $nin: keepIds },
+        },
+        { session },
+      );
+
+      // Update or Create payments
+      for (const p of updateData.splitPayments) {
+        if (p._id) {
+          await Payment.findOneAndUpdate(
+            { _id: p._id, subscriptionId: subscription._id },
+            {
+              amount: p.amount,
+              paymentMode: p.paymentMode,
+              durationDays: currentDuration,
+              receiptNumber: currentReceiptNumber,
+            },
+            { session },
+          );
+        } else {
+          await Payment.create(
+            [
+              {
+                userId: subscription.userId,
+                subscriptionId: subscription._id,
+                amount: p.amount,
+                paymentMode: p.paymentMode,
+                durationDays: currentDuration,
+                receiptNumber: currentReceiptNumber,
+              },
+            ],
+            { session },
+          );
+        }
+      }
+
+      await session.commitTransaction();
+      return { success: true };
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
+  }
 }

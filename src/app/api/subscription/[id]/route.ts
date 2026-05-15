@@ -6,3 +6,9 @@ export async function GET(
 ) {
   return await SubscriptionController.getSubscription(params);
 }
+export async function PUT(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  return await SubscriptionController.updateLastTransaction(req);
+}

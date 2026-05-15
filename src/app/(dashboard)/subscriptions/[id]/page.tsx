@@ -116,18 +116,17 @@ export default function ViewSubscriptionPage() {
               >
                 Renew
               </Button>
-              {/* Edit Button - Circular style like in Image 2 */}
-              <Button
-                variant="edit"
-                size="md"
-                // icon="lets-icons:edit-fill"
-                onClick={() => router.push(`/subscriptions/${id}/edit`)}
-                className="p-2.5 text-sm font-medium"
-                title="Edit Subscription"
-              >
-                {/* <Icon icon="lets-icons:edit-fill" className="w-5 h-5" /> */}
-                Edit
-              </Button>
+              <Link href={`/subscriptions/${id}/edit`}>
+                <Button
+                  variant="edit"
+                  size="md"
+                  icon="lets-icons:edit-fill"
+                  className="p-2.5 text-sm font-medium"
+                  title="Edit Subscription"
+                >
+                  Edit
+                </Button>
+              </Link>
 
             </div>
           }
@@ -338,18 +337,20 @@ export default function ViewSubscriptionPage() {
             </div>
 
             {/* Actions */}
+             {/* 
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <Button
-                  variant="outline"
-                  size="md"
-                  icon="lets-icons:edit-fill"
-                  className="font-medium"
-                  onClick={() => router.push(`/subscriptions/${id}/edit`)}
-                  fullWidth
-                >
-                  Edit
-                </Button>
+                <Link href={`/subscriptions/${id}/edit`} className="w-full">
+                  <Button
+                    variant="outline"
+                    size="md"
+                    icon="lets-icons:edit-fill"
+                    className="font-medium"
+                    fullWidth
+                  >
+                    Edit
+                  </Button>
+                </Link>
                 <Button
                   variant="outline"
                   size="md"
@@ -371,6 +372,7 @@ export default function ViewSubscriptionPage() {
                 Renew Subscription
               </Button>
             </div>
+             */}
           </div>
         </div>
       </div>
