@@ -105,6 +105,17 @@ export default function EditSubscriptionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validation: Total amount must match the seat price for the duration
+    if (totalAmount < estimatedAmount) {
+      toast.error(`Amount cannot be lower than ₹${estimatedAmount.toLocaleString()}`);
+      return;
+    }
+    if (totalAmount > estimatedAmount) {
+      toast.error(`Amount cannot be greater than ₹${estimatedAmount.toLocaleString()}`);
+      return;
+    }
+
     setLoading(true);
     const loadingToast = toast.loading(isNewPayment ? "Adding payment..." : "Updating transaction...");
     try {
@@ -310,7 +321,7 @@ export default function EditSubscriptionPage() {
                       <div className="flex items-center gap-3 bg-amber-100 px-4 py-1">
                          <span className="text-[11px] font-barlow font-semibold text-gray-600 uppercase ">Total Split:</span>
                          <span className={`text-sm font-bold ${
-                           totalAmount > estimatedAmount ? "text-red-500" : "text-emerald-700"
+                           totalAmount !== estimatedAmount ? "text-red-500" : "text-emerald-700"
                          }`}>
                            ₹{totalAmount.toLocaleString()} / ₹{estimatedAmount.toLocaleString()}
                          </span>
