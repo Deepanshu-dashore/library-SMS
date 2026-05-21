@@ -87,8 +87,12 @@ export default function AddSubscriptionPage() {
 
     if (isSplitPayment) {
       const total = splitPayments.reduce((s, p) => s + (p.amount || 0), 0);
+      if (total < estimatedAmount) {
+        toast.error(`Split payments total must be exactly ₹${estimatedAmount}`);
+        return;
+      }
       if (total > estimatedAmount) {
-        toast.error("Split payments cannot exceed the total amount");
+        toast.error(`Split payments total must be exactly ₹${estimatedAmount}`);
         return;
       }
       if (total <= 0) {
@@ -507,8 +511,8 @@ export default function AddSubscriptionPage() {
                         
                         <div className="flex items-center gap-3 bg-amber-100 px-4 py-1">
                            <span className="text-[11px] font-barlow font-semibold text-gray-600 uppercase ">Total Split:</span>
-                           <span className={`text-sm  ${
-                             splitPayments.reduce((s, p) => s + p.amount, 0) > estimatedAmount ? "text-red-500" : "text-emerald-700"
+                           <span className={`text-sm font-bold ${
+                             splitPayments.reduce((s, p) => s + p.amount, 0) !== estimatedAmount ? "text-red-500" : "text-emerald-700"
                            }`}>
                              ₹{splitPayments.reduce((s, p) => s + p.amount, 0)} / ₹{estimatedAmount}
                            </span>

@@ -97,8 +97,8 @@ export class SubscriptionService {
       // Validate total amount
       if (splitPayments && splitPayments.length > 0) {
         const totalSplit = splitPayments.reduce((acc, p) => acc + p.amount, 0);
-        if (totalSplit > amount) {
-          throw new Error("Total split payments exceed subscription amount");
+        if (totalSplit !== amount) {
+          throw new Error(`Total split payments must be exactly ₹${amount}`);
         }
       }
 
@@ -405,7 +405,7 @@ export class SubscriptionService {
     session.startTransaction();
     try {
       const subscription =
-        await Subscription.findById(subscriptionId).session(session);
+        await Subscription.findById(subscriptionId).populate("seatId").session(session);
       if (!subscription) {
         throw new Error("Subscription not found");
       }
@@ -421,6 +421,16 @@ export class SubscriptionService {
 
       const currentReceiptNumber = latestPayment.receiptNumber;
       const currentDuration = latestPayment.durationDays;
+
+      // Validate total amount matches seat price for duration
+      const seat = subscription.seatId as any;
+      if (!seat || !seat.price) throw new Error("Seat price not found");
+      const expectedAmount = Math.round((seat.price / 30) * currentDuration);
+      const totalAmount = updateData.splitPayments.reduce((acc, p) => acc + (p.amount || 0), 0);
+
+      if (totalAmount !== expectedAmount) {
+        throw new Error(`Total amount must be exactly ₹${expectedAmount.toLocaleString()}`);
+      }
 
       // Handle split payments
       // Delete existing payments for this receipt that are not in the new list
