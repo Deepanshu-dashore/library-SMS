@@ -17,6 +17,8 @@ import { DataTable, ColumnDef, TabDef } from "@/components/shared/DataTable";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
+import { TABLE_IDS } from "@/constants/tableIds";
+import { useTableState } from "@/hooks/useTableState";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 interface Transaction {
@@ -145,8 +147,12 @@ export default function BankingPage() {
   const [statView, setStatView] = useState<"monthly" | "yearly">("monthly");
   const [selectedYear, setSelectedYear] = useState<number>(CURRENT_YEAR);
   const [selectedMonth, setSelectedMonth] = useState<number>(0);
-  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [showExportMenu, setShowExportMenu] = useState(false);
+
+  const { activeFilter: typeFilter, setActiveFilter: setTypeFilter } = useTableState(
+    TABLE_IDS.BANKING,
+    { defaultActiveFilter: "all" },
+  );
 
   const fetchData = useCallback(async () => {
     try {

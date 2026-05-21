@@ -3,43 +3,25 @@ import React, { useState } from "react";
 import Link from "next/link";
 import ModeToggle from "./shared/ModeToggle";
 import { useDispatch, useSelector } from "react-redux";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "@iconify/react";
 import { MENU_ITEMS } from "@/constants/menuItems";
 import toast from "react-hot-toast";
 import { setMode } from "@/store/themeSlice";
-import { logoutUser } from "@/store/userSlice";
+import { clientLogout } from "@/app/lib/utils/clientLogout";
 
 export default function Header() {
   const dispatch = useDispatch();
   const { mode, activeNavStyle, color } = useSelector((state: any) => state.theme);
   const { currentUser } = useSelector((state: any) => state.user);
   const pathname = usePathname();
-  const router = useRouter();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const handleLogout = async () => {
-    try {
-      const res = await fetch("/api/auth/logout", { method: "POST" });
-      if (res.ok) {
-        // Clear all client-side cookies
-        document.cookie.split(";").forEach((cookie) => {
-          const name = cookie.split("=")[0].trim();
-          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-        });
-
-        
-
-        dispatch(logoutUser());
-        toast.success("Logged out successfully");
-        router.push("/login");
-      } else {
-        toast.error("Logout failed");
-      }
-    } catch (error) {
-      toast.error("An error occurred during logout");
-    }
+  const handleLogout = () => {
+    setShowUserMenu(false);
+    toast.loading("Signing out…", { duration: 1500 });
+    void clientLogout(dispatch);
   };
   
   const isTopNav = activeNavStyle === "nav-top";

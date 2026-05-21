@@ -7,10 +7,17 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, ColumnDef, TabDef, ActionDef } from "@/components/shared/DataTable";
 import { Button } from "@/components/shared/Button";
 import { SimpleLoader } from "@/components/shared/SimpleLoader";
+import { TABLE_IDS } from "@/constants/tableIds";
+import { useTableState } from "@/hooks/useTableState";
 
 export default function TrashPage() {
-  const [activeTab, setActiveTab] = useState("members");
   const [data, setData] = useState<any[]>([]);
+
+  const {
+    hydrated,
+    activeFilter: activeTab,
+    setActiveFilter: setActiveTab,
+  } = useTableState(TABLE_IDS.TRASH, { defaultActiveFilter: "members" });
   const [loading, setLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [stats, setStats] = useState({ members: 0 });
@@ -33,8 +40,9 @@ export default function TrashPage() {
   };
 
   useEffect(() => {
+    if (!hydrated) return;
     fetchTrash(activeTab);
-  }, [activeTab]);
+  }, [hydrated, activeTab]);
 
   const handleRestore = async (item: any) => {
     const loadingToast = toast.loading("Restoring item...");

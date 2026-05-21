@@ -21,6 +21,8 @@ import { Button } from "@/components/shared/Button";
 import { StatsCard } from "@/components/shared/StatsCard";
 import { SimpleLoader } from "@/components/shared/SimpleLoader";
 import { FilterChips, FilterBadge } from "@/components/shared/FilterChips";
+import { TABLE_IDS } from "@/constants/tableIds";
+import { useTableState } from "@/hooks/useTableState";
 import SeatCalendar from "./SeatCalendar";
 import * as XLSX from "xlsx";
 import { Icon } from "@iconify/react";
@@ -59,8 +61,15 @@ export default function SubscriptionManagement() {
     totalSub: 0
   });
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
+
+  const {
+    hydrated,
+    searchTerm,
+    statusFilter,
+    setSearchTerm,
+    setStatusFilter,
+    clearFilters,
+  } = useTableState(TABLE_IDS.SUBSCRIPTIONS);
 
   const fetchSubscriptions = async (status?: string) => {
     setLoading(true);
@@ -87,8 +96,9 @@ export default function SubscriptionManagement() {
   };
 
   useEffect(() => {
+    if (!hydrated) return;
     fetchSubscriptions(statusFilter);
-  }, [statusFilter]);
+  }, [hydrated, statusFilter]);
 
   const handleCancel = async (sub: Subscription) => {
     if (!confirm(`Are you sure you want to cancel the subscription for ${sub.userId.name}?`)) return;
@@ -377,10 +387,7 @@ export default function SubscriptionManagement() {
                     active: statusFilter !== "All",
                   },
                 ].filter((f) => f.active) as FilterBadge[]}
-                onClearAll={() => {
-                  setSearchTerm("");
-                  setStatusFilter("All");
-                }}
+                onClearAll={clearFilters}
               />
             )
           }

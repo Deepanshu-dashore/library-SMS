@@ -17,7 +17,7 @@ export async function proxy(
       config.body = JSON.stringify(body);
     }
 
-    const response = await fetch(url, config);
+    const response = await fetch(url, { ...config, credentials: "include" });
     const data = await response.json();
 
     if (!response.ok) {

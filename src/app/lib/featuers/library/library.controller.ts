@@ -4,6 +4,7 @@ import { CloudinaryService } from "../../services/cloudinary.service";
 import { ApiResponse } from "../../utils/ApiResponse";
 import { getUrls } from "../../utils/geturl";
 import { JWTHelper } from "../../utils/JWTHelper";
+import { AUTH_COOKIE_NAME, authCookieSetOptions } from "../../utils/authCookie";
 import { LibraryService } from "./library.service";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -63,13 +64,7 @@ export class LibraryController {
         { status: 200 },
       );
 
-      response.cookies.set("__lms_token", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-        maxAge: 60 * 60 * 24, // 1 day
-        path: "/",
-      });
+      response.cookies.set(AUTH_COOKIE_NAME, token, authCookieSetOptions());
 
       return response;
     } catch (error: any) {

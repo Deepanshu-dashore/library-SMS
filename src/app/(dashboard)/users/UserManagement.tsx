@@ -10,6 +10,8 @@ import { DataTable, ColumnDef, TabDef } from "@/components/shared/DataTable";
 import { Button } from "@/components/shared/Button";
 import { SimpleLoader } from "@/components/shared/SimpleLoader";
 import { FilterChips, FilterBadge } from "@/components/shared/FilterChips";
+import { TABLE_IDS } from "@/constants/tableIds";
+import { useTableState } from "@/hooks/useTableState";
 
 interface User {
   _id: string;
@@ -29,12 +31,21 @@ export default function UserManagement() {
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
   const [stats, setStats] = useState({ total: 0, active: 0, inactive: 0, unverify: 0, withoutSeat: 0 });
   const [total, setTotal] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const {
+    hydrated,
+    searchTerm,
+    statusFilter,
+    currentPage,
+    rowsPerPage,
+    setSearchTerm,
+    setStatusFilter,
+    setCurrentPage,
+    setRowsPerPage,
+    clearFilters,
+  } = useTableState(TABLE_IDS.USERS);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -62,23 +73,18 @@ export default function UserManagement() {
   };
 
   useEffect(() => {
-    // If it's the initial load (no search/filter), fetch immediately
+    if (!hydrated) return;
+
     if (!searchTerm && statusFilter === "All") {
       fetchUsers();
       return;
     }
 
-    // Debounce subsequent changes
     const timer = setTimeout(() => {
       fetchUsers();
     }, 400);
     return () => clearTimeout(timer);
-  }, [searchTerm, statusFilter, currentPage, rowsPerPage]);
-
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, statusFilter]);
+  }, [hydrated, searchTerm, statusFilter, currentPage, rowsPerPage]);
 
   const handleDelete = async (user: User) => {
     if (!confirm(`Are you sure you want to delete ${user.name}?`)) return;
@@ -245,10 +251,7 @@ export default function UserManagement() {
                     active: statusFilter !== "All",
                   },
                 ].filter((f) => f.active) as FilterBadge[]}
-                onClearAll={() => {
-                  setSearchTerm("");
-                  setStatusFilter("All");
-                }}
+                onClearAll={clearFilters}
               />
             )
           }

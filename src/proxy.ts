@@ -17,8 +17,8 @@ export function proxy(request: NextRequest) {
     path.startsWith("/status/");
 
 
-  // Get token from cookies
-  const token = request.cookies.get("__lms_token")?.value || "";
+  // Get token from cookies (ignore empty / cleared values)
+  const token = request.cookies.get("__lms_token")?.value?.trim() || "";
 
   // If trying to access a protected route without a token
   if (!isPublicPath && !token) {

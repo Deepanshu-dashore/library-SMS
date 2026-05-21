@@ -20,6 +20,8 @@ import { SimpleLoader } from "@/components/shared/SimpleLoader";
 import { DataTable, ColumnDef, TabDef } from "@/components/shared/DataTable";
 import * as XLSX from "xlsx";
 import { Button } from "@/components/shared/Button";
+import { TABLE_IDS } from "@/constants/tableIds";
+import { useTableState } from "@/hooks/useTableState";
 
 const CircularProgress = ({ value, icon, color1, color2, id }: { value: number; icon: string; color1: string; color2: string; id: string }) => {
   const radius = 24;
@@ -88,9 +90,15 @@ export default function PaymentManagement() {
   const router = useRouter();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("All");
-  const [searchTerm, setSearchTerm] = useState("");
   const [stats, setStats] = useState<any>(null);
+
+  const {
+    hydrated,
+    searchTerm,
+    activeFilter: activeTab,
+    setSearchTerm,
+    setActiveFilter: setActiveTab,
+  } = useTableState(TABLE_IDS.PAYMENTS);
   const [sharingId, setSharingId] = useState<string | null>(null);
 
   const fetchPayments = async () => {
@@ -116,11 +124,12 @@ export default function PaymentManagement() {
   };
 
   useEffect(() => {
+    if (!hydrated) return;
     const timer = setTimeout(() => {
-        fetchPayments();
+      fetchPayments();
     }, 400);
     return () => clearTimeout(timer);
-  }, [activeTab, searchTerm]);
+  }, [hydrated, activeTab, searchTerm]);
   
   const handleShareReceipt = async (payment: Payment) => {
     setSharingId(payment._id);

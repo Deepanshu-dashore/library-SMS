@@ -18,7 +18,7 @@ export default function LoginPage() {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await fetch("/api/auth/verify");
+        const response = await fetch("/api/auth/verify", { credentials: "include" });
         const data = await response.json();
         if (response.ok && data.success) {
           router.push("/dashboard");
