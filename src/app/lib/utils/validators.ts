@@ -1,3 +1,5 @@
+import { getAadhaarValidationError } from "@/utils/aadhaar";
+
 /**
  * validators.ts
  * ─────────────────────────────────────────────────────────────────────────────
@@ -62,14 +64,9 @@ export function validatePhone(value: string, label = "Mobile number"): string | 
 
 // ─── Aadhar ───────────────────────────────────────────────────────────────────
 
-/** Exactly 12 digits, optionally formatted as XXXX XXXX XXXX. */
+/** Format, first-digit, and Verhoeff checksum (see @/utils/aadhaar). */
 export function validateAadhar(value: string): string | null {
-  const req = validateRequired(value, "Aadhar number");
-  if (req) return req;
-  const digits = value.replace(/\s/g, "");
-  if (!/^\d{12}$/.test(digits))
-    return "Aadhar number must be exactly 12 digits (e.g. 1234 5678 9012).";
-  return null;
+  return getAadhaarValidationError(value);
 }
 
 // ─── Pincode ──────────────────────────────────────────────────────────────────

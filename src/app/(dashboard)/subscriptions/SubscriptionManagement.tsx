@@ -20,6 +20,7 @@ import { DataTable, ColumnDef, TabDef, ActionDef } from "@/components/shared/Dat
 import { Button } from "@/components/shared/Button";
 import { StatsCard } from "@/components/shared/StatsCard";
 import { SimpleLoader } from "@/components/shared/SimpleLoader";
+import { FilterChips, FilterBadge } from "@/components/shared/FilterChips";
 import SeatCalendar from "./SeatCalendar";
 import * as XLSX from "xlsx";
 import { Icon } from "@iconify/react";
@@ -269,7 +270,19 @@ export default function SubscriptionManagement() {
     { label: "Cancelled", value: "cancelled", count: stats.totalCancelled, color: "error" },
   ];
 
-  const filteredData = subscriptions;
+  const filteredData = React.useMemo(() => {
+    if (!searchTerm.trim()) return subscriptions;
+    const q = searchTerm.toLowerCase();
+    return subscriptions.filter((s) => {
+      const name = s.userId?.name?.toLowerCase() ?? "";
+      const email = s.userId?.email?.toLowerCase() ?? "";
+      const seat = String(s.seatId?.seatNumber ?? "").toLowerCase();
+      return name.includes(q) || email.includes(q) || seat.includes(q);
+    });
+  }, [subscriptions, searchTerm]);
+
+  const statusChipLabel =
+    tabs.find((t) => t.value === statusFilter)?.label ?? statusFilter;
 
   if (loading && subscriptions.length === 0) return <SimpleLoader text="Loading Subscriptions" />;
 
@@ -340,9 +353,37 @@ export default function SubscriptionManagement() {
           loading={loading}
           rowKey={(row) => row._id}
           searchPlaceholder="Search by member name or seat..."
+          onSearch={(val) => setSearchTerm(val)}
           tabs={tabs}
           activeTab={statusFilter}
           onTabChange={(val) => setStatusFilter(val)}
+          filterChips={
+            (searchTerm || statusFilter !== "All") && (
+              <FilterChips
+                className="pt-0 border-t-0"
+                filters={[
+                  {
+                    id: "search",
+                    label: "Search",
+                    value: searchTerm,
+                    onRemove: () => setSearchTerm(""),
+                    active: !!searchTerm,
+                  },
+                  {
+                    id: "status",
+                    label: "Status",
+                    value: statusChipLabel,
+                    onRemove: () => setStatusFilter("All"),
+                    active: statusFilter !== "All",
+                  },
+                ].filter((f) => f.active) as FilterBadge[]}
+                onClearAll={() => {
+                  setSearchTerm("");
+                  setStatusFilter("All");
+                }}
+              />
+            )
+          }
           onView={(row) => router.push(`/subscriptions/${row._id}`)}
           additionalActions={additionalActions}
           hiddenActions={['edit', 'delete']}

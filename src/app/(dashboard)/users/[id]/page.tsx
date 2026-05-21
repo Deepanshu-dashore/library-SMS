@@ -23,6 +23,8 @@ import {
   ArrowLeft,
   Home,
   Hash,
+  X,
+  ZoomIn,
 } from "lucide-react";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -60,6 +62,7 @@ interface UserDetails {
   photo?: string;
   notes?: string;
   status: string;
+  isVerified?: boolean;
   course?: string;
   createdAt: string;
   updatedAt: string;
@@ -145,6 +148,58 @@ function Divider() {
   return <hr className="border-gray-100 border my-2" />;
 }
 
+function ImagePreviewModal({
+  src,
+  title,
+  onClose,
+}: {
+  src: string;
+  title: string;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 sm:p-8"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute top-4 right-4 z-10 cursor-pointer rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition-colors"
+        aria-label="Close preview"
+      >
+        <X size={22} />
+      </button>
+      <div
+        className="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center gap-3"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <img
+          src={src}
+          alt={title}
+          className="max-w-full max-h-[calc(90vh-3rem)] object-contain rounded-xl shadow-2xl bg-white"
+        />
+        <p className="text-sm font-semibold text-white/90">{title}</p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Skeleton() {
@@ -178,6 +233,10 @@ export default function ViewUserPage() {
   const [payment,      setPayment]      = useState<PaymentInfo | null>(null);
   const [loading,      setLoading]      = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isVerifying, setIsVerifying]     = useState(false);
+  const [imagePreview, setImagePreview] = useState<{ src: string; title: string } | null>(null);
+
+  const openImagePreview = (src: string, title: string) => setImagePreview({ src, title });
 
   useEffect(() => {
     (async () => {
@@ -211,6 +270,25 @@ export default function ViewUserPage() {
       }
     } catch {
       toast.error("Something went wrong", { id: t });
+    }
+  };
+
+  const handleVerify = async () => {
+    if (!user) return;
+    setIsVerifying(true);
+    const t = toast.loading(`Verifying ${user.name}…`);
+    try {
+      const { data } = await axios.patch(`/api/user/verify/${id}`);
+      if (data.success) {
+        toast.success("Member verified successfully", { id: t });
+        setUser((prev) => (prev ? { ...prev, status: "Active", isVerified: true } : prev));
+      } else {
+        toast.error(data.message || "Verification failed", { id: t });
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Something went wrong", { id: t });
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -256,6 +334,7 @@ export default function ViewUserPage() {
   }
 
   const sc          = statusConfig[user.status] ?? statusConfig.Unverify;
+  const isVerified  = !!(user.isVerified || user.status === "Active");
   const subActive   = subscription && new Date(subscription.endDate) >= new Date() && subscription.status === "active";
   const subExpired  = subscription && new Date(subscription.endDate) < new Date() && subscription.status === "active";
   const subStatus   = !subscription ? null : subscription.status === "cancelled" ? "cancelled" : subExpired ? "expired" : "active";
@@ -292,15 +371,28 @@ export default function ViewUserPage() {
                 Download PDF
               </Button>
               {!subscription && (
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => router.push(`/subscriptions/add?userId=${id}`)}
-                  className="rounded-lg gap-2 py-2 px-4 h-9 h-9"
-                >
-                  <Armchair size={15} />
-                  Assign Seat
-                </Button>
+                isVerified ? (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => router.push(`/subscriptions/add?userId=${id}`)}
+                    className="rounded-lg gap-2 py-2 px-4 h-9"
+                  >
+                    <Armchair size={15} />
+                    Assign Seat
+                  </Button>
+                ) : (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={handleVerify}
+                    isLoading={isVerifying}
+                    className="rounded-lg gap-2 py-2 px-4 h-9"
+                  >
+                    <BadgeCheck size={15} />
+                    Verify User
+                  </Button>
+                )
               )}
               <Button
                 variant="edit"
@@ -329,11 +421,21 @@ export default function ViewUserPage() {
             {/* Avatar */}
             <div className="shrink-0">
               {user.photo ? (
-                <img
-                  src={user.photo}
-                  alt={user.name}
-                  className="w-16 h-16 rounded-xl object-cover border border-gray-100"
-                />
+                <button
+                  type="button"
+                  onClick={() => openImagePreview(user.photo!, `${user.name} — Photo`)}
+                  className="relative group rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                  aria-label="View photo"
+                >
+                  <img
+                    src={user.photo}
+                    alt={user.name}
+                    className="w-16 h-16 rounded-xl object-cover border border-gray-100 group-hover:opacity-90 transition-opacity"
+                  />
+                  <span className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ZoomIn size={18} className="text-white" />
+                  </span>
+                </button>
               ) : (
                 <div className="w-16 h-16 rounded-xl bg-slate-800 text-white flex items-center justify-center text-2xl font-black">
                   {user.name[0].toUpperCase()}
@@ -417,11 +519,21 @@ export default function ViewUserPage() {
               <div className="bg-white rounded-2xl border border-gray-100 p-5">
                 <SectionHeading icon={User} title="Photo" />
                 {user.photo ? (
-                  <img
-                    src={user.photo}
-                    alt={`${user.name} photo`}
-                    className="w-full h-60 object-cover rounded-xl border border-gray-100"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => openImagePreview(user.photo!, `${user.name} — Photo`)}
+                    className="relative group w-full rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                    aria-label="View photo full size"
+                  >
+                    <img
+                      src={user.photo}
+                      alt={`${user.name} photo`}
+                      className="w-full h-60 object-cover rounded-xl border border-gray-100 group-hover:opacity-90 transition-opacity"
+                    />
+                    <span className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ZoomIn size={28} className="text-white" />
+                    </span>
+                  </button>
                 ) : (
                   <div className="w-full h-60 bg-gray-50 rounded-xl border border-dashed border-gray-200 flex flex-col items-center justify-center gap-2">
                     <User size={28} className="text-gray-300" />
@@ -434,9 +546,21 @@ export default function ViewUserPage() {
               <div className="bg-white rounded-2xl border border-gray-100 p-5">
                 <SectionHeading icon={BadgeCheck} title="Signature" />
                 {user.signature ? (
-                  <div className="w-full h-60 bg-gray-50 rounded-xl border border-gray-100 p-4 flex items-center justify-center">
-                    <img src={user.signature} alt="Signature" className="max-h-full max-w-full object-contain" />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => openImagePreview(user.signature!, `${user.name} — Signature`)}
+                    className="relative group w-full h-60 bg-gray-50 rounded-xl border border-gray-100 p-4 flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                    aria-label="View signature full size"
+                  >
+                    <img
+                      src={user.signature}
+                      alt="Signature"
+                      className="max-h-full max-w-full object-contain group-hover:opacity-80 transition-opacity"
+                    />
+                    <span className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ZoomIn size={28} className="text-white" />
+                    </span>
+                  </button>
                 ) : (
                   <div className="w-full h-60 bg-gray-50 rounded-xl border border-dashed border-gray-200 flex flex-col items-center justify-center gap-2">
                     <BadgeCheck size={28} className="text-gray-300" />
@@ -503,15 +627,31 @@ export default function ViewUserPage() {
                   <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center">
                     <Armchair size={24} className="text-gray-400" />
                   </div>
-                  <p className="font-bold text-gray-400 text-sm">No active subscription</p>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => router.push(`/subscriptions/add?userId=${id}`)}
-                    className="rounded-xl"
-                  >
-                    Assign Seat
-                  </Button>
+                  <p className="font-bold text-gray-400 text-sm">
+                    {isVerified ? "No active subscription" : "Member pending verification"}
+                  </p>
+                  {isVerified ? (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => router.push(`/subscriptions/add?userId=${id}`)}
+                      className="rounded-xl"
+                    >
+                      <Armchair size={15} />
+                      Assign Seat
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={handleVerify}
+                      isLoading={isVerifying}
+                      className="rounded-xl gap-2"
+                    >
+                      <BadgeCheck size={15} />
+                      Verify User
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
@@ -535,6 +675,14 @@ export default function ViewUserPage() {
 
         </div>
       </div>
+
+      {imagePreview && (
+        <ImagePreviewModal
+          src={imagePreview.src}
+          title={imagePreview.title}
+          onClose={() => setImagePreview(null)}
+        />
+      )}
     </div>
   );
 }

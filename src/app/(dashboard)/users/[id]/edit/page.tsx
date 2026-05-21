@@ -432,7 +432,10 @@ export default function EditUserPage() {
               <div className="relative">
                 <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
-                  type="text" placeholder="1234 5678 9012"
+                  type="text"
+                  placeholder="1234 5678 9012"
+                  autoComplete="off"
+                  inputMode="numeric"
                   maxLength={14}
                   className={`${ic("adharNumber")} pl-10`}
                   value={formData.adharNumber}

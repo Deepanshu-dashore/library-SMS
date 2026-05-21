@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import Cropper from "react-easy-crop";
 import getCroppedImg from "@/utils/cropImage";
+import { formatAadhaarDisplay, parseAadhaarInput, getAadhaarValidationError } from "@/utils/aadhaar";
 import { motion, AnimatePresence } from "framer-motion";
 import "./register.css";
 
@@ -254,13 +255,14 @@ function RegisterContent() {
         if (!formData.fatherName.trim()) return "Father's Name is required";
         if (!formData.motherName.trim()) return "Mother's Name is required";
         if (!formData.category) return "Category is required";
-        if (!formData.adharNumber.trim()) return "Aadhar Number is required";
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
           return "Invalid Email Address";
         if (!/^\d{10}$/.test(formData.number.replace(/\D/g, "")))
           return "Phone Number must be 10 digits";
-        if (!/^\d{12}$/.test(formData.adharNumber.replace(/\D/g, "")))
-          return "Aadhar Number must be exactly 12 digits";
+        {
+          const adharErr = getAadhaarValidationError(formData.adharNumber);
+          if (adharErr) return adharErr.replace(/^Aadhar/, "Aadhar Number");
+        }
         break;
       case 2:
         if (!formData.address.detailedAddress.trim())
@@ -690,13 +692,15 @@ function RegisterContent() {
                     <FormField
                       label="Aadhar Number"
                       required
-                      placeholder="12 digit Aadhar"
-                      value={formData.adharNumber}
-                      maxLength={12}
+                      placeholder="1234 5678 9012"
+                      autoComplete="off"
+                      inputMode="numeric"
+                      maxLength={14}
+                      value={formatAadhaarDisplay(formData.adharNumber)}
                       onChange={(e: any) =>
                         setFormData({
                           ...formData,
-                          adharNumber: e.target.value.replace(/\D/g, ""),
+                          adharNumber: parseAadhaarInput(e.target.value),
                         })
                       }
                     />
