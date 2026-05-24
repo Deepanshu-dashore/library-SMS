@@ -265,25 +265,46 @@ export default function SubscriptionManagement() {
   };
 
   const handleWhatsAppReminder = (sub: Subscription) => {
-    const phone = sub.userId?.number?.replace(/\D/g, "");
-    if (!phone) {
-      toast.error("Phone number not available for this member");
-      return;
-    }
-    const name = sub.userId?.name || "Member";
-    const seat = sub.seatId?.seatNumber || "-";
-    const endDate = new Date(sub.endDate).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+  const phone = sub.userId?.number?.replace(/\D/g, "");
 
-    const message = `📚 *Library Subscription Reminder*\n\nDear *${name}*,\n\nYour library subscription has expired. Here are the details:\n\n📅 *Expiry Date:* ${endDate}\n💺 *Seat Number:* ${seat}\n\nPlease renew your subscription at the earliest to continue enjoying uninterrupted library services.\n\n🔗 Visit the library desk or contact us for renewal.\n\n*Thank you!*\n— Library Management`;
+  if (!phone) {
+    toast.error("Phone number not available for this member");
+    return;
+  }
 
-    const formattedPhone = phone.startsWith("91") ? phone : `91${phone}`;
-    const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, "_blank");
-  };
+  const name = sub.userId?.name || "Member";
+  const seat = sub.seatId?.seatNumber || "-";
+
+  const endDate = new Date(sub.endDate).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+
+  const message = `📚 *Library Subscription Renewal Notice*
+
+Dear *${name}*,
+
+This is to inform you that your library subscription has expired.
+
+• *Expiry Date:* ${endDate}
+• *Seat Number:* ${seat}
+
+Kindly renew your subscription at the earliest to continue accessing library facilities without interruption.
+
+Regards,  
+*Shree Sawariya Library*`;
+
+  const formattedPhone = phone.startsWith("91")
+    ? phone
+    : `91${phone}`;
+
+  const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(
+    message
+  )}`;
+
+  window.open(whatsappUrl, "_blank");
+};
 
   const additionalActions: ActionDef<Subscription>[] = [
     {
@@ -299,7 +320,7 @@ export default function SubscriptionManagement() {
       onClick: (row) => router.push(`/subscriptions/transfer/${row._id}`)
     },
     {
-      label: "WhatsApp Reminder",
+      label: "Reminder",
       icon: MessageCircle,
       disabled: (row) => {
         const today = new Date();
