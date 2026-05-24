@@ -61,21 +61,27 @@ export const Button = ({
           : "bg-gray-800 text-gray-300 hover:bg-gray-700";
       case "danger":
       case "delete":
-        return "bg-red-500 text-white hover:bg-red-600 shadow-sm shadow-red-200";
+        return mode === "light"
+          ? "bg-red-500 text-white hover:bg-red-600 shadow-sm shadow-red-200"
+          : "bg-red-600 text-white hover:bg-red-500 shadow-none";
       case "view":
-        return "bg-indigo-500 text-white hover:bg-indigo-600 shadow-sm shadow-indigo-200";
+        return mode === "light"
+          ? "bg-indigo-500 text-white hover:bg-indigo-600 shadow-sm shadow-indigo-200"
+          : "bg-indigo-600 text-white hover:bg-indigo-500 shadow-none";
       case "edit":
-        return "bg-gray-800 text-white hover:bg-gray-900 shadow-sm shadow-gray-200";
+        return mode === "light"
+          ? "bg-gray-800 text-white hover:bg-gray-900 shadow-sm shadow-gray-200"
+          : "bg-slate-700 text-white hover:bg-slate-600 shadow-none";
       case "submit":
         return "text-white shadow-lg hover:shadow-xl";
       case "outline":
         return mode === "light"
           ? "border-2 border-gray-200 text-gray-700 hover:bg-gray-50"
-          : "border-2 border-gray-700 text-gray-300 hover:bg-gray-800";
+          : "border-2 border-gray-700 text-gray-300 hover:bg-gray-850";
       case "ghost":
         return mode === "light"
           ? "text-gray-600 hover:bg-gray-100"
-          : "text-gray-400 hover:bg-gray-800";
+          : "text-gray-400 hover:bg-gray-850";
       default:
         return "";
     }

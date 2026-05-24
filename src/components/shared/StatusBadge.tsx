@@ -1,5 +1,7 @@
-import { getStatusStyle } from "@/constants/status";
+import { getStatusStyle, getDarkStatusStyle } from "@/constants/status";
 import React from "react";
+import { useSelector } from "react-redux";
+import clsx from "clsx";
 
 interface StatusBadgeProps {
   status: string;
@@ -12,7 +14,11 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   size = "sm", 
   className = "" 
 }) => {
-  const style = getStatusStyle(status);
+  const { mode } = useSelector((state: any) => state.theme);
+  
+  const style = mode === "dark" 
+    ? getDarkStatusStyle(status) 
+    : getStatusStyle(status);
   
   const sizeClasses = {
     xxs: "px-1.5 py-0 text-[8px]",
@@ -24,12 +30,12 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
 
   return (
     <span 
-      className={`
-        inline-flex items-center rounded-md font-bold transition-all whitespace-nowrap
-        ${style.color}
-        ${sizeClasses[size]}
-        ${className}
-      `}
+      className={clsx(
+        "inline-flex items-center rounded-md font-bold transition-all whitespace-nowrap",
+        style.color,
+        sizeClasses[size],
+        className
+      )}
     >
       {style.label}
     </span>

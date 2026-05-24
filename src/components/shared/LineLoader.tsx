@@ -1,5 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useSelector } from "react-redux";
+import clsx from "clsx";
 
 interface LineLoaderProps {
   color?: string;
@@ -12,9 +14,15 @@ export const LineLoader = ({
   height = 3, 
   className = "" 
 }: LineLoaderProps) => {
+  const { mode } = useSelector((state: any) => state.theme);
+
   return (
     <div 
-      className={`relative w-full overflow-hidden bg-gray-100 rounded-full ${className}`}
+      className={clsx(
+        "relative w-full overflow-hidden rounded-full",
+        mode === "dark" ? "bg-slate-800/40" : "bg-gray-100",
+        className
+      )}
       style={{ height }}
     >
       <motion.div

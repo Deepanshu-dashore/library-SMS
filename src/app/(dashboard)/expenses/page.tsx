@@ -10,6 +10,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/shared/Button";
 import * as XLSX from "xlsx";
 import { Icon } from "@iconify/react";
+import { useSelector } from "react-redux";
+import clsx from "clsx";
 
 interface ExpenseData {
   _id: string;
@@ -26,6 +28,7 @@ export default function ManageExpensesPage() {
   const [totalAmount, setTotalAmount] = useState(0);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { mode } = useSelector((state: any) => state.theme);
 
   const fetchExpenses = async () => {
     try {
@@ -127,7 +130,10 @@ export default function ManageExpensesPage() {
       type: "text",
       // sortable: true,
       render: (row) => (
-        <span className="font-bold text-gray-900 font-barlow">
+        <span className={clsx(
+          "font-bold font-barlow",
+          mode === "dark" ? "text-slate-100" : "text-gray-900"
+        )}>
           ₹{row.amount.toLocaleString()}
         </span>
       ),
@@ -152,7 +158,10 @@ export default function ManageExpensesPage() {
       label: "Note",
       type: "text",
       render: (row) => (
-        <span className="text-gray-500 max-w-[200px] truncate block">
+        <span className={clsx(
+          "max-w-[200px] truncate block",
+          mode === "dark" ? "text-slate-400" : "text-gray-500"
+        )}>
           {row.note || "-"}
         </span>
       ),
@@ -160,7 +169,7 @@ export default function ManageExpensesPage() {
   ];
 
   return (
-    <div className="h-full flex flex-col overflow-auto">
+    <div className="h-full flex flex-col overflow-auto bg-transparent">
       <PageHeader
         title="Manage Expenses"
         breadcrumbs={[
@@ -174,21 +183,41 @@ export default function ManageExpensesPage() {
                size="md"
                icon="vscode-icons:file-type-excel"
                onClick={handleDownloadExcel}
-               className="font-bold text-emerald-600 font-medium border-emerald-100 hover:bg-emerald-50"
+               className={clsx(
+                 "font-bold font-medium border",
+                 mode === "dark"
+                   ? "border-emerald-950/40 bg-transparent text-emerald-400 hover:bg-emerald-950/20 hover:border-emerald-900/60"
+                   : "text-emerald-600 border-emerald-100 hover:bg-emerald-50"
+               )}
              >
                Export Excel
             </Button>
-             <Button variant="edit" hideIcon className="font-medium">
+             <Button 
+               variant="edit" 
+               hideIcon 
+               className={clsx(
+                 "font-medium",
+                 mode === "dark" ? "bg-indigo-950/40 text-indigo-400 border border-indigo-900/50 hover:bg-indigo-950/60" : ""
+               )}
+             >
                  Total Expenses
-                <span className="font-semibold text-base tracking-tight font-barlow">₹{totalAmount.toLocaleString()}</span>
+                <span className="font-semibold text-base tracking-tight font-barlow ml-1">₹{totalAmount.toLocaleString()}</span>
              </Button>
-             <Button icon="ic:round-add" variant="primary" size="md" className="font-medium">   
-            <Link
-            className="py-0.5"
-              href="/expenses/add"
-            >
-              Add New Expense
-            </Link>
+             <Button 
+               icon="ic:round-add" 
+               variant="primary" 
+               size="md" 
+               className={clsx(
+                 "font-medium text-white",
+                 mode === "dark" ? "bg-indigo-600 hover:bg-indigo-700 shadow-none border-indigo-600" : ""
+               )}
+             >   
+              <Link
+                className="py-0.5"
+                href="/expenses/add"
+              >
+                Add New Expense
+              </Link>
              </Button>
           </div>
         }

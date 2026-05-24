@@ -8,16 +8,26 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/shared/Button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { useSelector } from "react-redux";
+import clsx from "clsx";
 
 interface ViewExpenseProps {
   params: Promise<{ id: string }>;
 }
 
-function HorizontalInfoRow({ label, value }: { label: string; value?: React.ReactNode }) {
+function HorizontalInfoRow({ label, value, mode }: { label: string; value?: React.ReactNode; mode?: string }) {
   return (
-    <div className="flex items-center gap-2 group py-4 border-b border-gray-100 border-dashed last:border-0 hover:bg-gray-50/50 transition-colors px-1">
-      <span className="text-sm font-bold text-slate-800 w-44 shrink-0 uppercase tracking-tight">{label}:</span>
-      <div className="text-sm font-bold text-slate-600 truncate flex-1 flex justify-end tracking-tight">
+    <div className={clsx(
+      "flex items-center gap-2 group py-4 border-b border-dashed last:border-0 transition-colors px-1",
+      mode === "dark" ? "border-gray-800 hover:bg-slate-800/10" : "border-gray-100 hover:bg-gray-50/50"
+    )}>
+      <span className={clsx(
+        "text-sm font-bold w-44 shrink-0 uppercase tracking-tight",
+        mode === "dark" ? "text-slate-300" : "text-slate-800"
+      )}>{label}:</span>
+      <div className={clsx(
+        "text-sm font-bold truncate flex-1 flex justify-end tracking-tight",
+        mode === "dark" ? "text-slate-400" : "text-slate-600"
+      )}>
         {value || "—"}
       </div>
     </div>
@@ -27,7 +37,7 @@ function HorizontalInfoRow({ label, value }: { label: string; value?: React.Reac
 export default function ViewExpensePage({ params }: ViewExpenseProps) {
   const { id } = use(params);
   const router = useRouter();
-  const { color } = useSelector((state: any) => state.theme);
+  const { color, mode } = useSelector((state: any) => state.theme);
   const [fetching, setFetching] = useState(true);
   const [expense, setExpense] = useState<any>(null);
 
@@ -56,7 +66,10 @@ export default function ViewExpensePage({ params }: ViewExpenseProps) {
   if (fetching) {
     return (
       <div className="flex h-[80vh] w-full items-center justify-center">
-        <div style={{ borderColor: color, borderTopColor: "transparent" }} className="w-12 h-12 border-4 rounded-full animate-spin"></div>
+        <div 
+          style={{ borderColor: mode === "dark" ? "#818cf8" : color, borderTopColor: "transparent" }} 
+          className="w-12 h-12 border-4 rounded-full animate-spin"
+        ></div>
       </div>
     );
   }
@@ -66,7 +79,7 @@ export default function ViewExpensePage({ params }: ViewExpenseProps) {
   const isImage = expense.receipt && (expense.receipt.match(/\.(jpeg|jpg|gif|png|webp)$/i) || expense.receipt.includes("cloudinary"));
 
   return (
-    <div className="bg-gray-50/50 min-h-screen font-public-sans pb-10">
+    <div className="bg-transparent min-h-screen font-public-sans pb-10">
       <div className="max-w-[1200px] mx-auto">
         <PageHeader
           title="View Transaction"
@@ -89,69 +102,98 @@ export default function ViewExpensePage({ params }: ViewExpenseProps) {
                </div>}
         />
 
-          
           {/* Main Content Card */}
-          <div className="bg-white rounded-xl shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_24px_48px_-8px_rgba(145,158,171,0.16)] border border-gray-100/80 overflow-hidden">
+          <div className={clsx(
+            "rounded-xl overflow-hidden border",
+            mode === "dark"
+              ? "bg-[#1c252e] border-gray-800 shadow-none ring-0"
+              : "bg-white border-gray-100/80 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_24px_48px_-8px_rgba(145,158,171,0.16)]"
+          )}>
             
             <div className="grid grid-cols-1 lg:grid-cols-2">
                
                {/* Left Column: Information Rows */}
-               <div className="p-8 md:p-10 border-b lg:border-b-0 lg:border-r border-gray-100">
+               <div className={clsx(
+                 "p-8 md:p-10 border-b lg:border-b-0 lg:border-r",
+                 mode === "dark" ? "border-gray-800" : "border-gray-100"
+               )}>
                   <div className="flex items-center gap-3 mb-8">
-                     <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
-                        <Icon icon="solar:wallet-bold-duotone" width={22} className="text-indigo-600" />
+                     <div className={clsx(
+                       "w-10 h-10 rounded-xl flex items-center justify-center",
+                       mode === "dark" ? "bg-indigo-950/40 text-indigo-400" : "bg-indigo-50"
+                     )}>
+                        <Icon icon="solar:wallet-bold-duotone" width={22} className={mode === "dark" ? "text-indigo-400" : "text-indigo-600"} />
                      </div>
-                     <h3 className="text-base font-public-sans uppercase font-bold text-slate-900 tracking-wide">Expense Information</h3>
+                     <h3 className={clsx("text-base font-public-sans uppercase font-bold tracking-wide", mode === "dark" ? "text-slate-200" : "text-slate-900")}>Expense Information</h3>
                   </div>
 
                   <div className="space-y-1">
                     <HorizontalInfoRow 
                       label="Expense Title" 
                       value={<span className=" capitalize">{expense.title}</span>} 
+                      mode={mode}
                     />
                     <HorizontalInfoRow 
                       label="Date" 
                       value={new Date(expense.date).toLocaleDateString("en-IN", { day: '2-digit', month: 'long', year: 'numeric' })} 
+                      mode={mode}
                     />
                     <HorizontalInfoRow 
                       label="Category" 
                       value={<StatusBadge status={expense.category} size="sm" />} 
+                      mode={mode}
                     />
                     <HorizontalInfoRow 
                       label="Amount Base" 
-                      value={<span className="text-slate-900 font-black">₹{expense.amount.toLocaleString()}</span>} 
+                      value={<span className={clsx("font-black", mode === "dark" ? "text-slate-100" : "text-slate-900")}>₹{expense.amount.toLocaleString()}</span>} 
+                      mode={mode}
                     />
                     <HorizontalInfoRow 
                       label="Notes" 
-                      value={<div className="text-right leading-relaxed text-slate-500 font-medium">
+                      value={<div className={clsx("text-right leading-relaxed font-medium", mode === "dark" ? "text-slate-400" : "text-slate-500")}>
                         {expense.note || "No notes available"}
                       </div>} 
+                      mode={mode}
                     />
                   </div>
                </div>
 
                {/* Right Column: Receipt Section */}
-               <div className="p-8 md:p-10 bg-slate-50/20 flex flex-col h-full">
+               <div className={clsx(
+                 "p-8 md:p-10 flex flex-col h-full",
+                 mode === "dark" ? "bg-slate-900/10 border-t lg:border-t-0 border-gray-800" : "bg-slate-50/20"
+               )}>
                   <div className="flex items-center justify-between mb-8">
                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
-                           <Icon icon="mdi:invoice-text" width={22} className="text-amber-600" />
+                        <div className={clsx(
+                          "w-10 h-10 rounded-xl flex items-center justify-center",
+                          mode === "dark" ? "bg-amber-950/20 text-amber-500" : "bg-amber-50"
+                        )}>
+                           <Icon icon="mdi:invoice-text" width={22} className={mode === "dark" ? "text-amber-500" : "text-amber-600"} />
                         </div>
-                        <h3 className="text-base font-public-sans uppercase font-bold text-slate-900 tracking-wide">Receipt Attachment</h3>
+                        <h3 className={clsx("text-base font-public-sans uppercase font-bold tracking-wide", mode === "dark" ? "text-slate-200" : "text-slate-900")}>Receipt Attachment</h3>
                      </div>
                      {expense.receipt && (
                         <a 
                           href={expense.receipt} 
                           target="_blank" 
                           rel="noreferrer" 
-                          className="text-[12px] font-medium uppercase text-indigo-600 hover:underline"
+                          className={clsx(
+                            "text-[12px] font-medium uppercase hover:underline",
+                            mode === "dark" ? "text-indigo-400" : "text-indigo-600"
+                          )}
                         >
                            Expand View
                         </a>
                      )}
                   </div>
 
-                  <div className="flex-1 min-h-[450px] flex rounded-lg border border-gray-200 bg-white shadow-inner overflow-hidden relative group">
+                  <div className={clsx(
+                    "flex-1 min-h-[450px] flex rounded-lg border overflow-hidden relative group",
+                    mode === "dark"
+                      ? "bg-slate-900 border-gray-800 shadow-none"
+                      : "bg-white border-gray-200 shadow-inner"
+                  )}>
                      {expense.receipt ? (
                         isImage ? (
                            <div className="w-full h-full flex items-center justify-center p-4">
@@ -168,17 +210,23 @@ export default function ViewExpensePage({ params }: ViewExpenseProps) {
                            </div>
                         ) : (
                            <div className="w-full flex flex-col items-center justify-center text-center p-10 space-y-4">
-                              <div className="w-20 h-20 rounded-3xl bg-amber-50 text-amber-600 flex items-center justify-center shadow-sm">
+                              <div className={clsx(
+                                "w-20 h-20 rounded-3xl flex items-center justify-center shadow-sm",
+                                mode === "dark" ? "bg-amber-950/20 text-amber-500" : "bg-amber-50 text-amber-600"
+                              )}>
                                  <Icon icon="solar:document-bold-duotone" width={36} height={36} />
                               </div>
                               <div className="space-y-1">
-                                 <p className="font-black text-slate-900">PDF/Binary Format</p>
+                                 <p className={clsx("font-black", mode === "dark" ? "text-slate-100" : "text-slate-900")}>PDF/Binary Format</p>
                                  <p className="text-[12px] font-bold text-slate-400">This receipt requires an external reader.</p>
                               </div>
                               <Button
                                  onClick={() => window.open(expense.receipt, '_blank')}
                                  variant="primary"
-                                 className="mt-4 px-10 bg-slate-900 h-11"
+                                 className={clsx(
+                                   "mt-4 px-10 h-11 text-white",
+                                   mode === "dark" ? "bg-indigo-600 hover:bg-indigo-700 shadow-none border-indigo-600" : "bg-slate-900"
+                                 )}
                               >
                                  View Document
                               </Button>

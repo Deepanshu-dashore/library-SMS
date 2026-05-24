@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { Button } from "@/components/shared/Button";
 import { FEATURE_SLIDES } from "@/constants/dashboard";
+import clsx from "clsx";
 import DashbordFigur from "@/components/shared/DashbordFigur";
 import { StatsCard } from "@/components/shared/StatsCard";
 import { ActivityListCard } from "@/components/shared/ActivityListCard";
@@ -22,20 +23,36 @@ const formatYAxis = (val: number) => {
 };
 
 const CustomTooltip = ({ active, payload, label }: any) => {
+  const { mode } = useSelector((state: any) => state.theme);
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden min-w-[140px]">
-        <div className="bg-gray-100 px-3 py-1.5 text-center">
-            <span className="text-xs font-semibold text-gray-500 capitalize">{label}</span>
+      <div className={clsx(
+        "bg-white rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden min-w-[140px]",
+        mode === "dark" && "!bg-[#1c252e] !border-gray-800"
+      )}>
+        <div className={clsx(
+          "bg-gray-100 px-3 py-1.5 text-center",
+          mode === "dark" && "!bg-slate-800"
+        )}>
+            <span className={clsx(
+              "text-xs font-semibold text-gray-500 capitalize",
+              mode === "dark" && "!text-slate-400"
+            )}>{label}</span>
         </div>
         <div className="p-3 space-y-2">
             {payload.map((entry: any, index: number) => (
                 <div key={index} className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
-                        <span className="text-[11px] font-semibold text-gray-600 capitalize">{entry.name}:</span>
+                        <span className={clsx(
+                          "text-[11px] font-semibold text-gray-600 capitalize",
+                          mode === "dark" && "!text-slate-400"
+                        )}>{entry.name}:</span>
                     </div>
-                    <span className="text-xs font-medium text-gray-800 tracking-tight">{fmt(entry.value)}</span>
+                    <span className={clsx(
+                      "text-xs font-medium text-gray-800 tracking-tight",
+                      mode === "dark" && "!text-slate-200"
+                    )}>{fmt(entry.value)}</span>
                 </div>
             ))}
         </div>
@@ -46,7 +63,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function DashboardPage() {
-  const { color,darkColor } = useSelector((state: any) => state.theme);
+  const { mode, color, darkColor } = useSelector((state: any) => state.theme);
   const { currentUser } = useSelector((state: any) => state.user);
   const router = useRouter();
   const [greeting, setGreeting] = useState("Good Evening");
@@ -264,14 +281,17 @@ export default function DashboardPage() {
       </div>
 
       {/* ─── SECTION 1.5: Quick Actions (Horizontal) ─── */}
-      <div className="bg-white rounded-2xl p-5 text-gray-900 relative overflow-hidden border border-gray-100">
+      <div className={clsx(
+        "bg-white rounded-2xl p-5 text-gray-900 relative overflow-hidden border border-gray-100",
+        mode === "dark" && "!bg-[#1c252e] !text-white !border-gray-800"
+      )}>
         <div className="absolute top-0 right-0 opacity-10 pointer-events-none translate-x-1/4 -translate-y-1/4">
           <Icon icon="solar:widget-bold-duotone" width={100}/>
         </div>
         <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 xl:gap-6 relative z-10">
           <div className="flex flex-col gap-0.5 whitespace-nowrap mb-4 xl:mb-0">
-            <h2 className="text-lg font-bold text-gray-800 tracking-tight">Quick Actions</h2>
-            <p className="text-[11px] font-semibold text-gray-500 leading-none">Administrative Shortcuts</p>
+            <h2 className={clsx("text-lg font-bold text-gray-800 tracking-tight", mode === "dark" && "!text-white")}>Quick Actions</h2>
+            <p className={clsx("text-[11px] font-semibold text-gray-500 leading-none", mode === "dark" && "!text-gray-400")}>Administrative Shortcuts</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 w-full">
             {[
@@ -283,12 +303,18 @@ export default function DashboardPage() {
               { label: "Add Expense", icon: "solar:bill-list-bold-duotone", href: "/expenses/add", color: " text-rose-600 border-rose-200" },
             ].map((action, i) => (
               action.href ? (
-                <a key={i} href={action.href} className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border ${action.color} hover:scale-105 transition-all group backdrop-blur-sm`}>
+                <a key={i} href={action.href} className={clsx(
+                  `flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border ${action.color} hover:scale-105 transition-all group backdrop-blur-sm`,
+                  mode === "dark" && "hover:!bg-slate-800/10"
+                )}>
                   <Icon icon={action.icon} width={14} className="group-hover:rotate-12 transition-transform shrink-0"/>
                   <span className="text-[10px] sm:text-xs font-semibold truncate">{action.label}</span>
                 </a>
               ) : (
-                <button key={i} onClick={action.onClick} className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border cursor-pointer ${action.color} hover:scale-105 transition-all group backdrop-blur-sm`}>
+                <button key={i} onClick={action.onClick} className={clsx(
+                  `flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border cursor-pointer ${action.color} hover:scale-105 transition-all group backdrop-blur-sm`,
+                  mode === "dark" && "hover:!bg-slate-800/10"
+                )}>
                   <Icon icon={action.icon} width={14} className="group-hover:rotate-12 transition-transform shrink-0"/>
                   <span className="text-[10px] sm:text-xs font-semibold truncate">{action.label}</span>
                 </button>
@@ -304,10 +330,10 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3 mb-5">
            <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-gray-900 tracking-tight">Critical KPIs</h2>
+                <h2 className={clsx("text-lg font-bold text-gray-900 tracking-tight", mode === "dark" && "!text-white")}>Critical KPIs</h2>
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               </div>
-              <p className="text-xs font-medium text-gray-400">Real-time top metrics</p>
+              <p className={clsx("text-xs font-medium text-gray-400", mode === "dark" && "!text-gray-400")}>Real-time top metrics</p>
            </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -334,13 +360,18 @@ export default function DashboardPage() {
       {/* ─── SECTION 2: Alerts + Seat Snapshot ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Alerts */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_0_2px_0_rgba(145,158,171,0.05),0_12px_24px_-4px_rgba(145,158,171,0.08)] overflow-hidden">
-          <div className="p-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div className={clsx(
+          "bg-white rounded-2xl border border-gray-100 overflow-hidden",
+          mode === "dark"
+            ? "!bg-[#1c252e] !border-gray-800 shadow-[0_0_2px_0_rgba(0,0,0,0.15),0_12px_24px_-4px_rgba(0,0,0,0.05)]"
+            : "shadow-[0_0_2px_0_rgba(145,158,171,0.05),0_12px_24px_-4px_rgba(145,158,171,0.08)]"
+        )}>
+          <div className={clsx("p-6 py-4 border-b border-gray-100 flex items-center justify-between", mode === "dark" && "!border-gray-800")}>
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-gray-900 tracking-tight">Alerts &amp; Urgencies</h2>
+                <h2 className={clsx("text-lg font-bold text-gray-900 tracking-tight", mode === "dark" && "!text-white")}>Alerts &amp; Urgencies</h2>
               </div>
-              <p className="text-xs font-medium text-gray-400">Requires immediate attention</p>
+              <p className={clsx("text-xs font-medium text-gray-400", mode === "dark" && "!text-gray-400")}>Requires immediate attention</p>
             </div>
             <StatusBadge status={`${(alerts?.ExpiringToday ?? 0) + (alerts?.ExpiringSoon ?? 0)} Critical`} size="xs" className="!bg-rose-100 !text-rose-600 !px-3 !py-1" />
           </div>
@@ -365,11 +396,14 @@ export default function DashboardPage() {
                 indigo: "!bg-indigo-100 !text-indigo-700"
               };
               return (
-                <a href={alert.link} key={i} className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer border border-transparent hover:border-slate-100">
+                <a href={alert.link} key={i} className={clsx(
+                  "flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer border border-transparent hover:border-slate-100",
+                  mode === "dark" && "hover:!bg-slate-800/40 hover:!border-gray-800"
+                )}>
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${c[alert.color]}`}>
                     <Icon icon={alert.icon} width={18} />
                   </div>
-                  <span className="flex-1 text-sm font-bold text-slate-700 group-hover:text-slate-900 transition-colors">{alert.label}</span>
+                  <span className={clsx("flex-1 text-sm font-bold text-slate-700 group-hover:text-slate-900 transition-colors", mode === "dark" && "!text-slate-300 group-hover:!text-white")}>{alert.label}</span>
                   <StatusBadge status={`${alert.count} ${alert.unit}`} size="xs" className={`!px-2.5 !py-1 ${badge[alert.color]}`} />
                   <Icon icon="lucide:chevron-right" width={14} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
                 </a>
@@ -379,29 +413,36 @@ export default function DashboardPage() {
         </div>
 
         {/* Seat Snapshot */}
-        <div className="bg-white rounded-2xl shadow-[0_0_2px_0_rgba(145,158,171,0.05),0_12px_24px_-4px_rgba(145,158,171,0.08)] border border-gray-50/50 transition-all duration-300 flex flex-col justify-between">
-        <div className="p-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div className={clsx(
+          "bg-white rounded-2xl border border-gray-50/50 transition-all duration-300 flex flex-col justify-between",
+          mode === "dark"
+            ? "!bg-[#1c252e] !border-gray-800 shadow-[0_0_2px_0_rgba(0,0,0,0.15),0_12px_24px_-4px_rgba(0,0,0,0.05)]"
+            : "shadow-[0_0_2px_0_rgba(145,158,171,0.05),0_12px_24px_-4px_rgba(145,158,171,0.08)]"
+        )}>
+          <div className={clsx("p-6 py-4 border-b border-gray-100 flex items-center justify-between", mode === "dark" && "!border-gray-800")}>
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-gray-900 tracking-tight">Occupied Seats</h2>
+                <h2 className={clsx("text-lg font-bold text-gray-900 tracking-tight", mode === "dark" && "!text-white")}>Occupied Seats</h2>
               </div>
-              {/* <p className="text-xs font-medium text-gray-400"></p> */}
             </div>
           </div>
           <div className="space-y-2 p-6">
             {dashLoading ? (
                <div className="h-64 flex items-center justify-center text-slate-400 font-bold">Loading Map...</div>
             ) : (groupedSeats.map((row, ri) => (
-              <div key={ri} className={ri !== 0 ? "pt-5 border-t border-gray-50" : ""}>
+              <div key={ri} className={clsx(ri !== 0 ? "pt-5 border-t border-gray-50" : "", mode === "dark" && ri !== 0 && "!border-gray-800")}>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm font-bold text-slate-800 capitalize">{row.floor} Floor</span>
-                  <button className="flex items-center gap-1.5 bg-slate-100/70 text-slate-500 hover:text-slate-700 font-semibold px-2.5 py-1 rounded-md text-[11px] transition-colors">
+                  <span className={clsx("text-sm font-bold text-slate-800 capitalize", mode === "dark" && "!text-slate-200")}>{row.floor} Floor</span>
+                  <button className={clsx(
+                    "flex items-center gap-1.5 bg-slate-100/70 text-slate-500 hover:text-slate-700 font-semibold px-2.5 py-1 rounded-md text-[11px] transition-colors",
+                    mode === "dark" && "bg-slate-800/80 hover:bg-slate-700/80 !text-slate-300 hover:!text-white"
+                  )}>
                     All Seats <Icon icon="lucide:chevron-down" width={14} />
                   </button>
                 </div>
                 <div className="flex gap-2.5 flex-wrap">
                     {row.seats.map((s: any, si: number) => {
-                      let colorClass = "bg-[#e2e8f0]"; // free
+                      let colorClass = mode === "dark" ? "bg-slate-800 text-slate-300" : "bg-[#e2e8f0]"; // free
                       if (s.status === "occupied") colorClass = "bg-[#59c378] shadow-sm"; 
                       else if (s.status === "reserved") colorClass = "bg-[#ef6b6b] shadow-sm";
                       return (
@@ -410,7 +451,7 @@ export default function DashboardPage() {
                           title={`Seat ${s.seatNumber}`}
                           className={`w-[18px] h-[18px] md:w-7.5 md:h-7.5 flex items-center justify-center rounded-md transition-all hover:scale-110 cursor-pointer ${colorClass}`} 
                         >
-                          <span className="text-[9px] font-bold text-slate-600">{s.seatNumber}</span>
+                          <span className={clsx("text-[9px] font-bold text-slate-600", mode === "dark" && "!text-slate-300")}>{s.seatNumber}</span>
                         </div>
                       )
                     })}
@@ -420,7 +461,10 @@ export default function DashboardPage() {
           </div>
 
           {!dashLoading && (
-            <div className="flex items-center p-6 gap-2 pt-5 border-t border-gray-50 mt-6 text-[13px] font-bold text-slate-700">
+            <div className={clsx(
+              "flex items-center p-6 gap-2 pt-5 border-t border-gray-50 mt-6 text-[13px] font-bold text-slate-700",
+              mode === "dark" && "!border-gray-800 !text-slate-300"
+            )}>
               <span className="w-4 h-4 rounded-md bg-[#59c378] shadow-[0_2px_4px_0_rgba(89,195,120,0.3)]"></span> 
               {sc?.totalOccupiedSeats || 0} of {floorWishSeats?.totalSets || 0} Seats Occupied
             </div>
@@ -429,13 +473,18 @@ export default function DashboardPage() {
       </div>
 
       {/* ─── SECTION 3: Finance Overview ─── */}
-      <div className="bg-white rounded-2xl shadow-[0_0_2px_0_rgba(145,158,171,0.05),0_12px_24px_-4px_rgba(145,158,171,0.08)] border border-gray-50/50 p-6 relative overflow-hidden transition-all duration-300">
-        <div className="flex justify-between items-start mb-4 pb-3 border-b border-gray-100">
+      <div className={clsx(
+        "bg-white rounded-2xl border border-gray-50/50 p-6 relative overflow-hidden transition-all duration-300",
+        mode === "dark"
+          ? "!bg-[#1c252e] !border-gray-800 shadow-[0_0_2px_0_rgba(0,0,0,0.15),0_12px_24px_-4px_rgba(0,0,0,0.05)]"
+          : "shadow-[0_0_2px_0_rgba(145,158,171,0.05),0_12px_24px_-4px_rgba(145,158,171,0.08)]"
+      )}>
+        <div className={clsx("flex justify-between items-start mb-4 pb-3 border-b border-gray-100", mode === "dark" && "!border-gray-800")}>
            <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-gray-900 tracking-tight">Balance Statistics</h2>
+                <h2 className={clsx("text-lg font-bold text-gray-900 tracking-tight", mode === "dark" && "!text-white")}>Balance Statistics</h2>
               </div>
-              <p className="text-xs font-medium text-gray-400">Statistics on balance over time</p>
+              <p className={clsx("text-xs font-medium text-gray-400", mode === "dark" && "!text-gray-400")}>Statistics on balance over time</p>
            </div>
            <div className="flex items-center gap-3">
               <Button 
@@ -457,7 +506,7 @@ export default function DashboardPage() {
                 <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color || "#10b981" }} />
                 Total Income
               </div>
-              <p className="text-xl font-medium text-gray-900">
+              <p className={clsx("text-xl font-medium text-gray-900", mode === "dark" && "!text-white")}>
                 {dashLoading ? "…" : `₹${(sc?.totalMonthlyRevenue ?? 0).toLocaleString("en-IN")}`}
               </p>
            </div>
@@ -466,7 +515,7 @@ export default function DashboardPage() {
                 <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
                 Total Expenses
               </div>
-              <p className="text-xl font-medium text-gray-900">
+              <p className={clsx("text-xl font-medium text-gray-900", mode === "dark" && "!text-white")}>
                 {dashLoading ? "…" : `₹${(sc?.totalMonthlyExpenses ?? 0).toLocaleString("en-IN")}`}
               </p>
            </div>
@@ -488,7 +537,7 @@ export default function DashboardPage() {
                 <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={color || "#10b981"} stopOpacity={0.1}/><stop offset="95%" stopColor={color || "#10b981"} stopOpacity={0}/></linearGradient>
                 <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#fbbf24" stopOpacity={0.1}/><stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/></linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={mode === "dark" ? "#1e293b" : "#f3f4f6"} />
               <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#9ca3af", fontWeight: 700 }} />
               <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#9ca3af", fontWeight: 700 }} tickFormatter={formatYAxis} />
               <Tooltip content={<CustomTooltip />} />
@@ -503,10 +552,16 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3 mb-5">
            <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-3">
-                <h2 className="text-lg font-bold text-gray-900 tracking-tight">Live Activity</h2>
-                <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /><span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Real-time</span></div>
+                <h2 className={clsx("text-lg font-bold text-gray-900 tracking-tight", mode === "dark" && "!text-white")}>Live Activity</h2>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className={clsx(
+                    "text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md",
+                    mode === "dark" && "bg-emerald-950/40 text-emerald-400"
+                  )}>Real-time</span>
+                </div>
               </div>
-              <p className="text-xs font-medium text-gray-400">Recent system events</p>
+              <p className={clsx("text-xs font-medium text-gray-400", mode === "dark" && "!text-gray-400")}>Recent system events</p>
            </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

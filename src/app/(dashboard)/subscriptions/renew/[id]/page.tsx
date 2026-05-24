@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/shared/Button";
 import { useSelector } from "react-redux";
+import clsx from "clsx";
 
 interface SubscriptionDetails {
   subscription: {
@@ -23,7 +24,7 @@ export default function RenewSubscriptionPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
-  const { color, darkColor } = useSelector((state: any) => state.theme);
+  const { color, darkColor, mode } = useSelector((state: any) => state.theme);
   
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -87,7 +88,7 @@ export default function RenewSubscriptionPage() {
   const estimatedAmount = Math.round((subscription.seatId.price / 30) * formData.durationDays);
 
   return (
-    <div className="bg-gray-50/50 min-h-screen">
+    <div className={clsx(mode === "dark" ? "bg-transparent" : "bg-gray-50/50", "min-h-screen")}>
       <div className="max-w-6xl mx-auto">
         <PageHeader 
           title="Renew Subscription"
@@ -102,35 +103,35 @@ export default function RenewSubscriptionPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             {/* Current Status Card */}
-            <div className="bg-white rounded-xl p-8 md:p-10 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.12)] border border-gray-100/80 flex items-start gap-6">
-               <div className="w-16 h-16 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+            <div className={clsx("rounded-xl p-8 md:p-10 border flex items-start gap-6", mode === "dark" ? "bg-[#1c252e] border-gray-800 shadow-none" : "bg-white border-gray-100/80 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.12)]")}>
+               <div className={clsx("w-16 h-16 rounded-xl flex items-center justify-center shrink-0", mode === "dark" ? "bg-indigo-950/40 text-indigo-400" : "bg-indigo-50 text-indigo-600")}>
                   <Icon icon="solar:armchair-bold-duotone" width={32} height={32} />
                </div>
                <div className="space-y-1 w-full">
-                  <h2 className="text-xl font-barlow font-bold text-gray-900">Seat {subscription.seatId.seatNumber}</h2>
+                  <h2 className={clsx("text-xl font-barlow font-bold", mode === "dark" ? "text-white" : "text-gray-900")}>Seat {subscription.seatId.seatNumber}</h2>
                   <div className="flex items-center justify-between w-full">
-                  <p className="text-[13px] font-public-sans font-bold text-gray-500 flex items-center gap-2">
+                  <p className={clsx("text-[13px] font-public-sans font-bold flex items-center gap-2", mode === "dark" ? "text-gray-300" : "text-gray-500")}>
                      <Icon icon="solar:user-bold-duotone" width={16} height={16} className="text-indigo-400" />
                      {subscription.userId.name}
                   </p>
-                  <p className="text-[11px] font-public-sans font-bold text-gray-600 uppercase tracking-widest pt-2">
-                     Current End: <span className="text-gray-400">{new Date(subscription.endDate).toLocaleDateString()}</span>
+                  <p className={clsx("text-[11px] font-public-sans font-bold uppercase tracking-widest pt-2", mode === "dark" ? "text-gray-400" : "text-gray-600")}>
+                     Current End: <span className={clsx(mode === "dark" ? "text-gray-300" : "text-gray-400")}>{new Date(subscription.endDate).toLocaleDateString()}</span>
                   </p>
                   </div>
                </div>
             </div>
 
-            <div className="bg-white rounded-xl p-8 md:p-10 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.12)] border border-gray-100/80">
+            <div className={clsx("rounded-xl p-8 md:p-10 border", mode === "dark" ? "bg-[#1c252e] border-gray-800 shadow-none" : "bg-white border-gray-100/80 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.12)]")}>
               <form onSubmit={handleSubmit} className="space-y-8">
                 
                 {/* Form Header */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pb-6 border-b border-gray-100">
-                  <div style={{color,backgroundColor:darkColor+"15"}} className="w-12 h-12 rounded-xl border border-gray-100 flex items-center justify-center text-gray-700 shrink-0">
+                <div className={clsx("flex flex-col sm:flex-row items-start sm:items-center gap-4 pb-6 border-b", mode === "dark" ? "border-gray-800" : "border-gray-100")}>
+                  <div className={clsx("w-12 h-12 rounded-xl border flex items-center justify-center shrink-0", mode === "dark" ? "bg-indigo-950/30 border-indigo-900/50 text-indigo-400" : "border-gray-100 text-gray-700")} style={mode === "dark" ? {} : {color,backgroundColor:darkColor+"15"}}>
                     <Icon icon="solar:refresh-circle-bold-duotone" width={24} height={24} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 leading-tight">Configure Renewal</h3>
-                    <p className="text-sm font-public-sans text-gray-500">Extend the duration and select payment</p>
+                    <h3 className={clsx("text-lg font-semibold leading-tight", mode === "dark" ? "text-white" : "text-gray-900")}>Configure Renewal</h3>
+                    <p className={clsx("text-sm font-public-sans", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Extend the duration and select payment</p>
                   </div>
                 </div>
 
@@ -138,19 +139,19 @@ export default function RenewSubscriptionPage() {
                   {/* Duration */}
                   <div className="space-y-2">
                     <div>
-                      <label className="block text-[15px] font-public-sans font-bold text-gray-900">Duration</label>
-                      <p className="text-[13px] font-public-sans text-gray-500 mt-0.5 mb-2">Number of days to extend the subscription.</p>
+                      <label className={clsx("block text-[15px] font-public-sans font-bold", mode === "dark" ? "text-gray-200" : "text-gray-900")}>Duration</label>
+                      <p className={clsx("text-[13px] font-public-sans mt-0.5 mb-2", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Number of days to extend the subscription.</p>
                     </div>
-                    <div className="flex items-stretch rounded-xl border border-gray-300/60 focus-within:ring-1 focus-within:ring-indigo-600 focus-within:border-indigo-600 hover:border-gray-400 transition-all overflow-hidden bg-white">
+                    <div className={clsx("flex items-stretch rounded-xl border transition-all overflow-hidden", mode === "dark" ? "border-gray-800 bg-slate-900 focus-within:ring-1 focus-within:ring-indigo-600 focus-within:border-indigo-600 hover:border-gray-700" : "bg-white border-gray-300/60 focus-within:ring-1 focus-within:ring-indigo-600 focus-within:border-indigo-600 hover:border-gray-400")}>
                       <input
                         type="number"
                         min="1"
                         required
                         value={formData.durationDays}
                         onChange={(e) => setFormData({ ...formData, durationDays: parseInt(e.target.value) })}
-                        className="flex-1 w-full px-4 py-4 bg-transparent outline-none text-[15px] font-public-sans text-gray-900 font-mono"
+                        className={clsx("flex-1 w-full px-4 py-4 bg-transparent outline-none text-[15px] font-public-sans font-mono", mode === "dark" ? "text-white" : "text-gray-900")}
                       />
-                      <div className="bg-gray-50/80 border-l border-gray-300/80 px-4 flex items-center justify-center text-[13px] font-public-sans font-bold text-gray-500 uppercase tracking-widest shrink-0">
+                      <div className={clsx("border-l px-4 flex items-center justify-center text-[13px] font-public-sans font-bold uppercase tracking-widest shrink-0", mode === "dark" ? "bg-slate-950/40 border-gray-800 text-slate-500" : "bg-gray-50/80 border-gray-300/80 text-gray-500")}>
                         Days
                       </div>
                     </div>
@@ -160,15 +161,15 @@ export default function RenewSubscriptionPage() {
                 {/* Payment Mode */}
                 <div className="space-y-2 pt-2">
                   <div>
-                    <label className="block text-[15px] font-public-sans font-bold text-gray-900">Payment Mode</label>
-                    <p className="text-[13px] font-public-sans text-gray-500 mt-0.5 mb-2">Select how the user paid for this renewal.</p>
+                    <label className={clsx("block text-[15px] font-public-sans font-bold", mode === "dark" ? "text-gray-200" : "text-gray-900")}>Payment Mode</label>
+                    <p className={clsx("text-[13px] font-public-sans mt-0.5 mb-2", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Select how the user paid for this renewal.</p>
                   </div>
                   <div className="relative">
                     <select
                       required
                       value={formData.paymentMode}
                       onChange={(e) => setFormData({ ...formData, paymentMode: e.target.value })}
-                      className="w-full px-4 py-4 bg-white border border-gray-300/60 rounded-xl text-[15px] font-public-sans text-gray-900 outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 hover:border-gray-400 transition-all appearance-none cursor-pointer"
+                      className={clsx("w-full px-4 py-4 border rounded-xl text-[15px] font-public-sans outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 hover:border-gray-400 transition-all appearance-none cursor-pointer", mode === "dark" ? "bg-slate-900 border-gray-800 text-white" : "bg-white border-gray-300/60 text-gray-900")}
                     >
                       <option value="cash">Cash</option>
                       <option value="upi">UPI</option>
@@ -195,23 +196,23 @@ export default function RenewSubscriptionPage() {
 
           {/* Right Sidebar: Summary */}
           <div className="space-y-6">
-            <div className="bg-white rounded-xl p-8 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.12)] border border-gray-100/80 sticky top-8">
-              <h3 className="text-2xl font-barlow font-bold text-gray-900 mb-6">Summary</h3>
+            <div className={clsx("rounded-xl p-8 border sticky top-8", mode === "dark" ? "bg-[#1c252e] border-gray-800 shadow-none" : "bg-white border-gray-100/80 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.12)]")}>
+              <h3 className={clsx("text-2xl font-barlow font-bold mb-6", mode === "dark" ? "text-white" : "text-gray-900")}>Summary</h3>
               
               <div className="space-y-6">
                 <div className="flex justify-between items-center font-public-sans text-sm">
-                  <span className="text-gray-500 font-semibold tracking-wide">Renewal Fee</span>
-                  <span className="text-gray-900 font-bold">₹{estimatedAmount}</span>
+                  <span className={clsx("font-semibold tracking-wide", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Renewal Fee</span>
+                  <span className={clsx("font-bold", mode === "dark" ? "text-white" : "text-gray-900")}>₹{estimatedAmount}</span>
                 </div>
 
-                <div className="pt-6 border-t border-dashed border-gray-200 space-y-4">
-                   <div className="p-2 bg-emerald-50/80 rounded-xl border border-emerald-100/50 flex gap-4 items-center">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-100/90 text-emerald-600 flex items-center justify-center shrink-0">
+                <div className={clsx("pt-6 border-t border-dashed", mode === "dark" ? "border-gray-800" : "border-gray-200")}>
+                   <div className={clsx("p-2 rounded-xl border flex gap-4 items-center", mode === "dark" ? "bg-emerald-950/20 border-emerald-900/30" : "bg-emerald-50/80 border-emerald-100/50")}>
+                      <div className={clsx("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", mode === "dark" ? "bg-emerald-950/50 text-emerald-400" : "bg-emerald-100/90 text-emerald-600")}>
                          <Icon icon="solar:calendar-bold-duotone" width={20} height={20} />
                       </div>
                       <div className="space-y-0.5">
                          <p className="text-[11px] font-public-sans font-bold text-emerald-900/60 tracking-wider uppercase">New End Date</p>
-                         <p className="text-[15px] font-public-sans font-bold text-emerald-900">
+                         <p className={clsx("text-[15px] font-public-sans font-bold", mode === "dark" ? "text-emerald-400" : "text-emerald-900")}>
                             {(() => {
                                const base = new Date(subscription.endDate) > new Date() ? new Date(subscription.endDate) : new Date();
                                const date = new Date(base);

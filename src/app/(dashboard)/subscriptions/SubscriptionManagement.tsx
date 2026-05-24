@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  Plus, 
-  RefreshCcw, 
-  ArrowRightLeft, 
-  XCircle, 
-  Ticket, 
-  CheckCircle, 
-  Clock, 
+import {
+  Plus,
+  RefreshCcw,
+  ArrowRightLeft,
+  XCircle,
+  Ticket,
+  CheckCircle,
+  Clock,
   AlertCircle,
   TrendingUp,
   TrendingDown
@@ -26,6 +26,8 @@ import { useTableState } from "@/hooks/useTableState";
 import SeatCalendar from "./SeatCalendar";
 import * as XLSX from "xlsx";
 import { Icon } from "@iconify/react";
+import { useSelector } from "react-redux";
+import clsx from "clsx";
 
 interface Subscription {
   _id: string;
@@ -53,6 +55,7 @@ interface Stats {
 
 export default function SubscriptionManagement() {
   const router = useRouter();
+  const { mode } = useSelector((state: any) => state.theme);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [stats, setStats] = useState<Stats>({
     totalActive: 0,
@@ -138,27 +141,32 @@ export default function SubscriptionManagement() {
       type: "custom",
       render: (row) => (
         <div className="flex items-center gap-2.5 font-barlow ">
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-sm text-indigo-600 font-bold border border-indigo-100">
+          <div className={clsx(
+            "w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border",
+            mode === "dark"
+              ? "bg-indigo-950/40 text-indigo-400 border-indigo-900/60"
+              : "bg-indigo-50 text-indigo-600 border-indigo-100"
+          )}>
             {row.seatId?.seatNumber || "-"}
           </div>
-          <span className="font-semibold text-gray-700">Seat {row.seatId?.seatNumber}</span>
+          <span className={clsx("font-semibold", mode === "dark" ? "text-gray-300" : "text-gray-700")}>Seat {row.seatId?.seatNumber}</span>
         </div>
       ),
       sortable: true
     },
     {
-       key: "status",
-       label: "Status",
-       type: "status",
-       getStatus: (row) => {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          const end = new Date(row.endDate);
-          if (row.status === "cancelled") return "Cancelled";
-          if (end < today) return "Expired";
-          return "Active";
-       },
-       sortable: true
+      key: "status",
+      label: "Status",
+      type: "status",
+      getStatus: (row) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const end = new Date(row.endDate);
+        if (row.status === "cancelled") return "Cancelled";
+        if (end < today) return "Expired";
+        return "Active";
+      },
+      sortable: true
     },
     {
       key: "startDate",
@@ -170,17 +178,17 @@ export default function SubscriptionManagement() {
         return (
           <div className="flex flex-col font-barlow">
             <div className="flex items-center gap-2">
-               <span className="font-semibold text-gray-700">{start.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
-               <ArrowRightLeft className="w-3 h-3 text-gray-400" />
-               <span className="font-semibold text-gray-700">{end.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+              <span className={clsx("font-semibold", mode === "dark" ? "text-gray-300" : "text-gray-700")}>{start.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
+              <ArrowRightLeft className="w-3 h-3 text-gray-400" />
+              <span className={clsx("font-semibold", mode === "dark" ? "text-gray-300" : "text-gray-700")}>{end.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
             </div>
-            <span className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">
-               {Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))} Days
+            <span className={clsx("text-[11px] font-bold uppercase tracking-wider", mode === "dark" ? "text-gray-400" : "text-gray-500")}>
+              {Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))} Days
             </span>
           </div>
         )
       }
-    },{
+    }, {
       key: "daysLeft",
       label: "Days Left",
       type: "custom",
@@ -189,23 +197,26 @@ export default function SubscriptionManagement() {
         const end = new Date(row.endDate);
         const diff = end.getTime() - today.getTime();
         const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-        
+
         if (row.status === "cancelled") return <span className="text-gray-400 font-medium">-</span>;
-        
+
         if (days < 0) return (
           <div className="flex items-center font-barlow gap-1.5 text-rose-600 font-medium text-sm">
             Expired
           </div>
         );
-        
+
         if (days <= 5) return (
           <div className="flex items-center font-barlow gap-1.5 text-amber-600 font-medium text-sm">
             {days} Days Left
           </div>
         );
-        
+
         return (
-          <div className="flex items-center font-barlow gap-1.5 text-gray-800 font-medium text-sm">
+          <div className={clsx(
+            "flex items-center font-barlow gap-1.5 font-medium text-sm",
+            mode === "dark" ? "text-gray-300" : "text-gray-800"
+          )}>
             {days} Days Left
           </div>
         );
@@ -297,10 +308,10 @@ export default function SubscriptionManagement() {
   if (loading && subscriptions.length === 0) return <SimpleLoader text="Loading Subscriptions" />;
 
   return (
-    <div className="bg-gray-50/50 min-h-screen">
+    <div className={clsx(mode === "dark" ? "bg-transparent" : "bg-gray-50/50", "min-h-screen")}>
       <div className="max-w-6xl">
-        
-        <PageHeader 
+
+        <PageHeader
           title="Subscription Management"
           breadcrumbs={[
             { label: "Dashboard", href: "/" },
@@ -313,17 +324,24 @@ export default function SubscriptionManagement() {
                 size="md"
                 icon="vscode-icons:file-type-excel"
                 onClick={handleDownloadExcel}
-                className="font-bold text-emerald-600 font-medium border-emerald-100 hover:bg-emerald-50"
+                className={clsx(
+                  "font-medium ",
+                  mode === "dark" ? "shadow-none" : ""
+                )}
               >
                 Export Excel
               </Button>
               <Button
-                 onClick={() => router.push("/subscriptions/add")}
-                 variant="primary"
-                 className="bg-indigo-600 hover:bg-indigo-700 font-medium rounded-2xl px-6 py-3 shadow-xl shadow-indigo-100"
+                onClick={() => router.push("/subscriptions/add")}
+                variant="primary"
+                size="md"
+                className={clsx(
+                  "font-medium ",
+                  mode === "dark" ? "shadow-none" : "shadow-xl shadow-indigo-100"
+                )}
               >
-                 <Plus className="text-xl" />
-                 Add Subscription
+                <Plus className="text-xl" />
+                Add Subscription
               </Button>
             </div>
           }
@@ -331,27 +349,27 @@ export default function SubscriptionManagement() {
 
         {/* Stats Summary Panel */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 overflow-visible">
-          <StatsCard 
-            title="Total Subscriptions" 
-            value={stats.totalSub} 
+          <StatsCard
+            title="Total Subscriptions"
+            value={stats.totalSub}
             icon={"solar:layers-bold-duotone"}
             accentColor="#6366f1"
           />
-          <StatsCard 
-            title="Active Subscriptions" 
-            value={stats.totalActive} 
+          <StatsCard
+            title="Active Subscriptions"
+            value={stats.totalActive}
             icon={"solar:bill-check-bold"}
             accentColor="#10b981"
           />
-          <StatsCard 
-            title="Expired Subscriptions" 
-            value={stats.totalExpired} 
+          <StatsCard
+            title="Expired Subscriptions"
+            value={stats.totalExpired}
             icon={"duo-icons:clock"}
             accentColor="#dc8a00"
           />
-          <StatsCard 
-            title="Cancelled Subscriptions" 
-            value={stats.totalCancelled} 
+          <StatsCard
+            title="Cancelled Subscriptions"
+            value={stats.totalCancelled}
             icon={"solar:bill-cross-bold-duotone"}
             accentColor="#f43f5e"
           />

@@ -20,6 +20,8 @@ import Table from "@/components/shared/Table";
 import { Button } from "@/components/shared/Button";
 import SlidingDropDown from "@/components/shared/SlidingDropDown";
 import { FilterChips, FilterBadge } from "@/components/shared/FilterChips";
+import { useSelector } from "react-redux";
+import clsx from "clsx";
 
 interface Seat {
   _id: string;
@@ -36,6 +38,7 @@ const TYPE_ALL = "All";
 
 export default function SeatManagement() {
   const router = useRouter();
+  const { mode } = useSelector((state: any) => state.theme);
   const [filteredSeats, setFilteredSeats] = useState<Seat[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -149,7 +152,29 @@ export default function SeatManagement() {
     }
   };
 
-  const seatStatusStyles = [
+  const seatStatusStyles = mode === "dark" ? [
+    {
+      status: "available",
+      label: "Available",
+      bg: "bg-green-950/40",
+      text: "text-green-400",
+      border: "border-green-900/50",
+    },
+    {
+      status: "occupied",
+      label: "Occupied",
+      bg: "bg-red-950/40",
+      text: "text-red-400",
+      border: "border-red-900/50",
+    },
+    {
+      status: "maintenance",
+      label: "Maintenance",
+      bg: "bg-amber-950/40",
+      text: "text-amber-400",
+      border: "border-amber-900/50",
+    },
+  ] : [
     {
       status: "available",
       label: "Available",
@@ -174,7 +199,7 @@ export default function SeatManagement() {
   ];
 
   return (
-    <div className="bg-gray-50/50 min-h-screen">
+    <div className={clsx("min-h-screen bg-transparent", mode !== "dark" && "bg-gray-50/50")}>
       <div className="">
         <PageHeader
           title="Seat Management"
@@ -184,13 +209,15 @@ export default function SeatManagement() {
           ]}
           actionNode={
             <div className="flex gap-3">
-              <div className="flex bg-gray-100/80 p-1 rounded-xl border border-gray-200/50">
+              <div className={clsx("flex p-1 rounded-xl border", mode === "dark" ? "bg-slate-900 border-gray-800" : "bg-gray-100/80 border-gray-200/50")}>
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 ${viewMode === "grid"
-                    ? "bg-white text-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
-                    : "text-gray-400 cursor-pointer hover:text-gray-600"
-                    }`}
+                  className={clsx(
+                    "px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center justify-center gap-2",
+                    viewMode === "grid"
+                      ? (mode === "dark" ? "bg-slate-800 text-white shadow-md" : "bg-white text-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.04)]")
+                      : "text-gray-400 cursor-pointer hover:text-gray-600"
+                  )}
                   title="Grid View"
                 >
                   <Grid size={16} />
@@ -198,10 +225,12 @@ export default function SeatManagement() {
                 </button>
                 <button
                   onClick={() => setViewMode("table")}
-                  className={`px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 ${viewMode === "table"
-                    ? "bg-white text-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
-                    : "text-gray-400 cursor-pointer hover:text-gray-600"
-                    }`}
+                  className={clsx(
+                    "px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center justify-center gap-2",
+                    viewMode === "table"
+                      ? (mode === "dark" ? "bg-slate-800 text-white shadow-md" : "bg-white text-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.04)]")
+                      : "text-gray-400 cursor-pointer hover:text-gray-600"
+                  )}
                   title="Table View"
                 >
                   <List size={16} />
@@ -218,7 +247,12 @@ export default function SeatManagement() {
                     error: "Error",
                   })
                 }
-                className="group hover:bg-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-200"
+                className={clsx(
+                  "group transition-all duration-200",
+                  mode === "dark"
+                    ? "hover:!bg-slate-800 shadow-none border-gray-850 text-gray-300 hover:text-white"
+                    : "hover:bg-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                )}
                 title="Refresh"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
@@ -374,7 +408,7 @@ export default function SeatManagement() {
         </div>
 
         {/* ── Filter Bar ──────────────────────────────────────────────────── */}
-        <div className="bg-white rounded-lg border border-gray-100 shadow-sm px-6 py-4 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4 items-center relative z-20">
+        <div className={clsx("rounded-lg border shadow-sm px-6 py-4 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4 items-center relative z-20", mode === "dark" ? "bg-[#1c252e] border-gray-800" : "bg-white border-gray-100")}>
           <SlidingDropDown
             name="floor-filter"
             label="Floor"
@@ -443,7 +477,10 @@ export default function SeatManagement() {
                 Array.from({ length: 12 }).map((_, i) => (
                   <div
                     key={i}
-                    className="aspect-square bg-white rounded-[28px] border-2 border-dashed border-gray-100 animate-pulse"
+                    className={clsx(
+                      "aspect-square rounded-[28px] border-2 border-dashed animate-pulse",
+                      mode === "dark" ? "bg-slate-900 border-gray-800" : "bg-white border-gray-100"
+                    )}
                   />
                 ))
               ) : filteredSeats.length === 0 ? (
@@ -454,12 +491,22 @@ export default function SeatManagement() {
                 filteredSeats.map((seat) => (
                   <div
                     key={seat._id}
-                    className="group bg-white rounded-lg p-4 shadow-sm border-2 border-transparent hover:border-blue-100 hover:shadow-xl hover:shadow-blue-50/50 transition-all duration-200 flex flex-col relative overflow-hidden"
+                    className={clsx(
+                      "group rounded-lg p-4 shadow-sm border-2 transition-all duration-200 flex flex-col relative overflow-hidden",
+                      mode === "dark"
+                        ? "bg-[#1c252e] border-gray-800 hover:border-indigo-900/50 hover:shadow-none"
+                        : "bg-white border-transparent hover:border-blue-100 hover:shadow-xl hover:shadow-blue-50/50"
+                    )}
                   >
                     {/* header row: icon + seat number */}
                     <div className="flex relative items-center justify-between mt-2">
                       <div
-                        className={`p-2 rounded-2xl border mx-auto ${(seatStatusStyles.find((s) => s.status === (seat.status || "available")) ?? seatStatusStyles[0]).bg} ${(seatStatusStyles.find((s) => s.status === (seat.status || "available")) ?? seatStatusStyles[0]).text} ${(seatStatusStyles.find((s) => s.status === (seat.status || "available")) ?? seatStatusStyles[0]).border}`}
+                        className={clsx(
+                          "p-2 rounded-2xl border mx-auto",
+                          (seatStatusStyles.find((s) => s.status === (seat.status || "available")) ?? seatStatusStyles[0]).bg,
+                          (seatStatusStyles.find((s) => s.status === (seat.status || "available")) ?? seatStatusStyles[0]).text,
+                          (seatStatusStyles.find((s) => s.status === (seat.status || "available")) ?? seatStatusStyles[0]).border
+                        )}
                       >
                         {seat.type === "ac" ? (
                           <svg
@@ -497,29 +544,41 @@ export default function SeatManagement() {
                       </div>
                       <div
                         title={seat.type === "ac" ? "AC Seat" : "Non-AC Seat"}
-                        className={`h-4 w-4 opacity-45 absolute right-5 top-0 border-4 rounded-full ${seat.type === "ac" ? "bg-blue-400 border-blue-600/70" : "bg-gray-500 border-gray-200/50"}`}
+                        className={clsx(
+                          "h-4 w-4 opacity-45 absolute right-5 top-0 border-4 rounded-full",
+                          seat.type === "ac"
+                            ? (mode === "dark" ? "bg-blue-500 border-blue-900/60" : "bg-blue-400 border-blue-600/70")
+                            : (mode === "dark" ? "bg-gray-600 border-gray-900" : "bg-gray-500 border-gray-200/50")
+                        )}
                       />
                     </div>
 
                     {/* seat number + meta */}
                     <div className="mt-3 text-center">
-                      <h5 className="text-xl font-bold text-gray-800 tracking-tight leading-none">
+                      <h5 className={clsx("text-xl font-bold tracking-tight leading-none", mode === "dark" ? "text-white" : "text-gray-800")}>
                         {seat.seatNumber}
                       </h5>
                       <p className="mt-1.5 text-[10px] text-gray-400 font-medium flex items-center justify-center w-full">
                         ₹{seat.price}{" "}
-                        <span className="inline-block h-3 border-l border-dashed border-gray-300 mx-2"></span>{" "}
+                        <span className={clsx("inline-block h-3 border-l border-dashed mx-2", mode === "dark" ? "border-gray-800" : "border-gray-300")}></span>{" "}
                         F - {seat.floor || "G"}
                       </p>
                     </div>
 
                     {/* hover actions */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-white/80 backdrop-blur-sm rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200">
+                    <div className={clsx(
+                      "absolute inset-0 flex flex-col items-center justify-center gap-2 backdrop-blur-sm rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200",
+                      mode === "dark" ? "bg-[#1c252e]/80" : "bg-white/80"
+                    )}>
                       {/* Top Row: 3 buttons */}
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => handleMaintenanceToggle(seat)}
-                          className={`p-1.5 cursor-pointer bg-white border border-gray-100 rounded-xl shadow-sm transition-colors ${seat.status === "maintenance" ? "text-emerald-500 hover:border-emerald-200" : "text-amber-500 hover:border-amber-200"}`}
+                          className={clsx(
+                            "p-1.5 cursor-pointer border rounded-xl shadow-sm transition-colors",
+                            mode === "dark" ? "bg-slate-900 border-gray-800" : "bg-white border-gray-100",
+                            seat.status === "maintenance" ? "text-emerald-500 hover:border-emerald-200" : "text-amber-500 hover:border-amber-200"
+                          )}
                           title={
                             seat.status === "maintenance"
                               ? "Complete Maintenance"
@@ -554,7 +613,12 @@ export default function SeatManagement() {
                           onClick={() =>
                             router.push(`/seat-management/${seat._id}/edit`)
                           }
-                          className="p-1.5 cursor-pointer bg-white border border-gray-100 rounded-xl text-gray-400 hover:text-indigo-500 hover:border-indigo-100 shadow-sm transition-colors"
+                          className={clsx(
+                            "p-1.5 cursor-pointer border rounded-xl shadow-sm transition-colors",
+                            mode === "dark"
+                              ? "bg-slate-900 border-gray-800 text-gray-400 hover:text-indigo-400 hover:border-indigo-900/50"
+                              : "bg-white border-gray-100 text-gray-400 hover:text-indigo-500 hover:border-indigo-100"
+                          )}
                           title="Edit"
                         >
                           <svg
@@ -573,7 +637,12 @@ export default function SeatManagement() {
                         </button>
                         <button
                           onClick={() => handleDelete(seat)}
-                          className="p-1.5 cursor-pointer bg-white border border-gray-100 rounded-xl text-gray-400 hover:text-red-500 hover:border-red-100 shadow-sm transition-colors"
+                          className={clsx(
+                            "p-1.5 cursor-pointer border rounded-xl shadow-sm transition-colors",
+                            mode === "dark"
+                              ? "bg-slate-900 border-gray-800 text-gray-400 hover:text-red-400 hover:border-red-900/50"
+                              : "bg-white border-gray-100 text-gray-400 hover:text-red-500 hover:border-red-100"
+                          )}
                           title="Delete"
                         >
                           <svg
@@ -601,39 +670,46 @@ export default function SeatManagement() {
                       </div>
 
                       {/* Bottom Row: 1 button */}
-                      {seat.status === "occupied" && <div className="flex items-center justify-start">
-                        <button
-                          onClick={() => handleSubscription(seat)}
-                          disabled={seat.status !== "occupied"}
-                          className={`p-1.5 cursor-pointer bg-white border border-gray-100 rounded-xl text-gray-400 shadow-sm transition-colors ${seat.status !== "occupied"
-                            ? "opacity-50 cursor-not-allowed"
-                            : "hover:text-emerald-500 hover:border-emerald-100"
-                            }`}
-                          title="Current Subscription"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24">
-                            <path fill="currentColor" fillRule="evenodd" d="M7.245 2h9.51c1.159 0 1.738 0 2.206.163a3.05 3.05 0 0 1 1.881 1.936C21 4.581 21 5.177 21 6.37v14.004c0 .858-.985 1.314-1.608.744a.946.946 0 0 0-1.284 0l-.483.442a1.657 1.657 0 0 1-2.25 0a1.657 1.657 0 0 0-2.25 0a1.657 1.657 0 0 1-2.25 0a1.657 1.657 0 0 0-2.25 0a1.657 1.657 0 0 1-2.25 0l-.483-.442a.946.946 0 0 0-1.284 0c-.623.57-1.608.114-1.608-.744V6.37c0-1.193 0-1.79.158-2.27c.3-.913.995-1.629 1.881-1.937C5.507 2 6.086 2 7.245 2M7 6.75a.75.75 0 0 0 0 1.5h.5a.75.75 0 0 0 0-1.5zm3.5 0a.75.75 0 0 0 0 1.5H17a.75.75 0 0 0 0-1.5zM7 10.25a.75.75 0 0 0 0 1.5h.5a.75.75 0 0 0 0-1.5zm3.5 0a.75.75 0 0 0 0 1.5H17a.75.75 0 0 0 0-1.5zM7 13.75a.75.75 0 0 0 0 1.5h.5a.75.75 0 0 0 0-1.5zm3.5 0a.75.75 0 0 0 0 1.5H17a.75.75 0 0 0 0-1.5z" clipRule="evenodd"></path>
-                          </svg>
-                        </button>
-                      </div>}
+                      {seat.status === "occupied" && (
+                        <div className="flex items-center justify-start">
+                          <button
+                            onClick={() => handleSubscription(seat)}
+                            disabled={seat.status !== "occupied"}
+                            className={clsx(
+                              "p-1.5 cursor-pointer border rounded-xl shadow-sm transition-colors",
+                              seat.status !== "occupied"
+                                ? "opacity-50 cursor-not-allowed text-gray-400"
+                                : (mode === "dark"
+                                  ? "bg-slate-900 border-gray-800 text-gray-400 hover:text-emerald-400 hover:border-emerald-900/50"
+                                  : "bg-white border-gray-100 text-gray-400 hover:text-emerald-500 hover:border-emerald-100"
+                                )
+                            )}
+                            title="Current Subscription"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24">
+                              <path fill="currentColor" fillRule="evenodd" d="M7.245 2h9.51c1.159 0 1.738 0 2.206.163a3.05 3.05 0 0 1 1.881 1.936C21 4.581 21 5.177 21 6.37v14.004c0 .858-.985 1.314-1.608.744a.946.946 0 0 0-1.284 0l-.483.442a1.657 1.657 0 0 1-2.25 0a1.657 1.657 0 0 0-2.25 0a1.657 1.657 0 0 1-2.25 0a1.657 1.657 0 0 0-2.25 0a1.657 1.657 0 0 1-2.25 0l-.483-.442a.946.946 0 0 0-1.284 0c-.623.57-1.608.114-1.608-.744V6.37c0-1.193 0-1.79.158-2.27c.3-.913.995-1.629 1.881-1.937C5.507 2 6.086 2 7.245 2M7 6.75a.75.75 0 0 0 0 1.5h.5a.75.75 0 0 0 0-1.5zm3.5 0a.75.75 0 0 0 0 1.5H17a.75.75 0 0 0 0-1.5zM7 10.25a.75.75 0 0 0 0 1.5h.5a.75.75 0 0 0 0-1.5zm3.5 0a.75.75 0 0 0 0 1.5H17a.75.75 0 0 0 0-1.5zM7 13.75a.75.75 0 0 0 0 1.5h.5a.75.75 0 0 0 0-1.5zm3.5 0a.75.75 0 0 0 0 1.5H17a.75.75 0 0 0 0-1.5z" clipRule="evenodd"></path>
+                            </svg>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))
               )}
             </div>
             {viewMode === "grid" && totalItems > 0 && (
-              <div className="flex items-center justify-between border-t border-dashed border-gray-200 py-4 px-2">
-                <div className="text-sm text-gray-500 font-medium">
+              <div className={clsx("flex items-center justify-between border-t border-dashed py-4 px-2", mode === "dark" ? "border-gray-800" : "border-gray-200")}>
+                <div className={clsx("text-sm font-medium", mode === "dark" ? "text-gray-400" : "text-gray-500")}>
                   Showing{" "}
-                  <span className="font-bold text-gray-900">
+                  <span className={clsx("font-bold", mode === "dark" ? "text-white" : "text-gray-900")}>
                     {(currentPage - 1) * rowsPerPage + 1}
                   </span>{" "}
                   to{" "}
-                  <span className="font-bold text-gray-900">
+                  <span className={clsx("font-bold", mode === "dark" ? "text-white" : "text-gray-900")}>
                     {Math.min(currentPage * rowsPerPage, totalItems)}
                   </span>{" "}
                   of{" "}
-                  <span className="font-bold text-gray-900">{totalItems}</span>{" "}
+                  <span className={clsx("font-bold", mode === "dark" ? "text-white" : "text-gray-900")}>{totalItems}</span>{" "}
                   seats
                 </div>
                 <div className="flex items-center gap-2">
@@ -646,10 +722,13 @@ export default function SeatManagement() {
                         setRowsPerPage(val);
                         setCurrentPage(1);
                       }}
-                      className={`text-[12px] bg-transparent outline-none cursor-pointer border rounded px-1 border-gray-200 text-gray-600`}
+                      className={clsx(
+                        "text-[12px] bg-transparent outline-none cursor-pointer border rounded px-1",
+                        mode === "dark" ? "border-gray-800 text-gray-400 bg-slate-900" : "border-gray-200 text-gray-600"
+                      )}
                     >
                       {[5, 10, 25, 50].map((num) => (
-                        <option key={num} value={num} className="text-black">
+                        <option key={num} value={num} className={mode === "dark" ? "bg-slate-900 text-white" : "text-black"}>
                           {num}
                         </option>
                       ))}

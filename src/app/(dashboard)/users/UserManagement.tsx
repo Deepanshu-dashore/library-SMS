@@ -12,6 +12,8 @@ import { SimpleLoader } from "@/components/shared/SimpleLoader";
 import { FilterChips, FilterBadge } from "@/components/shared/FilterChips";
 import { TABLE_IDS } from "@/constants/tableIds";
 import { useTableState } from "@/hooks/useTableState";
+import { useSelector } from "react-redux";
+import clsx from "clsx";
 
 interface User {
   _id: string;
@@ -29,6 +31,7 @@ interface User {
 
 export default function UserManagement() {
   const router = useRouter();
+  const { mode } = useSelector((state: any) => state.theme);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ total: 0, active: 0, inactive: 0, unverify: 0, withoutSeat: 0 });
@@ -134,8 +137,8 @@ export default function UserManagement() {
       type: "custom",
       render: (row) => (
         <div className="flex flex-col">
-          <span className="font-semibold text-gray-900">{row.email}</span>
-          <span className="text-[13px] text-gray-500 font-medium tracking-tight">{row.number}</span>
+          <span className={clsx("font-semibold text-gray-900", mode === "dark" && "!text-slate-200")}>{row.email}</span>
+          <span className={clsx("text-[13px] text-gray-500 font-medium tracking-tight", mode === "dark" && "!text-slate-400")}>{row.number}</span>
         </div>
       )
     },
@@ -163,10 +166,10 @@ export default function UserManagement() {
   if (loading && users.length === 0) return <SimpleLoader text="Loading Members" />;
 
   return (
-    <div className="bg-gray-50/50 min-h-screen">
+    <div className={clsx("min-h-screen bg-transparent", mode !== "dark" && "bg-gray-50/50")}>
       <div className="">
-        
-        <PageHeader 
+
+        <PageHeader
           title="Member Management"
           breadcrumbs={[
             { label: "Dashboard", href: "/" },
@@ -174,41 +177,44 @@ export default function UserManagement() {
           ]}
           actionNode={
             <div className="flex gap-4">
-               <Button
-                  onClick={async () => {
-                    const url = `${window.location.origin}/registration`;
-                    const shareText = `📚 *Library Member Registration*\n\nWelcome to our Library Management System! Please register your membership using the official portal link below:\n\n🔗 ${url}\n\n*Note:* After registration, please visit the library desk with your physical Aadhar card for biometric verification and seat allocation.`;
+              <Button
+                onClick={async () => {
+                  const url = `${window.location.origin}/registration`;
+                  const shareText = `📚 *Library Member Registration*\n\nWelcome to our Library Management System! Please register your membership using the official portal link below:\n\n🔗 ${url}\n\n*Note:* After registration, please visit the library desk with your physical Aadhar card for biometric verification and seat allocation.`;
 
-                    if (navigator.share) {
-                      try {
-                        await navigator.share({
-                          title: 'Library Registration Portal',
-                          text: shareText,
-                        });
-                      } catch (error) {
-                        // User cancelled or share failed, fallback to copy
-                        navigator.clipboard.writeText(shareText);
-                        toast.success("Shareable message copied!");
-                      }
-                    } else {
+                  if (navigator.share) {
+                    try {
+                      await navigator.share({
+                        title: 'Library Registration Portal',
+                        text: shareText,
+                      });
+                    } catch (error) {
+                      // User cancelled or share failed, fallback to copy
                       navigator.clipboard.writeText(shareText);
                       toast.success("Shareable message copied!");
                     }
-                  }}
-                  variant="outline"
-                  className="rounded-2xl px-4 py-1 font-medium text-indigo-600 border-indigo-100 hover:bg-indigo-50"
-               >
-                  <Share2 className="w-4 h-4" />
-                  Share Link
-               </Button>
-               <Button
-                  onClick={() => router.push("/users/create")}
-                  variant="primary"
-                  className="bg-indigo-600 font-medium hover:bg-indigo-700 rounded-2xl px-4 py-1 shadow-xl shadow-indigo-100"
-               >
-                  <Plus className="text-xl" />
-                  New Member
-               </Button>
+                  } else {
+                    navigator.clipboard.writeText(shareText);
+                    toast.success("Shareable message copied!");
+                  }
+                }}
+                size="sm"
+                variant="outline"
+                // className="rounded-2xl px-4 py-1 font-medium text-indigo-600 border-indigo-100 hover:bg-indigo-50"
+                className="font-medium"
+              >
+                <Share2 className="w-4 h-4" />
+                Share Link
+              </Button>
+              <Button
+                onClick={() => router.push("/users/create")}
+                variant="primary"
+                size="sm"
+                className="font-medium"
+              >
+                <Plus className="h-5 w-5" />
+                New Member
+              </Button>
             </div>
           }
         />

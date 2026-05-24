@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function PaymentsPage() {
   return (
-    <main className="min-h-screen bg-gray-50/50">
+    <main className="min-h-screen bg-transparent">
       <PaymentManagement />
     </main>
   );

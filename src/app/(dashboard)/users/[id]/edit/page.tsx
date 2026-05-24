@@ -13,22 +13,30 @@ import {
   type MemberFormErrors,
 } from "@/app/lib/utils/validators";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { useSelector } from "react-redux";
+import clsx from "clsx";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
 const inputBase =
   "w-full text-sm px-5 py-2.5 bg-gray-50/50 border rounded-lg focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 transition-all outline-none";
 
-const inputOk  = "border-gray-200";
+const inputOk = "border-gray-200";
 const inputErr = "border-red-400 bg-red-50/30 focus:ring-red-100 focus:border-red-500";
 
 // ─── Tiny helpers ─────────────────────────────────────────────────────────────
 
-const Label = ({ children }: { children: React.ReactNode }) => (
-  <label className="text-[12px] mb-1.5 inline-block font-bold text-gray-500 uppercase tracking-wider">
-    {children}
-  </label>
-);
+const Label = ({ children }: { children: React.ReactNode }) => {
+  const { mode } = useSelector((state: any) => state.theme);
+  return (
+    <label className={clsx(
+      "text-[12px] mb-1.5 inline-block font-bold uppercase tracking-wider",
+      mode === "dark" ? "text-gray-400" : "text-gray-500"
+    )}>
+      {children}
+    </label>
+  );
+};
 
 const FieldError = ({ msg }: { msg?: string }) =>
   msg ? (
@@ -38,9 +46,12 @@ const FieldError = ({ msg }: { msg?: string }) =>
     </span>
   ) : null;
 
-const Hint = ({ children }: { children: React.ReactNode }) => (
-  <span className="mt-1 text-[11px] text-gray-400 leading-snug block">{children}</span>
-);
+const Hint = ({ children }: { children: React.ReactNode }) => {
+  const { mode } = useSelector((state: any) => state.theme);
+  return (
+    <span className={clsx("mt-1 text-[11px] leading-snug block", mode === "dark" ? "text-gray-500" : "text-gray-400")}>{children}</span>
+  );
+};
 
 // ─── Image Upload Field ───────────────────────────────────────────────────────
 
@@ -55,6 +66,7 @@ interface ImageUploadFieldProps {
 
 function ImageUploadField({ label, hint, preview, error, onFile, onClear }: ImageUploadFieldProps) {
   const ref = useRef<HTMLInputElement>(null);
+  const { mode } = useSelector((state: any) => state.theme);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -78,9 +90,13 @@ function ImageUploadField({ label, hint, preview, error, onFile, onClear }: Imag
 
       {preview ? (
         <div
-          className={`relative w-full border rounded-lg overflow-hidden ${
-            error ? "border-red-400" : "border-gray-200"
-          } bg-white`}
+          className={clsx(
+            "relative w-full border rounded-lg overflow-hidden",
+            error
+              ? "border-red-400"
+              : (mode === "dark" ? "border-gray-800" : "border-gray-200"),
+            mode === "dark" ? "bg-slate-900" : "bg-white"
+          )}
         >
           <img
             src={preview}
@@ -90,7 +106,12 @@ function ImageUploadField({ label, hint, preview, error, onFile, onClear }: Imag
           <button
             type="button"
             onClick={() => { onClear(); if (ref.current) ref.current.value = ""; }}
-            className="absolute top-2 right-2 bg-white border border-gray-200 rounded-full p-0.5 hover:bg-red-50 hover:border-red-300 transition-colors"
+            className={clsx(
+              "absolute top-2 right-2 border rounded-full p-0.5 transition-colors",
+              mode === "dark"
+                ? "bg-slate-800 border-gray-700 hover:bg-red-950/20 hover:border-red-900"
+                : "bg-white border-gray-200 hover:bg-red-50 hover:border-red-300"
+            )}
           >
             <X className="w-3.5 h-3.5 text-gray-500" />
           </button>
@@ -99,14 +120,17 @@ function ImageUploadField({ label, hint, preview, error, onFile, onClear }: Imag
         <button
           type="button"
           onClick={() => ref.current?.click()}
-          className={`w-full flex flex-col items-center gap-2 py-6 border-2 border-dashed rounded-lg transition-all group ${
+          className={clsx(
+            "w-full flex flex-col items-center gap-2 py-6 border-2 border-dashed rounded-lg transition-all group",
             error
               ? "border-red-300 bg-red-50/30 hover:border-red-400"
-              : "border-gray-200 bg-gray-50/50 hover:border-indigo-300 hover:bg-indigo-50/30"
-          }`}
+              : (mode === "dark"
+                ? "border-gray-800 bg-slate-900/30 hover:border-indigo-900 hover:bg-indigo-950/20"
+                : "border-gray-200 bg-gray-50/50 hover:border-indigo-300 hover:bg-indigo-50/30")
+          )}
         >
-          <Upload className={`w-5 h-5 transition-colors ${error ? "text-red-400" : "text-gray-400 group-hover:text-indigo-500"}`} />
-          <span className={`text-xs transition-colors ${error ? "text-red-400" : "text-gray-400 group-hover:text-indigo-500"}`}>
+          <Upload className={clsx("w-5 h-5 transition-colors", error ? "text-red-400" : (mode === "dark" ? "text-gray-500 group-hover:text-indigo-400" : "text-gray-400 group-hover:text-indigo-500"))} />
+          <span className={clsx("text-xs transition-colors", error ? "text-red-400" : (mode === "dark" ? "text-gray-500 group-hover:text-indigo-400" : "text-gray-400 group-hover:text-indigo-500"))}>
             Click to upload — JPG, PNG, or WebP · max 2 MB
           </span>
         </button>
@@ -131,14 +155,15 @@ function ImageUploadField({ label, hint, preview, error, onFile, onClear }: Imag
 function SectionHeader({
   step, title, sub, color,
 }: { step: string; title: string; sub: string; color: string }) {
+  const { mode } = useSelector((state: any) => state.theme);
   return (
-    <div className="flex items-center gap-4 mb-8 bg-gray-100/80 p-1.5 rounded-xl">
-      <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center font-bold text-sm`}>
+    <div className={clsx("flex items-center gap-4 mb-8 p-1.5 rounded-xl border", mode === "dark" ? "bg-slate-900/40 border-gray-800" : "bg-gray-100/80 border-transparent")}>
+      <div className={clsx("w-12 h-12 rounded-xl flex items-center justify-center font-bold text-sm", mode === "dark" ? "bg-indigo-950/30 text-indigo-400" : color)}>
         {step}
       </div>
       <div>
-        <h3 className="text-base font-bold text-gray-800">{title}</h3>
-        <p className="text-xs text-gray-500">{sub}</p>
+        <h3 className={clsx("text-base font-bold", mode === "dark" ? "text-white" : "text-gray-800")}>{title}</h3>
+        <p className={clsx("text-xs", mode === "dark" ? "text-gray-400" : "text-gray-500")}>{sub}</p>
       </div>
     </div>
   );
@@ -179,12 +204,12 @@ export default function EditUserPage() {
   });
 
   // Raw File objects — needed for type/size validation
-  const [photoFile,     setPhotoFile]     = useState<File | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [signatureFile, setSignatureFile] = useState<File | null>(null);
 
   // touched tracks which fields the user has interacted with
-  const [touched,  setTouched]  = useState<Record<string, boolean>>({});
-  const [errors,   setErrors]   = useState<MemberFormErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [errors, setErrors] = useState<MemberFormErrors>({});
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
@@ -220,8 +245,8 @@ export default function EditUserPage() {
   // Revalidate on every change
   const revalidate = (
     data = formData,
-    pf   = photoFile,
-    sf   = signatureFile,
+    pf = photoFile,
+    sf = signatureFile,
   ) => {
     const errs = validateMemberForm(data, pf, sf);
     setErrors(errs);
@@ -256,7 +281,7 @@ export default function EditUserPage() {
       }
 
       // Attach new files if uploaded
-      if (photoFile)     fd.append("photo",     photoFile);
+      if (photoFile) fd.append("photo", photoFile);
       if (signatureFile) fd.append("signature", signatureFile);
 
       const { data } = await axios.patch(`/api/user/${id}`, fd);
@@ -273,11 +298,25 @@ export default function EditUserPage() {
   };
 
 
+  const { mode } = useSelector((state: any) => state.theme);
+
   const err = (key: keyof MemberFormErrors) =>
     (submitted || touched[key]) ? errors[key] : undefined;
 
-  const ic = (key: keyof MemberFormErrors) =>
-    `${inputBase} ${err(key) ? inputErr : inputOk}`;
+  const ic = (key: keyof MemberFormErrors) => {
+    const isError = err(key);
+    return clsx(
+      "w-full text-sm px-5 py-2.5 border rounded-lg transition-all outline-none",
+      mode === "dark"
+        ? "bg-slate-900/60 focus:ring-indigo-950/40 focus:border-indigo-600"
+        : "bg-gray-50/50 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600",
+      isError
+        ? (mode === "dark"
+          ? "border-red-900 bg-red-950/10 focus:ring-red-950/20 focus:border-red-600"
+          : "border-red-400 bg-red-50/30 focus:ring-red-100 focus:border-red-500")
+        : (mode === "dark" ? "border-gray-800 text-white animate-in" : "border-gray-200 text-gray-900")
+    );
+  };
 
   if (initialLoading) {
     return (
@@ -306,7 +345,7 @@ export default function EditUserPage() {
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
 
         {/* ── 01 Personal Credentials ── */}
-        <div className="bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
+        <div className={clsx("rounded-xl p-8 md:p-10 border", mode === "dark" ? "bg-[#1c252e] border-gray-800 shadow-none ring-0" : "bg-white border-gray-100 ring-1 ring-gray-100 shadow-xs")}>
           <SectionHeader
             step="01"
             title="Personal Credentials"
@@ -379,7 +418,12 @@ export default function EditUserPage() {
             <div>
               <Label>Marital Status *</Label>
               <select
-                className={`${inputBase} ${inputOk} appearance-none`}
+                className={clsx(
+                  "w-full text-sm px-5 py-2.5 border rounded-lg transition-all outline-none appearance-none",
+                  mode === "dark"
+                    ? "bg-slate-900/60 border-gray-800 text-white focus:border-indigo-600"
+                    : "bg-gray-50/50 border-gray-200 text-gray-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600"
+                )}
                 value={formData.maritalStatus}
                 onChange={(e) => set("maritalStatus", e.target.value)}
               >
@@ -392,7 +436,7 @@ export default function EditUserPage() {
         </div>
 
         {/* ── 02 Contact & Security ── */}
-        <div className="bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
+        <div className={clsx("rounded-xl p-8 md:p-10 border", mode === "dark" ? "bg-[#1c252e] border-gray-800 shadow-none ring-0" : "bg-white border-gray-100 ring-1 ring-gray-100 shadow-xs")}>
           <SectionHeader
             step="02"
             title="Contact & Security"
@@ -440,8 +484,8 @@ export default function EditUserPage() {
                   className={`${ic("adharNumber")} pl-10`}
                   value={formData.adharNumber}
                   onChange={(e) => {
-                    const raw   = e.target.value.replace(/\D/g, "").slice(0, 12);
-                    const fmt   = raw.replace(/(\d{4})(\d{4})?(\d{4})?/, (_, a, b, c) =>
+                    const raw = e.target.value.replace(/\D/g, "").slice(0, 12);
+                    const fmt = raw.replace(/(\d{4})(\d{4})?(\d{4})?/, (_, a, b, c) =>
                       [a, b, c].filter(Boolean).join(" ")
                     );
                     set("adharNumber", fmt);
@@ -456,7 +500,12 @@ export default function EditUserPage() {
             <div>
               <Label>Gender *</Label>
               <select
-                className={`${inputBase} ${inputOk} appearance-none`}
+                className={clsx(
+                  "w-full text-sm px-5 py-2.5 border rounded-lg transition-all outline-none appearance-none",
+                  mode === "dark"
+                    ? "bg-slate-900/60 border-gray-800 text-white focus:border-indigo-600"
+                    : "bg-gray-50/50 border-gray-200 text-gray-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600"
+                )}
                 value={formData.gender}
                 onChange={(e) => set("gender", e.target.value)}
               >
@@ -469,7 +518,12 @@ export default function EditUserPage() {
             <div>
               <Label>Category *</Label>
               <select
-                className={`${inputBase} ${inputOk} appearance-none`}
+                className={clsx(
+                  "w-full text-sm px-5 py-2.5 border rounded-lg transition-all outline-none appearance-none",
+                  mode === "dark"
+                    ? "bg-slate-900/60 border-gray-800 text-white focus:border-indigo-600"
+                    : "bg-gray-50/50 border-gray-200 text-gray-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600"
+                )}
                 value={formData.category}
                 onChange={(e) => set("category", e.target.value)}
               >
@@ -495,7 +549,7 @@ export default function EditUserPage() {
         </div>
 
         {/* ── 03 Residential Address ── */}
-        <div className="bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
+        <div className={clsx("rounded-xl p-8 md:p-10 border", mode === "dark" ? "bg-[#1c252e] border-gray-800 shadow-none ring-0" : "bg-white border-gray-100 ring-1 ring-gray-100 shadow-xs")}>
           <SectionHeader
             step="03"
             title="Residential Address"
@@ -523,10 +577,10 @@ export default function EditUserPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
               {(
                 [
-                  { key: "tehsil",   label: "Tehsil *",   ph: "e.g. Kopar" },
-                  { key: "district", label: "District *",  ph: "e.g. Pune" },
-                  { key: "state",    label: "State *",     ph: "e.g. Maharashtra" },
-                  { key: "pincode",  label: "Pincode *",   ph: "e.g. 411001" },
+                  { key: "tehsil", label: "Tehsil *", ph: "e.g. Kopar" },
+                  { key: "district", label: "District *", ph: "e.g. Pune" },
+                  { key: "state", label: "State *", ph: "e.g. Maharashtra" },
+                  { key: "pincode", label: "Pincode *", ph: "e.g. 411001" },
                 ] as const
               ).map(({ key, label, ph }) => (
                 <div key={key}>
@@ -549,7 +603,7 @@ export default function EditUserPage() {
         </div>
 
         {/* ── 04 Media & Verification ── */}
-        <div className="bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
+        <div className={clsx("rounded-xl p-8 md:p-10 border", mode === "dark" ? "bg-[#1c252e] border-gray-800 shadow-none ring-0" : "bg-white border-gray-100 ring-1 ring-gray-100 shadow-xs")}>
           <SectionHeader
             step="04"
             title="Media & Verification"
@@ -596,7 +650,12 @@ export default function EditUserPage() {
               <textarea
                 rows={3}
                 placeholder="Admin remarks…"
-                className={`${inputBase} ${inputOk} resize-none`}
+                className={clsx(
+                  "w-full text-sm px-5 py-2.5 border rounded-lg transition-all outline-none resize-none",
+                  mode === "dark"
+                    ? "bg-slate-900/60 border-gray-800 text-white focus:border-indigo-600"
+                    : "bg-gray-50/50 border-gray-200 text-gray-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600"
+                )}
                 value={formData.notes || ""}
                 onChange={(e) => set("notes", e.target.value)}
               />
@@ -618,14 +677,17 @@ export default function EditUserPage() {
             type="button"
             variant="outline"
             onClick={() => router.push(`/users/${id}`)}
-            className="px-10 py-3 bg-white border border-gray-200 text-sm font-medium rounded-2xl hover:bg-gray-50 transition-all"
+            className="font-medium"
+          // className={clsx("px-10 py-3 border text-sm font-medium rounded-2xl transition-all", mode === "dark" ? "bg-slate-900 border-gray-800 text-gray-400 hover:text-white" : "bg-white border-gray-200 hover:bg-gray-50")}
           >
             Cancel
           </Button>
           <Button
             type="submit"
             variant="primary"
-            className="w-fit py-3 rounded-2xl text-sm font-medium shadow-xl shadow-indigo-100 flex items-center justify-center gap-3 bg-indigo-600 outline-none border-none"
+            className="font-medium"
+
+          // className={clsx("w-fit py-3 rounded-2xl text-sm font-medium flex items-center justify-center gap-3 bg-indigo-600 outline-none border-none", mode === "dark" ? "shadow-none" : "shadow-xl shadow-indigo-100")}
           >
             Update Member Profile
           </Button>

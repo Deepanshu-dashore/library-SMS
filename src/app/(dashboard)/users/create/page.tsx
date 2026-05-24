@@ -11,22 +11,30 @@ import {
   validateImageFile,
   type MemberFormErrors,
 } from "@/app/lib/utils/validators";
+import { useSelector } from "react-redux";
+import clsx from "clsx";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
 const inputBase =
   "w-full text-sm px-5 py-2.5 bg-gray-50/50 border rounded-lg focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 transition-all outline-none";
 
-const inputOk  = "border-gray-200";
+const inputOk = "border-gray-200";
 const inputErr = "border-red-400 bg-red-50/30 focus:ring-red-100 focus:border-red-500";
 
 // ─── Tiny helpers ─────────────────────────────────────────────────────────────
 
-const Label = ({ children }: { children: React.ReactNode }) => (
-  <label className="text-[12px] mb-1.5 inline-block font-bold text-gray-500 uppercase tracking-wider">
-    {children}
-  </label>
-);
+const Label = ({ children }: { children: React.ReactNode }) => {
+  const { mode } = useSelector((state: any) => state.theme);
+  return (
+    <label className={clsx(
+      "text-[12px] mb-1.5 inline-block font-bold text-gray-500 uppercase tracking-wider",
+      mode === "dark" && "!text-slate-400"
+    )}>
+      {children}
+    </label>
+  );
+};
 
 const FieldError = ({ msg }: { msg?: string }) =>
   msg ? (
@@ -36,9 +44,17 @@ const FieldError = ({ msg }: { msg?: string }) =>
     </span>
   ) : null;
 
-const Hint = ({ children }: { children: React.ReactNode }) => (
-  <span className="mt-1 text-[11px] text-gray-400 leading-snug block">{children}</span>
-);
+const Hint = ({ children }: { children: React.ReactNode }) => {
+  const { mode } = useSelector((state: any) => state.theme);
+  return (
+    <span className={clsx(
+      "mt-1 text-[11px] text-gray-400 leading-snug block",
+      mode === "dark" && "!text-slate-500"
+    )}>
+      {children}
+    </span>
+  );
+};
 
 // ─── Image Upload Field ───────────────────────────────────────────────────────
 
@@ -53,6 +69,7 @@ interface ImageUploadFieldProps {
 
 function ImageUploadField({ label, hint, preview, error, onFile, onClear }: ImageUploadFieldProps) {
   const ref = useRef<HTMLInputElement>(null);
+  const { mode } = useSelector((state: any) => state.theme);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -76,9 +93,13 @@ function ImageUploadField({ label, hint, preview, error, onFile, onClear }: Imag
 
       {preview ? (
         <div
-          className={`relative w-full border rounded-lg overflow-hidden ${
-            error ? "border-red-400" : "border-gray-200"
-          } bg-white`}
+          className={clsx(
+            "relative w-full border rounded-lg overflow-hidden transition-colors",
+            error
+              ? "border-red-400"
+              : (mode === "dark" ? "border-gray-700" : "border-gray-200"),
+            mode === "dark" ? "bg-[#1c252e]" : "bg-white"
+          )}
         >
           <img
             src={preview}
@@ -88,23 +109,37 @@ function ImageUploadField({ label, hint, preview, error, onFile, onClear }: Imag
           <button
             type="button"
             onClick={() => { onClear(); if (ref.current) ref.current.value = ""; }}
-            className="absolute top-2 right-2 bg-white border border-gray-200 rounded-full p-0.5 hover:bg-red-50 hover:border-red-300 transition-colors"
+            className={clsx(
+              "absolute top-2 right-2 border rounded-full p-0.5 transition-colors",
+              mode === "dark"
+                ? "bg-slate-800 border-gray-750 hover:bg-red-950/40 hover:border-red-900/50 text-white"
+                : "bg-white border-gray-200 hover:bg-red-50 hover:border-red-300"
+            )}
           >
-            <X className="w-3.5 h-3.5 text-gray-500" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       ) : (
         <button
           type="button"
           onClick={() => ref.current?.click()}
-          className={`w-full flex flex-col items-center gap-2 py-6 border-2 border-dashed rounded-lg transition-all group ${
+          className={clsx(
+            "w-full flex flex-col items-center gap-2 py-6 border-2 border-dashed rounded-lg transition-all group",
             error
               ? "border-red-300 bg-red-50/30 hover:border-red-400"
-              : "border-gray-200 bg-gray-50/50 hover:border-indigo-300 hover:bg-indigo-50/30"
-          }`}
+              : (mode === "dark"
+                ? "border-gray-700 bg-slate-800/20 hover:border-indigo-500 hover:bg-indigo-950/20"
+                : "border-gray-200 bg-gray-50/50 hover:border-indigo-300 hover:bg-indigo-50/30")
+          )}
         >
-          <Upload className={`w-5 h-5 transition-colors ${error ? "text-red-400" : "text-gray-400 group-hover:text-indigo-500"}`} />
-          <span className={`text-xs transition-colors ${error ? "text-red-400" : "text-gray-400 group-hover:text-indigo-500"}`}>
+          <Upload className={clsx(
+            "w-5 h-5 transition-colors",
+            error ? "text-red-400" : "text-gray-400 group-hover:text-indigo-500"
+          )} />
+          <span className={clsx(
+            "text-xs transition-colors",
+            error ? "text-red-400" : "text-gray-400 group-hover:text-indigo-500"
+          )}>
             Click to upload — JPG, PNG, or WebP · max 2 MB
           </span>
         </button>
@@ -129,14 +164,33 @@ function ImageUploadField({ label, hint, preview, error, onFile, onClear }: Imag
 function SectionHeader({
   step, title, sub, color,
 }: { step: string; title: string; sub: string; color: string }) {
+  const { mode } = useSelector((state: any) => state.theme);
+
+  const bgColors = color.split(" ");
+  const bgPart = bgColors.find(p => p.startsWith("bg-"));
+  let darkColorOverride = "";
+  if (bgPart) {
+    const colorName = bgPart.replace("bg-", "").split("-")[0].split("/")[0];
+    if (colorName) {
+      darkColorOverride = `!bg-${colorName}-950/40 !text-${colorName}-400`;
+    }
+  }
+
   return (
-    <div className="flex items-center gap-4 mb-8 bg-gray-100/70 p-1.5 rounded-xl">
-      <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center font-bold text-sm`}>
+    <div className={clsx(
+      "flex items-center gap-4 mb-8 bg-gray-100/70 p-1.5 rounded-xl transition-colors",
+      mode === "dark" && "!bg-slate-800/40"
+    )}>
+      <div className={clsx(
+        "w-12 h-12 rounded-xl flex items-center justify-center font-bold text-sm",
+        color,
+        mode === "dark" && darkColorOverride
+      )}>
         {step}
       </div>
       <div>
-        <h3 className="text-base font-bold text-gray-800">{title}</h3>
-        <p className="text-xs text-gray-500">{sub}</p>
+        <h3 className={clsx("text-base font-bold text-gray-800 transition-colors", mode === "dark" && "!text-white")}>{title}</h3>
+        <p className={clsx("text-xs text-gray-500", mode === "dark" && "!text-slate-400")}>{sub}</p>
       </div>
     </div>
   );
@@ -146,6 +200,7 @@ function SectionHeader({
 
 export default function CreateUserPage() {
   const router = useRouter();
+  const { mode } = useSelector((state: any) => state.theme);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -174,12 +229,12 @@ export default function CreateUserPage() {
   });
 
   // Raw File objects — needed for type/size validation
-  const [photoFile,     setPhotoFile]     = useState<File | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [signatureFile, setSignatureFile] = useState<File | null>(null);
 
   // touched tracks which fields the user has interacted with
-  const [touched,  setTouched]  = useState<Record<string, boolean>>({});
-  const [errors,   setErrors]   = useState<MemberFormErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [errors, setErrors] = useState<MemberFormErrors>({});
   const [submitted, setSubmitted] = useState(false);
 
   const set = (key: string, value: string) =>
@@ -191,8 +246,8 @@ export default function CreateUserPage() {
   // Revalidate on every change — errors surface only after touch or submit
   const revalidate = (
     data = formData,
-    pf   = photoFile,
-    sf   = signatureFile,
+    pf = photoFile,
+    sf = signatureFile,
   ) => {
     const errs = validateMemberForm(data, pf, sf);
     setErrors(errs);
@@ -226,7 +281,7 @@ export default function CreateUserPage() {
       }
 
       // Attach File objects (not base64 strings) for Cloudinary upload
-      if (photoFile)     fd.append("photo",     photoFile);
+      if (photoFile) fd.append("photo", photoFile);
       if (signatureFile) fd.append("signature", signatureFile);
 
       const res = await fetch("/api/user", {
@@ -252,9 +307,19 @@ export default function CreateUserPage() {
   const err = (key: keyof MemberFormErrors) =>
     (submitted || touched[key]) ? errors[key] : undefined;
 
+  const dynamicInputBase = clsx(
+    "w-full text-sm px-5 py-2.5 border rounded-lg transition-all outline-none",
+    mode === "dark"
+      ? "bg-slate-800/40 border-gray-700 text-white placeholder-slate-500 focus:ring-4 focus:ring-indigo-950/40 focus:border-indigo-500"
+      : "bg-gray-50/50 border-gray-200 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600"
+  );
+
+  const dynamicInputOk = "";
+  const dynamicInputErr = "border-red-400 bg-red-50/30 focus:ring-red-100 focus:border-red-500";
+
   // ── Input classes helper ──
   const ic = (key: keyof MemberFormErrors) =>
-    `${inputBase} ${err(key) ? inputErr : inputOk}`;
+    `${dynamicInputBase} ${err(key) ? dynamicInputErr : dynamicInputOk}`;
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-20">
@@ -271,7 +336,10 @@ export default function CreateUserPage() {
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
 
         {/* ── 01 Personal Credentials ── */}
-        <div className="bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
+        <div className={clsx(
+          "bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100 transition-all duration-300",
+          mode === "dark" && "!bg-[#1c252e] !border-gray-800 !ring-gray-800 shadow-[0_0_2px_0_rgba(0,0,0,0.15),0_12px_24px_-4px_rgba(0,0,0,0.05)]"
+        )}>
           <SectionHeader
             step="01"
             title="Personal Credentials"
@@ -344,12 +412,17 @@ export default function CreateUserPage() {
             <div>
               <Label>Marital Status *</Label>
               <select
-                className={`${inputBase} ${inputOk} appearance-none`}
+                className={clsx(
+                  dynamicInputBase,
+                  dynamicInputOk,
+                  "appearance-none",
+                  mode === "dark" && "bg-[#1c252e]"
+                )}
                 value={formData.maritalStatus}
                 onChange={(e) => set("maritalStatus", e.target.value)}
               >
-                <option value="Unmarried">Unmarried</option>
-                <option value="Married">Married</option>
+                <option value="Unmarried" className={clsx(mode === "dark" && "bg-slate-800 text-white")}>Unmarried</option>
+                <option value="Married" className={clsx(mode === "dark" && "bg-slate-800 text-white")}>Married</option>
               </select>
             </div>
 
@@ -357,7 +430,10 @@ export default function CreateUserPage() {
         </div>
 
         {/* ── 02 Contact & Security ── */}
-        <div className="bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
+        <div className={clsx(
+          "bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100 transition-all duration-300",
+          mode === "dark" && "!bg-[#1c252e] !border-gray-800 !ring-gray-800 shadow-[0_0_2px_0_rgba(0,0,0,0.15),0_12px_24px_-4px_rgba(0,0,0,0.05)]"
+        )}>
           <SectionHeader
             step="02"
             title="Contact & Security"
@@ -387,7 +463,7 @@ export default function CreateUserPage() {
               <Label>Secondary Number</Label>
               <input
                 type="tel" placeholder="Optional alternate number"
-                className={`${inputBase} ${inputOk}`}
+                className={clsx(dynamicInputBase, dynamicInputOk)}
                 value={formData.secondaryNumber}
                 onChange={(e) => set("secondaryNumber", e.target.value)}
               />
@@ -406,8 +482,8 @@ export default function CreateUserPage() {
                   className={`${ic("adharNumber")} pl-10`}
                   value={formData.adharNumber}
                   onChange={(e) => {
-                    const raw   = e.target.value.replace(/\D/g, "").slice(0, 12);
-                    const fmt   = raw.replace(/(\d{4})(\d{4})?(\d{4})?/, (_, a, b, c) =>
+                    const raw = e.target.value.replace(/\D/g, "").slice(0, 12);
+                    const fmt = raw.replace(/(\d{4})(\d{4})?(\d{4})?/, (_, a, b, c) =>
                       [a, b, c].filter(Boolean).join(" ")
                     );
                     set("adharNumber", fmt);
@@ -423,28 +499,38 @@ export default function CreateUserPage() {
             <div>
               <Label>Gender *</Label>
               <select
-                className={`${inputBase} ${inputOk} appearance-none`}
+                className={clsx(
+                  dynamicInputBase,
+                  dynamicInputOk,
+                  "appearance-none",
+                  mode === "dark" && "bg-[#1c252e]"
+                )}
                 value={formData.gender}
                 onChange={(e) => set("gender", e.target.value)}
               >
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
+                <option value="Male" className={clsx(mode === "dark" && "bg-slate-800 text-white")}>Male</option>
+                <option value="Female" className={clsx(mode === "dark" && "bg-slate-800 text-white")}>Female</option>
+                <option value="Other" className={clsx(mode === "dark" && "bg-slate-800 text-white")}>Other</option>
               </select>
             </div>
 
             <div>
               <Label>Category *</Label>
               <select
-                className={`${inputBase} ${inputOk} appearance-none`}
+                className={clsx(
+                  dynamicInputBase,
+                  dynamicInputOk,
+                  "appearance-none",
+                  mode === "dark" && "bg-[#1c252e]"
+                )}
                 value={formData.category}
                 onChange={(e) => set("category", e.target.value)}
               >
-                <option value="General">General</option>
-                <option value="SC">SC</option>
-                <option value="ST">ST</option>
-                <option value="OBC">OBC</option>
-                <option value="EWS">EWS</option>
+                <option value="General" className={clsx(mode === "dark" && "bg-slate-800 text-white")}>General</option>
+                <option value="SC" className={clsx(mode === "dark" && "bg-slate-800 text-white")}>SC</option>
+                <option value="ST" className={clsx(mode === "dark" && "bg-slate-800 text-white")}>ST</option>
+                <option value="OBC" className={clsx(mode === "dark" && "bg-slate-800 text-white")}>OBC</option>
+                <option value="EWS" className={clsx(mode === "dark" && "bg-slate-800 text-white")}>EWS</option>
               </select>
             </div>
 
@@ -452,7 +538,7 @@ export default function CreateUserPage() {
               <Label>Course / Goal</Label>
               <input
                 type="text" placeholder="e.g. UPSC, CA, JEE"
-                className={`${inputBase} ${inputOk}`}
+                className={clsx(dynamicInputBase, dynamicInputOk)}
                 value={formData.course}
                 onChange={(e) => set("course", e.target.value)}
               />
@@ -462,7 +548,10 @@ export default function CreateUserPage() {
         </div>
 
         {/* ── 03 Residential Address ── */}
-        <div className="bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
+        <div className={clsx(
+          "bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100 transition-all duration-300",
+          mode === "dark" && "!bg-[#1c252e] !border-gray-800 !ring-gray-800 shadow-[0_0_2px_0_rgba(0,0,0,0.15),0_12px_24px_-4px_rgba(0,0,0,0.05)]"
+        )}>
           <SectionHeader
             step="03"
             title="Residential Address"
@@ -490,10 +579,10 @@ export default function CreateUserPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
               {(
                 [
-                  { key: "tehsil",   label: "Tehsil *",   ph: "e.g. Kopar" },
-                  { key: "district", label: "District *",  ph: "e.g. Pune" },
-                  { key: "state",    label: "State *",     ph: "e.g. Maharashtra" },
-                  { key: "pincode",  label: "Pincode *",   ph: "e.g. 411001" },
+                  { key: "tehsil", label: "Tehsil *", ph: "e.g. Kopar" },
+                  { key: "district", label: "District *", ph: "e.g. Pune" },
+                  { key: "state", label: "State *", ph: "e.g. Maharashtra" },
+                  { key: "pincode", label: "Pincode *", ph: "e.g. 411001" },
                 ] as const
               ).map(({ key, label, ph }) => (
                 <div key={key}>
@@ -516,7 +605,10 @@ export default function CreateUserPage() {
         </div>
 
         {/* ── 04 Media & Verification ── */}
-        <div className="bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100">
+        <div className={clsx(
+          "bg-white rounded-xl p-8 md:p-10 shadow-xs border border-gray-100 ring-1 ring-gray-100 transition-all duration-300",
+          mode === "dark" && "!bg-[#1c252e] !border-gray-800 !ring-gray-800 shadow-[0_0_2px_0_rgba(0,0,0,0.15),0_12px_24px_-4px_rgba(0,0,0,0.05)]"
+        )}>
           <SectionHeader
             step="04"
             title="Media & Verification"
@@ -580,7 +672,7 @@ export default function CreateUserPage() {
               <textarea
                 rows={3}
                 placeholder="Admin remarks, special instructions…"
-                className={`${inputBase} ${inputOk} resize-none`}
+                className={clsx(dynamicInputBase, dynamicInputOk, "resize-none")}
                 value={formData.notes}
                 onChange={(e) => set("notes", e.target.value)}
               />
@@ -595,15 +687,24 @@ export default function CreateUserPage() {
           <Button
             type="button"
             variant="outline"
+            size="md"
             onClick={() => router.push("/users")}
-            className="px-10 py-3 bg-white border border-gray-200 text-sm text-gray-500 font-medium rounded-xl hover:bg-gray-50"
+            className="font-medium"
+          // className={clsx(
+          //   "px-10 py-3 text-sm font-medium rounded-xl border transition-all",
+          //   mode === "dark"
+          //     ? "bg-slate-800 border-gray-700 text-slate-300 hover:bg-slate-700"
+          //     : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50"
+          // )}
           >
             Cancel
           </Button>
           <Button
             type="submit"
             variant="primary"
-            className="w-fit py-3 rounded-xl text-sm font-medium hover:bg-indigo-700 shadow-xl shadow-indigo-100 flex items-center justify-center gap-3 bg-indigo-600 outline-none border-none"
+            className="font-medium"
+            size="md"
+          // className="w-fit py-3 rounded-xl text-sm font-medium hover:bg-indigo-700 shadow-xl shadow-indigo-100 flex items-center justify-center gap-3 bg-indigo-600 outline-none border-none"
           >
             Create Member Profile
           </Button>

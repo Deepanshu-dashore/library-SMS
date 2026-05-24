@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { motion } from "framer-motion";
 import { Button } from "@/components/shared/Button";
 import { SimpleLoader } from "@/components/shared/SimpleLoader";
+import clsx from "clsx";
 
 interface SubscriptionDetails {
   subscription: {
@@ -36,7 +37,7 @@ export default function ViewSubscriptionPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
-  const { color } = useSelector((state: any) => state.theme);
+  const { color, mode } = useSelector((state: any) => state.theme);
   const themeColor = color || "#2563EB";
   const [data, setData] = useState<SubscriptionDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -138,32 +139,32 @@ export default function ViewSubscriptionPage() {
           <div className="lg:col-span-7 space-y-5">
 
             {/* Member Details */}
-            <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
-              <div className="px-6 py-4 flex items-center gap-3 border-b border-gray-100">
-                <h3 className="text-base font-bold text-gray-900">Member Details</h3>
+            <div className={clsx("rounded-xl overflow-hidden border", mode === "dark" ? "bg-[#1c252e] border-gray-800" : "bg-white border-gray-100")}>
+              <div className={clsx("px-6 py-4 flex items-center gap-3 border-b", mode === "dark" ? "border-gray-800" : "border-gray-100")}>
+                <h3 className={clsx("text-base font-bold", mode === "dark" ? "text-white" : "text-gray-900")}>Member Details</h3>
                 <StatusBadge status={statusKey} size="xs" />
               </div>
-              <div className="divide-y divide-gray-50">
+              <div className={clsx("divide-y", mode === "dark" ? "divide-gray-800" : "divide-gray-50")}>
                 {[
                   { label: "Full Name", value: subscription.userId.name },
                   { label: "Email", value: subscription.userId.email },
                   { label: "Phone", value: subscription.userId.number },
                 ].map(({ label, value }) => (
                   <div key={label} className="grid grid-cols-12 gap-2 px-6 py-3.5 items-center">
-                    <p className="col-span-4 text-sm text-gray-800 font-medium">{label}</p>
-                    <p className="col-span-8 text-sm capitalize font-medium text-gray-500">{value}</p>
+                    <p className={clsx("col-span-4 text-sm font-medium", mode === "dark" ? "text-gray-200" : "text-gray-800")}>{label}</p>
+                    <p className={clsx("col-span-8 text-sm capitalize font-medium", mode === "dark" ? "text-gray-400" : "text-gray-500")}>{value}</p>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Transaction History */}
-            <div className="bg-white border border-gray-100 rounded-xl  overflow-hidden">
-              <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100">
-                <h3 className="text-base font-barlow font-bold text-gray-900">Transaction History</h3>
+            <div className={clsx("rounded-xl overflow-hidden border", mode === "dark" ? "bg-[#1c252e] border-gray-800" : "bg-white border-gray-100")}>
+              <div className={clsx("px-6 py-4 flex items-center justify-between border-b", mode === "dark" ? "border-gray-800" : "border-gray-100")}>
+                <h3 className={clsx("text-base font-barlow font-bold", mode === "dark" ? "text-white" : "text-gray-900")}>Transaction History</h3>
                 <Link
                   href="/payments"
-                  className="inline-flex items-center gap-1 text-gray-600 text-xs font-semibold hover:underline"
+                  className={clsx("inline-flex items-center gap-1 text-xs font-semibold hover:underline", mode === "dark" ? "text-gray-400 hover:text-white" : "text-gray-600")}
                 >
                   View All
                   <Icon icon="mingcute:right-line" className="w-4 h-4" />
@@ -173,28 +174,28 @@ export default function ViewSubscriptionPage() {
               <div className="overflow-x-auto p-4">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-gray-100/80 border-b border-gray-100">
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Receipt Number</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Amount</th>
-                      <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Action</th>
+                    <tr className={clsx("border-b", mode === "dark" ? "bg-slate-900/60 border-gray-800" : "bg-gray-100/80 border-gray-100")}>
+                      <th className={clsx("px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Receipt Number</th>
+                      <th className={clsx("px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Date</th>
+                      <th className={clsx("px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Amount</th>
+                      <th className={clsx("px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <tbody className={clsx("divide-y", mode === "dark" ? "divide-gray-800" : "divide-gray-50")}>
                     {payment.length > 0 ? (
                       payment.map((pay, i) => (
-                        <tr key={i} className="hover:bg-gray-50/60 transition-colors">
-                          <td className="px-6 font-barlow py-4 font-bold text-gray-600 uppercase">{pay.receiptNumber}</td>
-                          <td className="px-6 font-barlow py-4 font-medium text-gray-600">
+                        <tr key={i} className={clsx("transition-colors", mode === "dark" ? "hover:bg-slate-900/40" : "hover:bg-gray-50/60")}>
+                          <td className={clsx("px-6 font-barlow py-4 font-bold uppercase", mode === "dark" ? "text-gray-300" : "text-gray-600")}>{pay.receiptNumber}</td>
+                          <td className={clsx("px-6 font-barlow py-4 font-medium", mode === "dark" ? "text-gray-300" : "text-gray-600")}>
                             {new Date(pay.createdAt).toLocaleDateString("en-GB", {
                               day: "numeric",
                               month: "short",
                               year: "numeric",
                             })}
                           </td>
-                          <td className="px-6 font-barlow py-4 font-medium text-gray-600">₹{pay.amount.toLocaleString()}</td>
+                          <td className={clsx("px-6 font-barlow py-4 font-medium", mode === "dark" ? "text-gray-300" : "text-gray-600")}>₹{pay.amount.toLocaleString()}</td>
                           <td className="px-6 py-4 text-right">
-                            <Link href={`/payments/${pay._id}`} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 border border-blue-100 rounded-lg bg-blue-50 hover:bg-blue-100 transition-all">
+                            <Link href={`/payments/${pay._id}`} className={clsx("inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all border", mode === "dark" ? "text-blue-400 border-blue-900/40 bg-blue-950/20 hover:bg-blue-950/40" : "text-blue-700 border-blue-100 bg-blue-50 hover:bg-blue-100")}>
                               <Icon icon="mdi:invoice-text" className="w-4 h-4" />
                               Receipt
                             </Link>
@@ -214,10 +215,10 @@ export default function ViewSubscriptionPage() {
             </div>
 
             {/* Subscription Progress */}
-            <div className="bg-white border border-gray-100 rounded-xl p-6">
-              <div className="pb-4 flex items-center justify-between border-b border-gray-100">
-                <h3 className="text-base font-barlow font-bold text-gray-900">Subscription Progress</h3>
-                <p className="text-xs font-barlow font-bold text-gray-700 tracking-tight whitespace-nowrap">
+            <div className={clsx("rounded-xl p-6 border", mode === "dark" ? "bg-[#1c252e] border-gray-800" : "bg-white border-gray-100")}>
+              <div className={clsx("pb-4 flex items-center justify-between border-b", mode === "dark" ? "border-gray-800" : "border-gray-100")}>
+                <h3 className={clsx("text-base font-barlow font-bold", mode === "dark" ? "text-white" : "text-gray-900")}>Subscription Progress</h3>
+                <p className={clsx("text-xs font-barlow font-bold tracking-tight whitespace-nowrap", mode === "dark" ? "text-gray-300" : "text-gray-700")}>
                   {daysRemaining} Days Remaining
                 </p>
               </div>
@@ -237,7 +238,7 @@ export default function ViewSubscriptionPage() {
                             transition={{ duration: 0.4, delay: i * 0.03, ease: "easeOut" }}
                             className="flex-1 h-[8px] rounded-[1px]"
                             style={{
-                              backgroundColor: filled ? themeColor : "#e2e8f0",
+                              backgroundColor: filled ? themeColor : (mode === "dark" ? "#2d3748" : "#e2e8f0"),
                               boxShadow: filled ? `0 0 4px ${themeColor}40` : "none",
                             }}
                           />
@@ -264,36 +265,36 @@ export default function ViewSubscriptionPage() {
           <div className="lg:col-span-5 space-y-5">
 
             {/* Seat & Duration */}
-            <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
-              <div className="px-6 py-4 flex items-center gap-3 border-b border-gray-100">
-                <h3 className="text-base font-bold text-gray-900">Subscription Info</h3>
+            <div className={clsx("rounded-xl overflow-hidden border", mode === "dark" ? "bg-[#1c252e] border-gray-800" : "bg-white border-gray-100")}>
+              <div className={clsx("px-6 py-4 flex items-center gap-3 border-b", mode === "dark" ? "border-gray-800" : "border-gray-100")}>
+                <h3 className={clsx("text-base font-bold", mode === "dark" ? "text-white" : "text-gray-900")}>Subscription Info</h3>
               </div>
               <div className="p-6 space-y-5">
                 {/* Seat */}
                 <div className="flex items-center gap-4">
-                  <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                  <div className={clsx("w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border", mode === "dark" ? "bg-blue-950/20 border-blue-900/40 text-blue-400" : "bg-blue-50 border-blue-100 text-blue-600")}>
                     <Icon icon="solar:chair-bold-duotone" width={24} height={24} />
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-gray-400">Seat Number</p>
-                    <p className="text-base font-bold font-barlow text-gray-900 leading-tight">{subscription.seatId.seatNumber}</p>
+                    <p className={clsx("text-base font-bold font-barlow leading-tight", mode === "dark" ? "text-white" : "text-gray-900")}>{subscription.seatId.seatNumber}</p>
                   </div>
                   <div className="ml-auto text-right">
                     <p className="text-xs font-semibold text-gray-400">Floor</p>
-                    <p className="text-sm font-bold capitalize text-blue-600">{subscription.seatId.floor || "1st Floor"}</p>
+                    <p className={clsx("text-sm font-bold capitalize", mode === "dark" ? "text-blue-400" : "text-blue-600")}>{subscription.seatId.floor || "1st Floor"}</p>
                   </div>
                 </div>
 
-                <div className="border-t border-dashed border-gray-100" />
+                <div className={clsx("border-t border-dashed", mode === "dark" ? "border-gray-800" : "border-gray-100")} />
 
                 {/* Duration */}
                 <div className="flex items-start gap-4">
-                  <div className="w-11 h-11 rounded-lg bg-gray-50 border border-gray-100 text-gray-500 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className={clsx("w-11 h-11 rounded-lg flex items-center justify-center shrink-0 mt-0.5 border", mode === "dark" ? "bg-slate-900 border-gray-800 text-gray-400" : "bg-gray-50 border-gray-100 text-gray-500")}>
                     <Icon icon="mdi:invoice-schedule" width={20} height={20} />
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-gray-400">Subscription Duration</p>
-                    <p className="text-[13px] font-bold text-gray-900 mt-0.5 font-barlow">
+                    <p className={clsx("text-[13px] font-bold mt-0.5 font-barlow", mode === "dark" ? "text-white" : "text-gray-900")}>
                       {startDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                       {" – "}
                       {endDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
@@ -303,12 +304,12 @@ export default function ViewSubscriptionPage() {
 
                 {/* Created On */}
                 <div className="flex items-start gap-4">
-                  <div className="w-11 h-11 rounded-lg bg-gray-50 border border-gray-100 text-gray-500 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className={clsx("w-11 h-11 rounded-lg flex items-center justify-center shrink-0 mt-0.5 border", mode === "dark" ? "bg-slate-900 border-gray-800 text-gray-400" : "bg-gray-50 border-gray-100 text-gray-500")}>
                     <Icon icon="solar:alarm-bold-duotone" width={20} height={20} />
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-gray-400">Subscription Date</p>
-                    <p className="text-[13px] font-barlow font-bold text-gray-900 mt-0.5">
+                    <p className={clsx("text-[13px] font-barlow font-bold mt-0.5", mode === "dark" ? "text-white" : "text-gray-900")}>
                       {new Date(subscription.createdAt).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "long",
@@ -321,14 +322,14 @@ export default function ViewSubscriptionPage() {
             </div>
 
             {/* Plan & Price */}
-            <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
-              <div className="px-6 py-4 flex items-center gap-3 border-b border-gray-100">
-                <h3 className="text-base font-bold text-gray-900">Standard Plan</h3>
+            <div className={clsx("rounded-xl overflow-hidden border", mode === "dark" ? "bg-[#1c252e] border-gray-800" : "bg-white border-gray-100")}>
+              <div className={clsx("px-6 py-4 flex items-center gap-3 border-b", mode === "dark" ? "border-gray-800" : "border-gray-100")}>
+                <h3 className={clsx("text-base font-bold", mode === "dark" ? "text-white" : "text-gray-900")}>Standard Plan</h3>
                   <StatusBadge status={statusKey} size="xs" />
               </div>
               <div className="p-6">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-barlow font-bold text-gray-900 tracking-tight leading-none">
+                  <span className={clsx("text-2xl font-barlow font-bold tracking-tight leading-none", mode === "dark" ? "text-white" : "text-gray-900")}>
                     ₹{subscription.seatId.price.toLocaleString()}
                   </span>
                   <span className="text-sm font-public-sans font-semibold text-gray-400 ml-1">/ per month</span>

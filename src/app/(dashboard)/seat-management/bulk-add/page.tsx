@@ -9,6 +9,8 @@ import {
   ChevronLeft
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import clsx from "clsx";
 
 interface BulkSeatRow {
   seatNumber: string;
@@ -19,6 +21,7 @@ interface BulkSeatRow {
 
 export default function BulkAddSeatsPage() {
   const router = useRouter();
+  const { mode } = useSelector((state: any) => state.theme);
   const [step, setStep] = useState<"config" | "preview">("config");
   const [submitting, setSubmitting] = useState(false);
   const [floors, setFloors] = useState<string[]>([]);
@@ -113,19 +116,30 @@ export default function BulkAddSeatsPage() {
 
       {step === "config" ? (
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="bg-white rounded-xl p-8 md:p-10 shadow-sm border border-gray-100 ring-1 ring-gray-100">
-            <div className="flex p-2 rounded-sm items-center gap-4 mb-16 bg-gray-100">
-              <div className="w-12 h-12 bg-gray-800 text-white rounded-lg flex items-center justify-center font-black text-lg">01</div>
+          <div className={clsx(
+            "rounded-xl p-8 md:p-10 border",
+            mode === "dark"
+              ? "bg-[#1c252e] border-gray-800 shadow-none ring-0"
+              : "bg-white border-gray-100 shadow-sm ring-1 ring-gray-100"
+          )}>
+            <div className={clsx(
+              "flex p-2 rounded-sm items-center gap-4 mb-16",
+              mode === "dark" ? "bg-slate-800/60" : "bg-gray-100"
+            )}>
+              <div className={clsx(
+                "w-12 h-12 rounded-lg flex items-center justify-center font-black text-lg",
+                mode === "dark" ? "bg-slate-700 text-slate-100" : "bg-gray-800 text-white"
+              )}>01</div>
               <div>
-                <h3 className="text-lg font-bold text-gray-800">Batch Configuration</h3>
-                <p className="text-xs text-gray-500 font-medium">Set your defaults — fine-tune each row individually on the next step.</p>
+                <h3 className={clsx("text-lg font-bold", mode === "dark" ? "text-slate-200" : "text-gray-800")}>Batch Configuration</h3>
+                <p className={clsx("text-xs font-medium", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Set your defaults — fine-tune each row individually on the next step.</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Seat Count */}
               <div className="space-y-2">
-                <label className="text-[12px] mb-1.5 font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                <label className={clsx("text-[12px] mb-1.5 font-bold uppercase tracking-wider flex items-center gap-2", mode === "dark" ? "text-gray-400" : "text-gray-500")}>
                   <Layers3 size={14} /> Total Seat Count
                 </label>
                 <input
@@ -133,13 +147,18 @@ export default function BulkAddSeatsPage() {
                   min={1} max={500}
                   value={config.count}
                   onChange={e => setConfig(c => ({ ...c, count: Number(e.target.value) }))}
-                  className="w-full text-sm px-5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 transition-all outline-none"
+                  className={clsx(
+                    "w-full text-sm px-5 py-2.5 rounded-lg outline-none transition-all border",
+                    mode === "dark"
+                      ? "bg-slate-900 border-gray-800 text-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                      : "bg-gray-50/50 border-gray-200 text-gray-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600"
+                  )}
                 />
               </div>
 
               {/* Numbering Pattern */}
               <div className="space-y-2">
-                <label className="text-[12px] mb-1.5 font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                <label className={clsx("text-[12px] mb-1.5 font-bold uppercase tracking-wider flex items-center gap-2", mode === "dark" ? "text-gray-400" : "text-gray-500")}>
                   <Settings2 size={14} /> Seat Numbering (Prefix + Start)
                 </label>
                 <div className="flex gap-3">
@@ -149,18 +168,28 @@ export default function BulkAddSeatsPage() {
                     placeholder="S"
                     value={config.prefix}
                     onChange={e => setConfig(c => ({ ...c, prefix: e.target.value.toUpperCase() }))}
-                    className="w-20 text-center text-sm px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 transition-all outline-none"
+                    className={clsx(
+                      "w-20 text-center text-sm px-4 py-2.5 rounded-lg outline-none transition-all border",
+                      mode === "dark"
+                        ? "bg-slate-900 border-gray-800 text-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                        : "bg-gray-50/50 border-gray-200 text-gray-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600"
+                    )}
                   />
                   <input
                     type="number"
                     min={1}
                     value={config.startFrom}
                     onChange={e => setConfig(c => ({ ...c, startFrom: Number(e.target.value) }))}
-                    className="flex-1 text-sm px-5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 transition-all outline-none"
+                    className={clsx(
+                      "flex-1 text-sm px-5 py-2.5 rounded-lg outline-none transition-all border",
+                      mode === "dark"
+                        ? "bg-slate-900 border-gray-800 text-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                        : "bg-gray-50/50 border-gray-200 text-gray-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600"
+                    )}
                   />
                 </div>
-                <p className="text-xs text-gray-400 font-bold pt-1">
-                  Preview: <span className="text-gray-600">
+                <p className={clsx("text-xs font-bold pt-1", mode === "dark" ? "text-slate-400" : "text-gray-400")}>
+                  Preview: <span className={clsx(mode === "dark" ? "text-slate-300" : "text-gray-600")}>
                     {config.prefix}{config.startFrom}, {config.prefix}{config.startFrom + 1} … {config.prefix}{config.startFrom + config.count - 1}
                   </span>
                 </p>
@@ -168,7 +197,7 @@ export default function BulkAddSeatsPage() {
 
               {/* Default Price */}
               <div className="space-y-2">
-                <label className="text-[12px] mb-1.5 font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                <label className={clsx("text-[12px] mb-1.5 font-bold uppercase tracking-wider flex items-center gap-2", mode === "dark" ? "text-gray-400" : "text-gray-500")}>
                   <IndianRupee size={14} /> Default Monthly Price (₹)
                 </label>
                 <input
@@ -176,13 +205,18 @@ export default function BulkAddSeatsPage() {
                   min={0}
                   value={config.defaultPrice}
                   onChange={e => setConfig(c => ({ ...c, defaultPrice: Number(e.target.value) }))}
-                  className="w-full text-sm px-5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 transition-all outline-none"
+                  className={clsx(
+                    "w-full text-sm px-5 py-2.5 rounded-lg outline-none transition-all border",
+                    mode === "dark"
+                      ? "bg-slate-900 border-gray-800 text-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                      : "bg-gray-50/50 border-gray-200 text-gray-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600"
+                  )}
                 />
               </div>
 
               {/* Default Floor */}
               <div className="space-y-2">
-                <label className="text-[12px] mb-1.5 font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">Default Floor</label>
+                <label className={clsx("text-[12px] mb-1.5 font-bold uppercase tracking-wider flex items-center gap-2", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Default Floor</label>
                 {floors.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {floors.map(fl => (
@@ -190,11 +224,15 @@ export default function BulkAddSeatsPage() {
                         key={fl}
                         type="button"
                         onClick={() => setConfig(c => ({ ...c, defaultFloor: fl }))}
-                        className={`px-5 capitalize py-2.5 rounded-lg text-sm font-bold transition-all ${
+                        className={clsx(
+                          "px-5 capitalize py-2.5 rounded-lg text-sm font-bold transition-all border",
                           config.defaultFloor === fl
-                            ? "bg-indigo-600 text-white shadow-md border-indigo-600"
-                            : "bg-gray-50 cursor-pointer border border-gray-200 text-gray-500 hover:border-gray-300"
-                        }`}
+                            ? "bg-indigo-600 text-white border-indigo-600 shadow-md"
+                            : (mode === "dark"
+                              ? "bg-slate-900 text-gray-400 border-gray-800 hover:border-gray-700 cursor-pointer"
+                              : "bg-gray-50 cursor-pointer border border-gray-200 text-gray-500 hover:border-gray-300"
+                            )
+                        )}
                       >
                         {fl}
                       </button>
@@ -207,7 +245,12 @@ export default function BulkAddSeatsPage() {
                       placeholder="e.g. Ground, 1st, 2nd"
                       value={config.defaultFloor}
                       onChange={e => setConfig(c => ({ ...c, defaultFloor: e.target.value }))}
-                      className="w-full text-sm px-5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 transition-all outline-none"
+                      className={clsx(
+                        "w-full text-sm px-5 py-2.5 rounded-lg outline-none transition-all border",
+                        mode === "dark"
+                          ? "bg-slate-900 border-gray-800 text-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                          : "bg-gray-50/50 border-gray-200 text-gray-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600"
+                      )}
                     />
                     <p className="text-xs text-amber-600 font-bold">
                       ⚠️ No floors configured. Add them in Settings → Edit Profile.
@@ -218,10 +261,16 @@ export default function BulkAddSeatsPage() {
 
               {/* Default Type */}
               <div className="space-y-2 md:col-span-2">
-                <label className="text-[12px] mb-1.5 font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">Default Seat Category</label>
-                <div className="relative flex p-1 bg-gray-100 rounded-lg w-full border border-gray-200/60 sm:max-w-md">
+                <label className={clsx("text-[12px] mb-1.5 font-bold uppercase tracking-wider flex items-center gap-2", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Default Seat Category</label>
+                <div className={clsx(
+                  "relative flex p-1 rounded-lg w-full border sm:max-w-md",
+                  mode === "dark" ? "bg-slate-900 border-gray-800" : "bg-gray-100 border-gray-200/60"
+                )}>
                   <div
-                    className="absolute top-1 bottom-1 left-1 bg-white rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.1)] transition-transform duration-300 ease-out"
+                    className={clsx(
+                      "absolute top-1 bottom-1 left-1 rounded-[6px] transition-transform duration-300 ease-out",
+                      mode === "dark" ? "bg-slate-800 shadow-none" : "bg-white shadow-[0_1px_3px_rgba(0,0,0,0.1)]"
+                    )}
                     style={{
                       width: 'calc(50% - 4px)',
                       transform: config.defaultType === 'normal' ? 'translateX(0)' : 'translateX(100%)'
@@ -232,9 +281,12 @@ export default function BulkAddSeatsPage() {
                       key={type}
                       type="button"
                       onClick={() => setConfig(c => ({ ...c, defaultType: type }))}
-                      className={`relative flex-1 py-2.5 text-sm font-bold rounded-md transition-colors z-10 ${
-                        config.defaultType === type ? "bg-indigo-600 text-white" : "bg-gray-100 cursor-pointer hover:bg-gray-200"
-                      }`}
+                      className={clsx(
+                        "relative flex-1 py-2.5 text-sm font-bold rounded-md transition-colors z-10",
+                        config.defaultType === type
+                          ? "text-white"
+                          : (mode === "dark" ? "bg-transparent text-gray-400 hover:text-white cursor-pointer" : "bg-transparent text-gray-500 hover:text-gray-700 cursor-pointer")
+                      )}
                     >
                       {type === "ac" ? "AC Seat" : "Normal Seat"}
                     </button>
@@ -243,13 +295,16 @@ export default function BulkAddSeatsPage() {
               </div>
             </div>
 
-            <div className="flex justify-end pt-4 mt-6 border-t border-gray-100">
+            <div className={clsx("flex justify-end pt-4 mt-6 border-t", mode === "dark" ? "border-gray-800" : "border-gray-100")}>
               <Button
                 onClick={generateRows}
                 disabled={!config.count || !config.prefix || !config.defaultFloor}
-                className="px-8 py-3 rounded-lg text-sm font-bold bg-gray-800 hover:bg-indigo-700 text-white shadow-md flex items-center gap-2"
-                color="#1e2939"
-                hoverColor="#1e2960"
+                className={clsx(
+                  "px-8 py-3 rounded-lg text-sm font-bold text-white shadow-md flex items-center gap-2",
+                  mode === "dark" ? "bg-indigo-600 hover:bg-indigo-700 shadow-none border-indigo-600" : "bg-gray-800 hover:bg-indigo-700"
+                )}
+                color={mode === "dark" ? undefined : "#1e2939"}
+                hoverColor={mode === "dark" ? undefined : "#1e2960"}
               >
                 Generate Preview Table <ArrowRight size={18} />
               </Button>
@@ -258,18 +313,37 @@ export default function BulkAddSeatsPage() {
         </div>
       ) : (
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden ring-1 ring-gray-100">
-            <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100 bg-gray-50/50">
-              <div className="flex bg-gray-100 p-2 rounded-sm  items-center gap-4">
-                <div className="w-12 h-12 bg-blue-600 text-white rounded-lg flex items-center justify-center font-black text-lg">02</div>
+          <div className={clsx(
+            "rounded-xl shadow-sm border overflow-hidden",
+            mode === "dark"
+              ? "bg-[#1c252e] border-gray-800 shadow-none ring-0"
+              : "bg-white border-gray-100 shadow-sm ring-1 ring-gray-100"
+          )}>
+            <div className={clsx(
+              "flex items-center justify-between px-8 py-6 border-b",
+              mode === "dark" ? "border-gray-800 bg-slate-800/20" : "border-gray-100 bg-gray-50/50"
+            )}>
+              <div className={clsx(
+                "flex p-2 rounded-sm items-center gap-4",
+                mode === "dark" ? "bg-slate-800/40" : "bg-gray-100"
+              )}>
+                <div className={clsx(
+                  "w-12 h-12 rounded-lg flex items-center justify-center font-black text-lg",
+                  mode === "dark" ? "bg-slate-700 text-slate-100" : "bg-blue-600 text-white"
+                )}>02</div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-800">Review & Fine-tune</h3>
-                  <p className="text-xs text-gray-500 font-medium">{rows.length} seats ready — edit any row, then submit</p>
+                  <h3 className={clsx("text-lg font-bold", mode === "dark" ? "text-slate-200" : "text-gray-800")}>Review & Fine-tune</h3>
+                  <p className={clsx("text-xs font-medium", mode === "dark" ? "text-gray-400" : "text-gray-500")}>{rows.length} seats ready — edit any row, then submit</p>
                 </div>
               </div>
               <button
                 onClick={() => setStep("config")}
-                className="text-sm flex items-center gap-2 cursor-pointer font-semibold text-gray-400 hover:text-gray-700 transition-colors px-4 py-2 bg-white border border-gray-200 rounded-xl"
+                className={clsx(
+                  "text-sm flex items-center gap-2 cursor-pointer font-semibold transition-colors px-4 py-2 border rounded-xl",
+                  mode === "dark"
+                    ? "bg-transparent border-gray-800 text-gray-400 hover:text-gray-300 hover:bg-slate-800"
+                    : "bg-white border-gray-200 text-gray-400 hover:text-gray-700"
+                )}
               >
                 <ChevronLeft size={18} /> Prev Step
               </button>
@@ -278,75 +352,112 @@ export default function BulkAddSeatsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200">
-                    <th className="px-6 py-4 text-left text-[12px] font-bold uppercase tracking-widest text-gray-400 w-12 border-x border-gray-100">#</th>
-                    <th className="px-6 py-4 text-left text-[12px] font-bold uppercase tracking-widest text-gray-400 border-r border-gray-100">Seat No.</th>
-                    <th className="px-6 py-4 text-left text-[12px] font-bold uppercase tracking-widest text-gray-400 border-r border-gray-100">Price (₹)</th>
-                    <th className="px-6 py-4 text-left text-[12px] font-bold uppercase tracking-widest text-gray-400 border-r border-gray-100">Category</th>
-                    <th className="px-6 py-4 text-left text-[12px] font-bold uppercase tracking-widest text-gray-400 border-r border-gray-100">Floor</th>
-                    <th className="px-6 py-4 w-12 border-r border-gray-100"></th>
+                  <tr className={clsx(
+                    "border-b",
+                    mode === "dark" ? "bg-slate-800/40 border-gray-800" : "bg-gray-50 border-gray-200"
+                  )}>
+                    <th className={clsx("px-6 py-4 text-left text-[12px] font-bold uppercase tracking-widest w-12 border-x", mode === "dark" ? "text-slate-400 border-gray-800" : "text-gray-400 border-gray-100")}>#</th>
+                    <th className={clsx("px-6 py-4 text-left text-[12px] font-bold uppercase tracking-widest border-r", mode === "dark" ? "text-slate-400 border-gray-800" : "text-gray-400 border-gray-100")}>Seat No.</th>
+                    <th className={clsx("px-6 py-4 text-left text-[12px] font-bold uppercase tracking-widest border-r", mode === "dark" ? "text-slate-400 border-gray-800" : "text-gray-400 border-gray-100")}>Price (₹)</th>
+                    <th className={clsx("px-6 py-4 text-left text-[12px] font-bold uppercase tracking-widest border-r", mode === "dark" ? "text-slate-400 border-gray-800" : "text-gray-400 border-gray-100")}>Category</th>
+                    <th className={clsx("px-6 py-4 text-left text-[12px] font-bold uppercase tracking-widest border-r", mode === "dark" ? "text-slate-400 border-gray-800" : "text-gray-400 border-gray-100")}>Floor</th>
+                    <th className={clsx("px-6 py-4 w-12 border-r", mode === "dark" ? "border-gray-800" : "border-gray-100")}></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className={clsx("divide-y", mode === "dark" ? "divide-gray-800" : "divide-gray-200")}>
                   {rows.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50/40 transition-colors group border-b border-dashed border-gray-200/80">
-                      <td className="px-6 py-3 text-gray-300 font-black text-xs border-x border-gray-100">{idx + 1}</td>
+                    <tr key={idx} className={clsx(
+                      "transition-colors group border-b border-dashed",
+                      mode === "dark"
+                        ? "hover:bg-slate-800/20 border-gray-800"
+                        : "hover:bg-gray-50/40 border-gray-200/80"
+                    )}>
+                      <td className={clsx("px-6 py-3 font-black text-xs border-x", mode === "dark" ? "text-slate-500 border-gray-800" : "text-gray-300 border-gray-100")}>{idx + 1}</td>
 
-                      <td className="px-6 py-3 border-r border-gray-100">
+                      <td className={clsx("px-6 py-3 border-r", mode === "dark" ? "border-gray-800" : "border-gray-100")}>
                         <input
                           value={row.seatNumber}
                           onChange={e => updateRow(idx, "seatNumber", e.target.value)}
-                          className="w-24 bg-gray-50/50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-600 transition-all"
+                          className={clsx(
+                            "w-24 border rounded-lg px-3 py-2 text-sm font-semibold outline-none transition-all",
+                            mode === "dark"
+                              ? "bg-slate-900 border-gray-800 text-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                              : "bg-gray-50/50 border-gray-200 text-gray-900 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-600"
+                          )}
                         />
                       </td>
 
-                      <td className="px-6 py-3 border-r border-gray-100">
+                      <td className={clsx("px-6 py-3 border-r", mode === "dark" ? "border-gray-800" : "border-gray-100")}>
                         <input
                           type="number"
                           min={0}
                           value={row.price}
                           onChange={e => updateRow(idx, "price", Number(e.target.value))}
-                          className="w-28 bg-gray-50/50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-600 transition-all"
+                          className={clsx(
+                            "w-28 border rounded-lg px-3 py-2 text-sm font-semibold outline-none transition-all",
+                            mode === "dark"
+                              ? "bg-slate-900 border-gray-800 text-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                              : "bg-gray-50/50 border-gray-200 text-gray-900 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-600"
+                          )}
                         />
                       </td>
 
-                      <td className="px-6 py-3 border-r border-gray-100">
+                      <td className={clsx("px-6 py-3 border-r", mode === "dark" ? "border-gray-800" : "border-gray-100")}>
                         <select
                           value={row.type}
                           onChange={e => updateRow(idx, "type", e.target.value as "normal" | "ac")}
-                          className={`bg-gray-50/50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-600 transition-all appearance-none cursor-pointer ${
-                            row.type === "ac" ? "text-indigo-600" : "text-gray-700"
-                          }`}
+                          className={clsx(
+                            "border rounded-lg px-3 py-2 text-sm font-semibold outline-none transition-all appearance-none cursor-pointer",
+                            row.type === "ac" ? "text-indigo-600" : (mode === "dark" ? "text-gray-300" : "text-gray-700"),
+                            mode === "dark"
+                              ? "bg-slate-900 border-gray-800 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                              : "bg-gray-50/50 border-gray-200 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-600"
+                          )}
                         >
-                          <option value="normal">Normal</option>
-                          <option value="ac">AC</option>
+                          <option value="normal" className={clsx(mode === "dark" && "bg-[#1c252e] text-white")}>Normal</option>
+                          <option value="ac" className={clsx(mode === "dark" && "bg-[#1c252e] text-white")}>AC</option>
                         </select>
                       </td>
 
-                      <td className="px-6 py-3 border-r border-gray-100">
+                      <td className={clsx("px-6 py-3 border-r", mode === "dark" ? "border-gray-800" : "border-gray-100")}>
                         {floors.length > 0 ? (
                           <select
                             value={row.floor}
                             onChange={e => updateRow(idx, "floor", e.target.value)}
-                            className="bg-gray-50/50 capitalize border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold text-gray-700 outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-600 transition-all cursor-pointer appearance-none"
+                            className={clsx(
+                              "capitalize border rounded-lg px-3 py-2 text-sm font-semibold outline-none transition-all cursor-pointer appearance-none",
+                              mode === "dark"
+                                ? "bg-slate-900 border-gray-800 text-gray-300 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                                : "bg-gray-50/50 border-gray-200 text-gray-700 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-600"
+                            )}
                           >
                             {floors.map(fl => (
-                              <option key={fl} value={fl}>{fl}</option>
+                              <option key={fl} value={fl} className={clsx(mode === "dark" && "bg-[#1c252e] text-white")}>{fl}</option>
                             ))}
                           </select>
                         ) : (
                           <input
                             value={row.floor}
                             onChange={e => updateRow(idx, "floor", e.target.value)}
-                            className="w-28 bg-gray-50/50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold text-gray-700 outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-600 transition-all"
+                            className={clsx(
+                              "w-28 border rounded-lg px-3 py-2 text-sm font-semibold outline-none transition-all",
+                              mode === "dark"
+                                ? "bg-slate-900 border-gray-800 text-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                                : "bg-gray-50/50 border-gray-200 text-gray-700 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-600"
+                            )}
                           />
                         )}
                       </td>
 
-                      <td className="px-6 py-3 border-r border-gray-100">
+                      <td className={clsx("px-6 py-3 border-r", mode === "dark" ? "border-gray-800" : "border-gray-100")}>
                         <button
                           onClick={() => removeRow(idx)}
-                          className="p-1.5 text-gray-200 hover:text-red-400 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                          className={clsx(
+                            "p-1.5 rounded-lg transition-all opacity-0 group-hover:opacity-100",
+                            mode === "dark"
+                              ? "text-slate-500 hover:text-red-400 hover:bg-red-950/20"
+                              : "text-gray-200 hover:text-red-400 hover:bg-red-50"
+                          )}
                         >
                           <X size={14} strokeWidth={3} />
                         </button>
@@ -363,7 +474,12 @@ export default function BulkAddSeatsPage() {
               type="button"
               variant="outline"
               onClick={() => router.push("/seat-management")}
-              className="px-8 py-3 rounded-lg text-sm font-bold border-gray-300/70 bg-white hover:bg-gray-50 text-gray-600"
+              className={clsx(
+                "px-8 py-3 rounded-lg text-sm font-bold border",
+                mode === "dark"
+                  ? "border-gray-800 text-gray-300 hover:bg-slate-800 bg-transparent hover:text-white"
+                  : "border-gray-300/70 bg-white hover:bg-gray-50 text-gray-600"
+              )}
             >
               Cancel
             </Button>
@@ -371,9 +487,14 @@ export default function BulkAddSeatsPage() {
               onClick={handleSubmit}
               disabled={submitting || rows.length === 0}
               isLoading={submitting}
-              className="px-8 py-3 rounded-lg text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-100"
-              color="#2563eb"
-              hoverColor="#1d4ed8"
+              className={clsx(
+                "px-8 py-3 rounded-lg text-sm font-bold text-white shadow-md",
+                mode === "dark"
+                  ? "bg-indigo-600 hover:bg-indigo-700 shadow-none border-indigo-600"
+                  : "bg-blue-600 hover:bg-blue-700 shadow-blue-100"
+              )}
+              color={mode === "dark" ? undefined : "#2563eb"}
+              hoverColor={mode === "dark" ? undefined : "#1d4ed8"}
               icon="mingcute:save-fill"
             >
               {submitting ? "Registering seats..." : `Register ${rows.length} Seats`}

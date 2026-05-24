@@ -23,7 +23,7 @@ export default function Header() {
     toast.loading("Signing out…", { duration: 1500 });
     void clientLogout(dispatch);
   };
-  
+
   const isTopNav = activeNavStyle === "nav-top";
 
   const MenuItem = ({ icon, label, href, onClick, className = "", rightElement }: any) => (
@@ -92,9 +92,9 @@ export default function Header() {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className={`relative z-10 w-full flex flex-col border-b backdrop-blur-md bg-opacity-80 transition-all duration-300`}
-      style={{ 
-        backgroundColor: "var(--bg)", 
+      className={`relative z-40 w-full flex flex-col border-b backdrop-blur-md bg-opacity-80 transition-all duration-300`}
+      style={{
+        backgroundColor: "var(--bg)",
         borderColor: "var(--border)",
         color: "var(--text)"
       }}
@@ -120,7 +120,7 @@ export default function Header() {
         {isTopNav && (
           <nav className="hidden xl:flex items-center gap-1">
             {MENU_ITEMS.map((item: any, index: number) => (
-              <Link 
+              <Link
                 key={index}
                 href={item.path || "#"}
                 className={`px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-200 flex items-center gap-2`}
@@ -155,31 +155,31 @@ export default function Header() {
               <Icon icon="lucide:bell" className="w-5 h-5 text-[var(--gray-500)]" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-[var(--bg)]" />
             </button> */}
-            
+
             <ModeToggle />
-            
+
             <div className="h-6 w-px bg-[var(--border)] mx-1" />
-            
+
             {/* <SettingsDrawer /> */}
 
             <div className="relative">
-              <button 
+              <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-3 px-4 py-2 cursor-pointer rounded-xl border border-[var(--border)] bg-[var(--bg)] hover:border-[var(--gray-200)] transition-all duration-200 group active:scale-95 shadow-xs"
               >
                 <div className="w-6 h-6 rounded-full overflow-hidden shadow-sm">
-                  <img 
-                    src={currentUser?.logo || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.name || "User"}`} 
-                    alt="User" 
+                  <img
+                    src={currentUser?.logo || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.name || "User"}`}
+                    alt="User"
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="hidden sm:flex items-center gap-2">
                   <span className="text-sm font-semibold text-[var(--text)]">{currentUser?.name || "User"}</span>
                 </div>
-                <Icon 
-                  icon="lucide:chevron-down" 
-                  className={`w-4 h-4 text-[var(--gray-500)] transition-transform duration-300 ${showUserMenu ? "rotate-180" : ""}`} 
+                <Icon
+                  icon="lucide:chevron-down"
+                  className={`w-4 h-4 text-[var(--gray-500)] transition-transform duration-300 ${showUserMenu ? "rotate-180" : ""}`}
                 />
               </button>
 
@@ -187,25 +187,25 @@ export default function Header() {
                 {showUserMenu && (
                   <>
                     <div className="fixed inset-0 z-0" onClick={() => setShowUserMenu(false)} />
-                    
+
                     <motion.div
-                    onMouseDown={() => setShowUserMenu(false)}
-                    onMouseLeave={()=>setShowUserMenu(false)}
+                      onMouseDown={() => setShowUserMenu(false)}
+                      onMouseLeave={() => setShowUserMenu(false)}
                       initial={{ opacity: 0, y: 10, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.98 }}
                       transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-                      className="absolute right-0 mt-3 w-64 rounded-xl shadow-2xl border border-[var(--border)] overflow-hidden z-100"
-                      style={{ 
+                      className="absolute right-0 mt-3 w-64 rounded-xl shadow-2xl border border-[var(--border)] overflow-hidden z-50"
+                      style={{
                         backgroundColor: mode === "light" ? "#ffffff" : "#1C1C1E",
                       }}
                     >
                       {/* Dropdown Header */}
                       <div className="px-5 py-2.5 flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-                          <img 
-                            src={currentUser?.logo || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.name || "User"}`} 
-                            alt="Avatar" 
+                          <img
+                            src={currentUser?.logo || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.name || "User"}`}
+                            alt="Avatar"
                             className="w-full h-full object-cover"
                           />
                         </div>
@@ -220,19 +220,19 @@ export default function Header() {
                       <div className="h-px bg-[var(--border)]" />
 
                       <div className="p-0">
-                        <MenuItem 
-                          icon="lucide:settings-2" 
-                          label="Profile Settings" 
+                        <MenuItem
+                          icon="lucide:settings-2"
+                          label="Profile Settings"
                           href="/settings"
                           onClick={() => setShowUserMenu(false)}
                         />
-                        <MenuItem 
-                          icon="lucide:help-circle" 
-                          label="Help Center" 
+                        <MenuItem
+                          icon="lucide:help-circle"
+                          label="Help Center"
                           href="/help-center"
                           onClick={() => setShowUserMenu(false)}
                         />
-                        
+
                         {/* <button
                           onClick={() => dispatch(setMode(mode === "light" ? "dark" : "light"))}
                           className="flex items-center justify-between w-full px-5 py-3.5 transition-all hover:bg-gray-500/5 group"
@@ -247,7 +247,7 @@ export default function Header() {
                             </span>
                           </div>
                         </button> */}
-                        
+
                         <div className="h-px bg-[var(--border)] my-2" />
 
                         <button

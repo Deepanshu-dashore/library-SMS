@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/shared/Button";
 import { useSelector } from "react-redux";
 import { SimpleLoader } from "@/components/shared/SimpleLoader";
+import clsx from "clsx";
 
 interface PaymentEntry {
   _id?: string;
@@ -38,7 +39,7 @@ export default function EditSubscriptionPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
-  const { color } = useSelector((state: any) => state.theme);
+  const { color, mode } = useSelector((state: any) => state.theme);
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -162,7 +163,7 @@ export default function EditSubscriptionPage() {
   const estimatedAmount = Math.round((subscription.seatId.price / 30) * durationDays);
 
   return (
-    <div className="bg-gray-50/50 min-h-screen pb-20 font-public-sans">
+    <div className={clsx(mode === "dark" ? "bg-transparent" : "bg-gray-50/50", "min-h-screen pb-20 font-public-sans")}>
       <div className="max-w-6xl mx-auto">
         <PageHeader
           title="Edit Subscription"
@@ -178,41 +179,41 @@ export default function EditSubscriptionPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             {/* Info Card */}
-            <div className="bg-white rounded-xl p-8 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.12)] border border-gray-100/80 flex items-start gap-6">
-              <div className="w-16 h-16 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+            <div className={clsx("rounded-xl p-8 border flex items-start gap-6", mode === "dark" ? "bg-[#1c252e] border-gray-800 shadow-none" : "bg-white border-gray-100/80 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.12)]")}>
+              <div className={clsx("w-16 h-16 rounded-xl flex items-center justify-center shrink-0", mode === "dark" ? "bg-indigo-950/40 text-indigo-400" : "bg-indigo-50 text-indigo-600")}>
                 <Icon icon="solar:armchair-bold-duotone" width={32} height={32} />
               </div>
               <div className="space-y-1 w-full">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-barlow font-bold text-gray-900">Seat {subscription.seatId.seatNumber}</h2>
-                  <span className="text-[11px] font-public-sans font-bold text-gray-600 uppercase tracking-widest px-2 py-1 bg-gray-100 rounded-md">
+                  <h2 className={clsx("text-xl font-barlow font-bold", mode === "dark" ? "text-white" : "text-gray-900")}>Seat {subscription.seatId.seatNumber}</h2>
+                  <span className={clsx("text-[11px] font-public-sans font-bold uppercase tracking-widest px-2 py-1 rounded-md", mode === "dark" ? "bg-slate-800 text-gray-400" : "bg-gray-100 text-gray-600")}>
                     {subscription.status}
                   </span>
                 </div>
                 <div className="flex items-center justify-between w-full">
-                  <p className="text-[13px] font-public-sans font-bold text-gray-500 flex items-center gap-2">
+                  <p className={clsx("text-[13px] font-public-sans font-bold flex items-center gap-2", mode === "dark" ? "text-gray-300" : "text-gray-500")}>
                     <Icon icon="solar:user-bold-duotone" width={16} height={16} className="text-indigo-400" />
                     {subscription.userId.name}
                   </p>
                   <p className="text-[11px] font-public-sans font-bold text-gray-400 uppercase tracking-widest">
-                    Floor: <span className="text-gray-600">{subscription.seatId.floor || "1st Floor"}</span>
+                    Floor: <span className={clsx(mode === "dark" ? "text-gray-300" : "text-gray-600")}>{subscription.seatId.floor || "1st Floor"}</span>
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Edit Form */}
-            <div className="bg-white rounded-xl p-8 md:p-10 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.12)] border border-gray-100/80">
+            <div className={clsx("rounded-xl p-8 md:p-10 border", mode === "dark" ? "bg-[#1c252e] border-gray-800 shadow-none" : "bg-white border-gray-100/80 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.12)]")}>
               <form onSubmit={handleSubmit} className="space-y-8">
                 
                 {/* Form Header */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pb-6 border-b border-gray-100">
-                  <div className="w-12 h-12 rounded-xl border border-gray-100 bg-indigo-50/50 flex items-center justify-center text-indigo-600 shrink-0">
+                <div className={clsx("flex flex-col sm:flex-row items-start sm:items-center gap-4 pb-6 border-b", mode === "dark" ? "border-gray-800" : "border-gray-100")}>
+                  <div className={clsx("w-12 h-12 rounded-xl border flex items-center justify-center shrink-0", mode === "dark" ? "bg-indigo-950/30 border-indigo-900/50 text-indigo-400" : "bg-indigo-50/50 border-gray-100 text-indigo-600")}>
                     <Icon icon="solar:refresh-circle-bold-duotone" width={24} height={24} />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold text-gray-900 leading-tight">
+                      <h3 className={clsx("text-lg font-semibold leading-tight", mode === "dark" ? "text-white" : "text-gray-900")}>
                         {isNewPayment ? "Add New Payment" : "Update Last Transaction"}
                       </h3>
                       <button
@@ -223,19 +224,19 @@ export default function EditSubscriptionPage() {
                         {isNewPayment ? "Edit Last instead?" : "Add New Payment?"}
                       </button>
                     </div>
-                    <p className="text-sm font-public-sans text-gray-500">Modify duration and payment details</p>
+                    <p className={clsx("text-sm font-public-sans", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Modify duration and payment details</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Receipt Number */}
                   <div className="space-y-2">
-                    <label className="block text-[15px] font-public-sans font-bold text-gray-900">Receipt Number</label>
+                    <label className={clsx("block text-[15px] font-public-sans font-bold", mode === "dark" ? "text-gray-200" : "text-gray-900")}>Receipt Number</label>
                     <div className="relative">
                       <input
                         type="text"
                         value={receiptNumber}
-                        className="w-full px-4 py-4 bg-gray-100 border border-gray-200 rounded-xl text-[15px] font-public-sans text-gray-400 outline-none cursor-not-allowed font-mono"
+                        className={clsx("w-full px-4 py-4 rounded-xl text-[15px] font-public-sans outline-none cursor-not-allowed font-mono border", mode === "dark" ? "bg-slate-900 border-gray-800 text-slate-500" : "bg-gray-100 border-gray-200 text-gray-400")}
                         placeholder="RCPT-XXXX"
                         disabled
                       />
@@ -244,15 +245,15 @@ export default function EditSubscriptionPage() {
 
                   {/* Duration */}
                   <div className="space-y-2">
-                    <label className="block text-[15px] font-public-sans font-bold text-gray-900">Duration (Days)</label>
-                    <div className="flex items-stretch rounded-xl border border-gray-200 bg-gray-100 overflow-hidden cursor-not-allowed">
+                    <label className={clsx("block text-[15px] font-public-sans font-bold", mode === "dark" ? "text-gray-200" : "text-gray-900")}>Duration (Days)</label>
+                    <div className={clsx("flex items-stretch rounded-xl border overflow-hidden cursor-not-allowed", mode === "dark" ? "border-gray-800 bg-slate-900" : "border-gray-200 bg-gray-100")}>
                       <input
                         type="number"
                         value={durationDays}
-                        className="flex-1 w-full px-4 py-4 bg-transparent outline-none text-[15px] font-public-sans text-gray-400 font-mono"
+                        className={clsx("flex-1 w-full px-4 py-4 bg-transparent outline-none text-[15px] font-public-sans font-mono", mode === "dark" ? "text-slate-500" : "text-gray-400")}
                         disabled
                       />
-                      <div className="bg-gray-50/80 border-l border-gray-200 px-4 flex items-center justify-center text-[13px] font-public-sans font-bold text-gray-400 uppercase tracking-widest shrink-0">
+                      <div className={clsx("border-l px-4 flex items-center justify-center text-[13px] font-public-sans font-bold uppercase tracking-widest shrink-0", mode === "dark" ? "bg-slate-950/40 border-gray-800 text-slate-500" : "bg-gray-50/80 border-gray-200 text-gray-400")}>
                         Days
                       </div>
                     </div>
@@ -263,12 +264,12 @@ export default function EditSubscriptionPage() {
                 <div className="space-y-4 pt-2">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <label className="block text-[15px] font-public-sans font-bold text-gray-900">Payment Breakdown</label>
-                      <p className="text-[13px] font-public-sans text-gray-500 mt-0.5">Manage split payments for this receipt.</p>
+                      <label className={clsx("block text-[15px] font-public-sans font-bold", mode === "dark" ? "text-gray-200" : "text-gray-900")}>Payment Breakdown</label>
+                      <p className={clsx("text-[13px] font-public-sans mt-0.5", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Manage split payments for this receipt.</p>
                     </div>
                   </div>
 
-                  <div className="space-y-3 bg-gray-50/50 p-4 rounded-xl border border-gray-200/60">
+                  <div className={clsx("space-y-3 p-4 rounded-xl border", mode === "dark" ? "bg-slate-900/40 border-gray-800" : "bg-gray-50/50 border-gray-200/60")}>
                     {splitPayments.map((payment, index) => (
                       <div key={index} className="flex flex-col sm:flex-row gap-3 items-end">
                         <div className="flex-1 w-full">
@@ -277,7 +278,7 @@ export default function EditSubscriptionPage() {
                             <select
                               value={payment.paymentMode}
                               onChange={(e) => handleUpdateRow(index, "paymentMode", e.target.value)}
-                              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:border-indigo-500 transition-all appearance-none"
+                              className={clsx("w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-indigo-500 transition-all appearance-none border", mode === "dark" ? "bg-slate-900 border-gray-800 text-gray-300" : "bg-white border-gray-200 text-gray-800")}
                             >
                               <option value="cash">Cash</option>
                               <option value="upi">UPI</option>
@@ -293,14 +294,14 @@ export default function EditSubscriptionPage() {
                             placeholder="0"
                             value={payment.amount}
                             onChange={(e) => handleUpdateRow(index, "amount", parseInt(e.target.value) || 0)}
-                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:border-indigo-500 transition-all font-mono"
+                            className={clsx("w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-indigo-500 transition-all font-mono border", mode === "dark" ? "bg-slate-900 border-gray-800 text-gray-300" : "bg-white border-gray-200 text-gray-800")}
                           />
                         </div>
                         {splitPayments.length > 1 && (
                           <button
                             type="button"
                             onClick={() => handleRemoveRow(index)}
-                            className="p-3 bg-white border border-red-100 text-red-500 rounded-lg hover:bg-red-50 transition-all shrink-0"
+                            className={clsx("p-3 rounded-lg transition-all shrink-0 border", mode === "dark" ? "bg-red-950/20 border-red-900/30 text-red-400 hover:bg-red-950/40" : "bg-white border-red-100 text-red-500 hover:bg-red-50")}
                           >
                             <Icon icon="solar:trash-bin-trash-bold" width={20} />
                           </button>
@@ -308,18 +309,18 @@ export default function EditSubscriptionPage() {
                       </div>
                     ))}
                     
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 mt-3 border-t border-dashed border-gray-200">
+                    <div className={clsx("flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 mt-3 border-t border-dashed", mode === "dark" ? "border-gray-800" : "border-gray-200")}>
                       <button
                         type="button"
                         onClick={handleAddRow}
-                        className="flex items-center gap-2 px-3 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors border border-indigo-100"
+                        className={clsx("flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-colors border", mode === "dark" ? "bg-indigo-950/40 text-indigo-400 border-indigo-900/50 hover:bg-indigo-950/60" : "bg-indigo-50 text-indigo-600 border-indigo-100 hover:bg-indigo-100")}
                       >
                         <Icon icon="solar:add-circle-bold" width={18} />
                         Add Payment Row
                       </button>
                       
-                      <div className="flex items-center gap-3 bg-amber-100 px-4 py-1">
-                         <span className="text-[11px] font-barlow font-semibold text-gray-600 uppercase ">Total Split:</span>
+                      <div className={clsx("flex items-center gap-3 px-4 py-1.5 rounded-lg border", mode === "dark" ? "bg-amber-950/20 border-amber-900/40" : "bg-amber-100")}>
+                         <span className={clsx("text-[11px] font-barlow font-semibold uppercase", mode === "dark" ? "text-amber-400" : "text-gray-600")}>Total Split:</span>
                          <span className={`text-sm font-bold ${
                            totalAmount !== estimatedAmount ? "text-red-500" : "text-emerald-700"
                          }`}>
@@ -335,7 +336,7 @@ export default function EditSubscriptionPage() {
                   variant="primary"
                   disabled={loading}
                   fullWidth
-                  className="w-full py-4 bg-[#6366f1] hover:bg-[#4f46e5] text-white rounded-xl font-public-sans font-bold text-[16px] transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-100"
+                  className={clsx("w-full py-4 bg-[#6366f1] hover:bg-[#4f46e5] text-white rounded-xl font-public-sans font-bold text-[16px] transition-all flex items-center justify-center gap-2", mode === "dark" ? "shadow-none" : "shadow-lg shadow-indigo-100")}
                 >
                   <Icon icon="solar:check-circle-bold" width={20} height={20} />
                   {isNewPayment ? "Confirm New Payment" : "Update Transaction"}
@@ -346,48 +347,48 @@ export default function EditSubscriptionPage() {
 
           {/* Right Sidebar: Summary */}
           <div className="space-y-6">
-            <div className="bg-white rounded-xl p-8 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.12)] border border-gray-100/80 sticky top-8">
-              <h3 className="text-2xl font-barlow font-bold text-gray-900 mb-6">Summary</h3>
+            <div className={clsx("rounded-xl p-8 border sticky top-8", mode === "dark" ? "bg-[#1c252e] border-gray-800 shadow-none" : "bg-white border-gray-100/80 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.12)]")}>
+              <h3 className={clsx("text-2xl font-barlow font-bold mb-6", mode === "dark" ? "text-white" : "text-gray-900")}>Summary</h3>
               
               <div className="space-y-6">
                 <div className="flex justify-between items-center font-public-sans text-sm">
-                  <span className="text-gray-500 font-semibold tracking-wide">Seat Number</span>
-                  <span className="text-gray-900 font-bold">{subscription.seatId.seatNumber}</span>
+                  <span className={clsx("font-semibold tracking-wide", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Seat Number</span>
+                  <span className={clsx("font-bold", mode === "dark" ? "text-white" : "text-gray-900")}>{subscription.seatId.seatNumber}</span>
                 </div>
                 
                 <div className="flex justify-between items-center font-public-sans text-sm">
-                  <span className="text-gray-500 font-semibold tracking-wide">Duration</span>
-                  <span className="text-gray-900 font-bold">{durationDays} Days</span>
+                  <span className={clsx("font-semibold tracking-wide", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Duration</span>
+                  <span className={clsx("font-bold", mode === "dark" ? "text-white" : "text-gray-900")}>{durationDays} Days</span>
                 </div>
 
-                <div className="pt-6 border-t border-dashed border-gray-200">
+                <div className={clsx("pt-6 border-t border-dashed", mode === "dark" ? "border-gray-800" : "border-gray-200")}>
                   <div className="flex justify-between items-end font-public-sans">
-                    <span className="text-gray-500 font-semibold tracking-wide text-xs">Total Amount</span>
+                    <span className={clsx("font-semibold tracking-wide text-xs", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Total Amount</span>
                     <span className="text-lg font-barlow font-bold text-indigo-600">₹{totalAmount.toLocaleString()}</span>
                   </div>
                 </div>
 
                 {splitPayments.length > 0 && (
-                  <div className="p-4 bg-gray-50 rounded-xl space-y-3 border border-gray-100">
+                  <div className={clsx("p-4 rounded-xl space-y-3 border", mode === "dark" ? "bg-slate-900/60 border-gray-800" : "bg-gray-50 border-gray-100")}>
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Payment Breakdown</p>
                     <div className="space-y-2">
                       {splitPayments.map((p, i) => (
                         <div key={i} className="flex justify-between items-center text-xs font-public-sans px-1">
-                          <span className="text-gray-500 font-medium capitalize">{p.paymentMode}</span>
-                          <span className="text-gray-900 font-bold font-mono">₹{p.amount.toLocaleString()}</span>
+                          <span className={clsx("font-medium capitalize", mode === "dark" ? "text-gray-400" : "text-gray-500")}>{p.paymentMode}</span>
+                          <span className={clsx("font-bold font-mono", mode === "dark" ? "text-white" : "text-gray-900")}>₹{p.amount.toLocaleString()}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                <div className="p-2 bg-amber-50/80 rounded-xl border border-amber-100/50 flex gap-4 items-center">
-                   <div className="w-10 h-10 rounded-xl bg-amber-100/90 text-amber-600 flex items-center justify-center shrink-0">
+                <div className={clsx("p-2 rounded-xl border flex gap-4 items-center", mode === "dark" ? "bg-amber-950/20 border-amber-900/30" : "bg-amber-50/80 border-amber-100/50")}>
+                   <div className={clsx("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", mode === "dark" ? "bg-amber-950/50 text-amber-400" : "bg-amber-100/90 text-amber-600")}>
                       <Icon icon="duo-icons:clock" width={20} height={20} />
                    </div>
                    <div className="space-y-0.5">
                       <p className="text-[11px] font-public-sans font-bold text-amber-900/60 tracking-wider uppercase">Ends On</p>
-                      <p className="text-[15px] font-public-sans font-bold text-amber-900">
+                      <p className={clsx("text-[15px] font-public-sans font-bold", mode === "dark" ? "text-amber-400" : "text-amber-900")}>
                          {(() => {
                             const date = new Date(subscription.startDate);
                             date.setDate(date.getDate() + durationDays);
