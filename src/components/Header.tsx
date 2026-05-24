@@ -7,8 +7,6 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "@iconify/react";
 import { MENU_ITEMS } from "@/constants/menuItems";
-import toast from "react-hot-toast";
-import { setMode } from "@/store/themeSlice";
 import { clientLogout } from "@/app/lib/utils/clientLogout";
 
 export default function Header() {
@@ -20,8 +18,7 @@ export default function Header() {
 
   const handleLogout = () => {
     setShowUserMenu(false);
-    toast.loading("Signing out…", { duration: 1500 });
-    void clientLogout(dispatch);
+    clientLogout(dispatch);
   };
 
   const isTopNav = activeNavStyle === "nav-top";
