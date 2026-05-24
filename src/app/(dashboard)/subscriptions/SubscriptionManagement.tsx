@@ -281,7 +281,7 @@ export default function SubscriptionManagement() {
     year: "numeric",
   });
 
-  const message = `📚 *Library Subscription Renewal Notice*
+  const message = `*Library Subscription Renewal Notice*
 
 Dear *${name}*,
 
