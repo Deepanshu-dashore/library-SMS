@@ -77,23 +77,23 @@ export class SubscriptionService {
       const paymentsToCreate =
         splitPayments && splitPayments.length > 0
           ? splitPayments.map((p) => ({
-            userId,
-            subscriptionId: subscription._id,
-            amount: p.amount,
-            paymentMode: p.mode,
-            durationDays,
-            receiptNumber: commonReceiptNumber,
-          }))
-          : [
-            {
               userId,
               subscriptionId: subscription._id,
-              amount,
-              paymentMode: paymentMode as string,
+              amount: p.amount,
+              paymentMode: p.mode,
               durationDays,
               receiptNumber: commonReceiptNumber,
-            },
-          ];
+            }))
+          : [
+              {
+                userId,
+                subscriptionId: subscription._id,
+                amount,
+                paymentMode: paymentMode as string,
+                durationDays,
+                receiptNumber: commonReceiptNumber,
+              },
+            ];
 
       // Validate total amount
       if (splitPayments && splitPayments.length > 0) {
@@ -311,8 +311,9 @@ export class SubscriptionService {
 
   static async getSubscriptionBySeatId(id: string) {
     await connectDB();
-    const subscription = await Subscription.findOne({ seatId: id })
-      .select("-__v");
+    const subscription = await Subscription.findOne({ seatId: id }).select(
+      "-__v",
+    );
 
     if (!subscription) {
       throw new Error("No subscription found for this seat");
@@ -377,7 +378,7 @@ export class SubscriptionService {
     }
 
     const subscriptions = await Subscription.find(mongoFilter)
-      .populate("userId", "name email")
+      .populate("userId", "name email number")
       .populate("seatId", "seatNumber")
       .select("-__v -transferHistory")
       .sort({ createdAt: -1 });
@@ -419,8 +420,9 @@ export class SubscriptionService {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-      const subscription =
-        await Subscription.findById(subscriptionId).populate("seatId").session(session);
+      const subscription = await Subscription.findById(subscriptionId)
+        .populate("seatId")
+        .session(session);
       if (!subscription) {
         throw new Error("Subscription not found");
       }
@@ -441,10 +443,15 @@ export class SubscriptionService {
       const seat = subscription.seatId as any;
       if (!seat || !seat.price) throw new Error("Seat price not found");
       const expectedAmount = Math.round((seat.price / 30) * currentDuration);
-      const totalAmount = updateData.splitPayments.reduce((acc, p) => acc + (p.amount || 0), 0);
+      const totalAmount = updateData.splitPayments.reduce(
+        (acc, p) => acc + (p.amount || 0),
+        0,
+      );
 
       if (totalAmount !== expectedAmount) {
-        throw new Error(`Total amount must be exactly ₹${expectedAmount.toLocaleString()}`);
+        throw new Error(
+          `Total amount must be exactly ₹${expectedAmount.toLocaleString()}`,
+        );
       }
 
       // Handle split payments

@@ -12,7 +12,8 @@ import {
   Clock,
   AlertCircle,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  MessageCircle
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -35,6 +36,7 @@ interface Subscription {
     _id: string;
     name: string;
     email: string;
+    number?: string;
   };
   seatId: {
     _id: string;
@@ -262,6 +264,27 @@ export default function SubscriptionManagement() {
     toast.success("Subscriptions exported successfully");
   };
 
+  const handleWhatsAppReminder = (sub: Subscription) => {
+    const phone = sub.userId?.number?.replace(/\D/g, "");
+    if (!phone) {
+      toast.error("Phone number not available for this member");
+      return;
+    }
+    const name = sub.userId?.name || "Member";
+    const seat = sub.seatId?.seatNumber || "-";
+    const endDate = new Date(sub.endDate).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+
+    const message = `📚 *Library Subscription Reminder*\n\nDear *${name}*,\n\nYour library subscription has expired. Here are the details:\n\n📅 *Expiry Date:* ${endDate}\n💺 *Seat Number:* ${seat}\n\nPlease renew your subscription at the earliest to continue enjoying uninterrupted library services.\n\n🔗 Visit the library desk or contact us for renewal.\n\n*Thank you!*\n— Library Management`;
+
+    const formattedPhone = phone.startsWith("91") ? phone : `91${phone}`;
+    const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
   const additionalActions: ActionDef<Subscription>[] = [
     {
       label: "Renew",
@@ -274,6 +297,17 @@ export default function SubscriptionManagement() {
       icon: ArrowRightLeft,
       disabled: (row) => row.status !== "active",
       onClick: (row) => router.push(`/subscriptions/transfer/${row._id}`)
+    },
+    {
+      label: "WhatsApp Reminder",
+      icon: MessageCircle,
+      disabled: (row) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const end = new Date(row.endDate);
+        return end >= today || row.status === "cancelled";
+      },
+      onClick: handleWhatsAppReminder
     },
     {
       label: "Cancel",
