@@ -9,9 +9,11 @@ import { Button } from "@/components/shared/Button";
 import { SimpleLoader } from "@/components/shared/SimpleLoader";
 import { TABLE_IDS } from "@/constants/tableIds";
 import { useTableState } from "@/hooks/useTableState";
+import { useSelector } from "react-redux";
 
 export default function TrashPage() {
   const [data, setData] = useState<any[]>([]);
+  const { mode } = useSelector((state: any) => state.theme);
 
   const {
     hydrated,
@@ -127,6 +129,11 @@ export default function TrashPage() {
         <PageHeader 
           title="Recycle Bin" 
           breadcrumbs={[{ label: "Dashboard", href: "/" }, { label: "Recycle Bin" }]}
+          actionNode={
+            <span className={`text-xs font-bold uppercase tracking-widest ${mode === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+              {stats.members} item{stats.members !== 1 ? 's' : ''} in bin
+            </span>
+          }
         />
 
         <DataTable

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Loader2, Building, Mail, Phone, MapPin, Edit3, Clock, Calendar, HelpCircle, User, Eye, EyeOff, PenTool, ShieldCheck, Palette, Bell } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { Icon } from "@iconify/react";
 import { useSelector } from "react-redux";
 import { Button } from "@/components/shared/Button";
@@ -29,11 +29,11 @@ interface LibraryProfile {
   helpDesk?: HelpDesk;
 }
 
-function HorizontalInfoRow({ label, value }: { label: string; value?: React.ReactNode }) {
+function HorizontalInfoRow({ label, value, mode }: { label: string; value?: React.ReactNode; mode?: string }) {
   return (
-    <div className="flex items-center gap-2 group py-4 border-b border-gray-100 border-dashed last:border-0 hover:bg-gray-50/50 transition-colors px-1">
-      <span className="text-sm font-bold text-slate-800 w-44 shrink-0 uppercase tracking-tight">{label}:</span>
-      <div className="text-sm font-bold text-slate-600 truncate flex-1 flex justify-end tracking-tight">
+    <div className={`flex items-center gap-2 group py-4 border-b border-dashed last:border-0 transition-colors px-1 ${mode === 'dark' ? 'border-slate-700 hover:bg-slate-800/20' : 'border-gray-100 hover:bg-gray-50/50'}`}>
+      <span className={`text-xs font-semibold w-40 shrink-0 uppercase tracking-wider ${mode === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{label}:</span>
+      <div className={`text-sm font-semibold truncate flex-1 flex justify-end tracking-tight ${mode === 'dark' ? 'text-slate-200' : 'text-slate-700'}`}>
         {value || "—"}
       </div>
     </div>
@@ -42,7 +42,7 @@ function HorizontalInfoRow({ label, value }: { label: string; value?: React.Reac
 
 export default function SettingsProfilePage() {
   const router = useRouter();
-  const { color } = useSelector((state: any) => state.theme);
+  const { color, mode } = useSelector((state: any) => state.theme);
   
   const [profile, setProfile] = useState<LibraryProfile | null>(null);
   const [fetching, setFetching] = useState(true);
@@ -79,13 +79,13 @@ export default function SettingsProfilePage() {
   ];
 
   return (
-    <div className="bg-gray-50/50 min-h-screen font-public-sans">
+    <div className={`min-h-screen font-public-sans ${mode === 'dark' ? 'bg-transparent' : 'bg-gray-50/50'}`}>
       <div className="max-w-7xl mx-auto space-y-6">
         
         {/* ─── Premium Profile Header Section ─── */}
-        <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+        <div className={`rounded-2xl overflow-hidden border shadow-sm ${mode === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
            {/* Banner */}
-           <div className="h-44 w-full relative">
+           <div className="h-36 w-full relative">
               <div 
                 className="absolute inset-0 opacity-90 transition-all duration-1000"
                 style={{ 
@@ -102,62 +102,59 @@ export default function SettingsProfilePage() {
            <div className="px-8 pb-0 pt-3 relative flex flex-col md:flex-row items-end md:items-center justify-between gap-6">
               <div className="flex items-center gap-6">
                  {/* Avatar */}
-                 <div className="relative -mt-16 group">
-                    <div className="w-32 h-32 rounded-full border-[6px] border-white shadow-xl overflow-hidden bg-slate-900 group-hover:scale-105 transition-transform duration-500">
+                 <div className="relative -mt-14 group">
+                    <div className="w-28 h-28 rounded-full border-[5px] border-white shadow-xl overflow-hidden bg-slate-900 group-hover:scale-105 transition-transform duration-500">
                       {profile.logo ? (
                         <img src={profile.logo} alt="Logo" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-white/20">
-                           <Icon icon="solar:library-bold-duotone" width={64} />
+                           <Icon icon="solar:library-bold-duotone" width={56} />
                         </div>
                       )}
                     </div>
-                    <button className="absolute bottom-2 right-2 p-2 bg-white rounded-full shadow-lg border border-gray-100 hover:scale-110 transition-transform text-slate-600">
-                       <Icon icon="solar:camera-bold" width={18} />
+                    <button className="absolute bottom-1 right-1 p-1.5 bg-white rounded-full shadow-md border border-gray-100 hover:scale-110 transition-transform text-slate-600">
+                       <Icon icon="solar:camera-bold" width={16} />
                     </button>
                  </div>
 
                  {/* Names */}
-                 <div className="pb-4 flex gap-2">
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-none group flex items-center gap-3">
+                 <div className="pb-3">
+                    <h1 className={`text-xl font-bold tracking-tight leading-tight flex items-center gap-2 ${mode === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                         {profile.name}
-                        {/* <Icon icon="solar:verified-check-bold" width={22} className="text-blue-500" /> */}
                     </h1>
-                    <p className="text-sm font-semibold text-slate-600 mt-2 capitalize">({profile.email.split('@')[0]} Admin)</p>
+                    <p className={`text-xs font-semibold mt-1 capitalize ${mode === 'dark' ? 'text-gray-400' : 'text-slate-550'}`}>({profile.email.split('@')[0]} Admin)</p>
                  </div>
               </div>
 
               {/* Action */}
-              <div className="pb-6">
-                 <Button
+              <div className="pb-4">
+                 <button
                     onClick={() => router.push("/settings/edit")}
-                    variant="edit"
-                    size="sm"
-                    className="rounded-2xl px-6 py-2.5 font-bold text-sm shadow-xl"
+                    className="rounded-xl px-5 py-2 font-semibold text-xs transition-all active:scale-95 flex items-center justify-center gap-2 border bg-indigo-600 hover:bg-indigo-700 text-white border-transparent shadow-md"
                  >
                     Edit Profile
-                 </Button>
+                 </button>
               </div>
            </div>
 
            {/* Tab Navigation - Shifted Right */}
-           <div className="px-8 border-t border-gray-50 flex items-center justify-end gap-10">
+           <div className={`px-8 border-t flex items-center justify-end gap-8 ${mode === 'dark' ? 'border-slate-700' : 'border-gray-50'}`}>
               {tabs.map(tab => (
                  <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2.5 py-4 transition-all relative group outline-none`}
+                    className={`flex items-center gap-2 py-3 transition-all relative group outline-none`}
                  >
                     <Icon 
                        icon={tab.icon} 
-                       width={20} 
-                       className={`transition-colors ${activeTab === tab.id ? "text-slate-900" : "text-slate-400 group-hover:text-slate-600"}`} 
+                       width={18} 
+                       className={`transition-colors ${activeTab === tab.id ? (mode === 'dark' ? "text-white" : "text-slate-900") : (mode === 'dark' ? "text-gray-500 group-hover:text-gray-300" : "text-slate-400 group-hover:text-slate-600")}`} 
                     />
-                    <span className={`text-[13.5px] font-bold tracking-tight transition-colors ${activeTab === tab.id ? "text-slate-900" : "text-slate-400 group-hover:text-slate-600"}`}>
+                    <span className={`text-xs font-semibold tracking-tight transition-colors ${activeTab === tab.id ? (mode === 'dark' ? "text-white" : "text-slate-900") : (mode === 'dark' ? "text-gray-500 group-hover:text-gray-300" : "text-slate-400 group-hover:text-slate-600")}`}>
                        {tab.label}
                     </span>
                     {activeTab === tab.id && (
-                       <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900 rounded-full" />
+                       <div className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full ${mode === 'dark' ? 'bg-white' : 'bg-slate-900'}`} />
                     )}
                  </button>
               ))}
@@ -171,77 +168,77 @@ export default function SettingsProfilePage() {
               <>
                  {/* Left: About / Contact */}
                  <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className={`rounded-2xl p-8 border shadow-sm space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 ${mode === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
-                             <Icon icon="solar:info-square-bold-duotone" width={22} className="text-indigo-600" />
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${mode === 'dark' ? 'bg-indigo-500/10 text-indigo-400' : 'bg-indigo-50 text-indigo-605'}`}>
+                             <Icon icon="solar:info-square-bold-duotone" width={20} />
                           </div>
                           <div>
-                             <h3 className="text-lg font-black text-slate-900 tracking-tight">Organization Profile</h3>
+                             <h3 className={`text-base font-semibold tracking-tight ${mode === 'dark' ? 'text-white' : 'text-slate-900'}`}>Organization Profile</h3>
                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Public identity & contact</p>
                           </div>
                        </div>
 
                        <div className="space-y-1">
-                          <HorizontalInfoRow label="Official Email" value={profile.email} />
-                          <HorizontalInfoRow label="Contact Number" value={profile.phone} />
-                          <HorizontalInfoRow label="Library Address" value={profile.address} />
+                          <HorizontalInfoRow label="Official Email" value={profile.email} mode={mode} />
+                          <HorizontalInfoRow label="Contact Number" value={profile.phone} mode={mode} />
+                          <HorizontalInfoRow label="Library Address" value={profile.address} mode={mode} />
                        </div>
                     </div>
                  </div>
 
                  {/* Right: Support Desk */}
                  <div className="lg:col-span-1">
-                    <div className="bg-slate-900 rounded-2xl p-8 text-white relative overflow-hidden h-fit shadow-lg shadow-slate-200">
-                       <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-2xl" />
+                    <div className={`rounded-2xl p-8 text-white relative overflow-hidden h-fit shadow-md ${mode === 'dark' ? 'bg-slate-900 shadow-none border border-slate-700' : 'bg-slate-900 shadow-slate-205'}`}>
+                       <div className="absolute -bottom-10 -right-10 w-36 h-36 bg-white/5 rounded-full blur-2xl" />
                        
-                       <div className="flex items-center gap-3 mb-6">
-                          <h3 className="text-xl font-black tracking-tight">Support Desk</h3>
+                       <div className="flex items-center gap-3 mb-5">
+                          <h3 className="text-base font-bold tracking-tight">Support Desk</h3>
                        </div>
 
-                       <div className="relative z-10 space-y-7">
-                          <p className="text-[13px] font-medium text-white/50 leading-relaxed italic">
+                       <div className="relative z-10 space-y-6">
+                          <p className="text-xs font-normal text-white/60 leading-relaxed italic">
                              Official contact point for all member queries and infrastructure assistance.
                           </p>
 
-                          <div className="space-y-6">
+                          <div className="space-y-5">
                              {/* Phone */}
-                             <div className="flex items-center gap-4 group">
-                                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/10 group-hover:bg-indigo-500 transition-colors">
-                                   <Icon icon="solar:phone-bold-duotone" width={18} className="text-white/80" />
+                             <div className="flex items-center gap-3 group">
+                                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/10 group-hover:bg-indigo-500 transition-colors">
+                                   <Icon icon="solar:phone-bold-duotone" width={15} className="text-white/80" />
                                 </div>
-                                <span className="text-[14px] font-medium text-white/80">
-                                   Reachable at <span className="font-black text-white">{profile.helpDesk?.number || "88000-00000"}</span>
+                                <span className="text-xs font-medium text-white/80">
+                                   Reachable at <span className="font-semibold text-white">{profile.helpDesk?.number || "88000-00000"}</span>
                                 </span>
                              </div>
 
                              {/* Email */}
-                             <div className="flex items-center gap-4 group">
-                                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/10 group-hover:bg-indigo-500 transition-colors">
-                                   <Icon icon="solar:letter-bold-duotone" width={18} className="text-white/80" />
+                             <div className="flex items-center gap-3 group">
+                                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/10 group-hover:bg-indigo-500 transition-colors">
+                                   <Icon icon="solar:letter-bold-duotone" width={15} className="text-white/80" />
                                 </div>
-                                <span className="text-[14px] font-medium text-white/80">
+                                <span className="text-xs font-medium text-white/80">
                                    {profile.helpDesk?.email || "help@library.com"}
                                 </span>
                              </div>
 
                              {/* Hours */}
-                             <div className="flex items-center gap-4 group">
-                                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/10 group-hover:bg-indigo-500 transition-colors">
-                                   <Icon icon="solar:clock-circle-bold-duotone" width={18} className="text-white/80" />
+                             <div className="flex items-center gap-3 group">
+                                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/10 group-hover:bg-indigo-500 transition-colors">
+                                   <Icon icon="solar:clock-circle-bold-duotone" width={15} className="text-white/80" />
                                 </div>
-                                <span className="text-[14px] font-medium text-white/80">
-                                   Open from <span className="font-black text-white">{profile.helpDesk?.hours || "09:00 AM - 09:00 PM"}</span>
+                                <span className="text-xs font-medium text-white/80">
+                                   Open <span className="font-semibold text-white">{profile.helpDesk?.hours || "09:00 AM - 09:00 PM"}</span>
                                 </span>
                              </div>
 
                              {/* Location */}
-                             <div className="flex items-center gap-4 group">
-                                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/10 group-hover:bg-indigo-500 transition-colors">
-                                   <Icon icon="solar:map-point-bold-duotone" width={18} className="text-white/80" />
+                             <div className="flex items-center gap-3 group">
+                                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/10 group-hover:bg-indigo-500 transition-colors">
+                                   <Icon icon="solar:map-point-bold-duotone" width={15} className="text-white/80" />
                                 </div>
-                                <span className="text-[14px] font-medium text-white/80">
-                                   Located at <span className="font-black text-white">{profile.helpDesk?.address?.split(',')[0] || "Main Wing"}</span>
+                                <span className="text-xs font-medium text-white/80">
+                                   Located at <span className="font-semibold text-white">{profile.helpDesk?.address?.split(',')[0] || "Main Wing"}</span>
                                 </span>
                              </div>
                           </div>
@@ -254,55 +251,64 @@ export default function SettingsProfilePage() {
            {activeTab === 'branding' && (
               <div className="col-span-1 lg:col-span-3 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                  {/* Identity Assets */}
-                 <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
-                    <div className="flex items-center gap-3 mb-8">
+                 <div className={`rounded-2xl p-8 border shadow-sm ${mode === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
+                    <div className="flex items-center gap-3 mb-6">
                        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                          <Icon icon="solar:globus-bold-duotone" width={22} className="text-emerald-600" />
+                          <Icon icon="solar:globus-bold-duotone" width={20} className="text-emerald-600" />
                        </div>
                        <div>
-                          <h3 className="text-lg font-black text-slate-900 tracking-tight">Identity Assets</h3>
+                          <h3 className={`text-base font-semibold tracking-tight ${mode === 'dark' ? 'text-white' : 'text-slate-900'}`}>Identity Assets</h3>
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Manage logo & signatures</p>
                        </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                        {/* Logo Management */}
                        <div className="space-y-4">
-                          <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+                          <div className={`p-4 rounded-xl border flex items-center justify-between ${mode === 'dark' ? 'bg-slate-700/30 border-slate-650' : 'bg-gray-50 border-gray-100'}`}>
                              <div className="flex items-center gap-4">
-                                <div className="w-16 h-16 rounded-xl bg-slate-900 border-2 border-white shadow-sm overflow-hidden">
-                                   <img src={profile.logo} className="w-full h-full object-cover" />
+                                <div className="w-14 h-14 rounded-xl bg-slate-900 border-2 border-white shadow-sm overflow-hidden flex items-center justify-center">
+                                   {profile.logo ? (
+                                     <img src={profile.logo} className="w-full h-full object-cover" />
+                                   ) : (
+                                     <Icon icon="solar:library-bold-duotone" className="text-slate-600" width={28} />
+                                   )}
                                 </div>
                                 <div>
-                                   <p className="text-sm font-black text-slate-800">Primary Logo</p>
-                                   <p className="text-[11px] font-bold text-slate-400 uppercase tracking-tight">Main brand asset</p>
+                                   <p className={`text-sm font-semibold ${mode === 'dark' ? 'text-white' : 'text-slate-805'}`}>Primary Logo</p>
+                                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Main brand asset</p>
                                 </div>
                              </div>
-                             <Button variant="outline" className="text-[10px] px-3 py-1 font-black uppercase tracking-widest">Update</Button>
+                             <button
+                               onClick={() => router.push("/settings/edit")}
+                               className={`px-3 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-lg border ${mode === 'dark' ? 'border-slate-600 text-slate-300 hover:bg-slate-700' : 'border-slate-205 text-slate-600 hover:bg-slate-50'}`}
+                             >
+                               Update
+                             </button>
                           </div>
                        </div>
 
                        {/* Signature Section */}
-                       <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 space-y-4">
+                       <div className={`border rounded-xl p-5 space-y-3 ${mode === 'dark' ? 'bg-slate-700/30 border-slate-650' : 'bg-slate-50 border-slate-100'}`}>
                           <div className="flex items-center justify-between">
                              <div className="flex items-center gap-2">
-                                <Icon icon="solar:pen-new-square-bold-duotone" width={18} className="text-slate-500" />
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Authorized Signature</span>
+                                <Icon icon="solar:pen-new-square-bold-duotone" width={16} className="text-slate-500" />
+                                <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Authorized Signature</span>
                              </div>
                              <button 
                                 onClick={() => setShowSignature(!showSignature)}
-                                className="text-[10px] font-black uppercase tracking-widest text-indigo-600"
+                                className="text-[10px] font-semibold uppercase tracking-widest text-indigo-600 hover:text-indigo-700"
                              >
                                 {showSignature ? "Hide" : "Show"}
                              </button>
                           </div>
-                          <div className="bg-white rounded-xl h-24 border border-gray-100 flex items-center justify-center p-4">
+                          <div className={`rounded-xl h-20 border flex items-center justify-center p-3 ${mode === 'dark' ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-100'}`}>
                              {showSignature ? (
-                                <img src={profile.signature} className="h-full object-contain mix-blend-multiply" />
+                                <img src={profile.signature} className={`h-full object-contain ${mode === 'dark' ? '' : 'mix-blend-multiply'}`} />
                              ) : (
-                                <div className="flex flex-col items-center gap-2 opacity-20">
-                                   <Icon icon="solar:eye-closed-bold-duotone" width={24} className="text-slate-300" />
-                                   <span className="text-[10px] font-black uppercase tracking-widest">Hidden</span>
+                                <div className="flex flex-col items-center gap-1 opacity-20">
+                                   <Icon icon="solar:eye-closed-bold-duotone" width={20} className="text-slate-400" />
+                                   <span className="text-[9px] font-semibold uppercase tracking-widest">Hidden</span>
                                 </div>
                              )}
                           </div>
@@ -314,54 +320,57 @@ export default function SettingsProfilePage() {
 
            {activeTab === 'personalization' && (
               <div className="col-span-1 lg:col-span-3">
-                 <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                 <div className={`rounded-2xl p-8 border shadow-sm space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 ${mode === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
                     <div className="flex items-center gap-3">
                        <div className="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center">
-                          <Icon icon="solar:palette-bold-duotone" width={22} className="text-pink-600" />
+                          <Icon icon="solar:palette-bold-duotone" width={20} className="text-pink-600" />
                        </div>
                        <div>
-                          <h3 className="text-lg font-black text-slate-900 tracking-tight">Appearance & Theme</h3>
+                          <h3 className={`text-base font-semibold tracking-tight ${mode === 'dark' ? 'text-white' : 'text-slate-900'}`}>Appearance & Theme</h3>
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Customize your dashboard look</p>
                        </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                        <div 
-                        onClick={() => router.push('/settings/personalization')}
-                        className="group cursor-pointer p-8 rounded-[32px] border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-gray-200 transition-all hover:shadow-xl"
+                         onClick={() => router.push('/settings/personalization')}
+                         className={`group cursor-pointer p-6 rounded-2xl border transition-all ${mode === 'dark' ? 'border-slate-700 bg-slate-700/30 hover:bg-slate-700 hover:border-slate-600' : 'border-gray-100 bg-gray-50/50 hover:bg-white hover:border-gray-205 hover:shadow-sm'}`}
                        >
-                          <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                             <Icon icon="solar:palet-2-bold-duotone" width={24} style={{ color }} />
+                          <div className={`w-10 h-10 rounded-xl shadow-sm flex items-center justify-center mb-4 group-hover:scale-105 transition-transform ${mode === 'dark' ? 'bg-slate-800' : 'bg-white'}`}>
+                             <Icon icon="solar:palet-2-bold-duotone" width={20} style={{ color }} />
                           </div>
-                          <div className="space-y-3">
+                          <div className="space-y-2">
                              <div>
-                                <h4 className="font-black text-slate-800 leading-none">Global Theme</h4>
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1.5">Brand & Primary Colors</p>
+                                <h4 className={`font-semibold leading-none text-base ${mode === 'dark' ? 'text-white' : 'text-slate-800'}`}>Global Theme</h4>
+                                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1.5">Brand & Primary Colors</p>
                              </div>
-                             <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-xl border border-gray-100 w-fit">
-                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
-                                <span className="text-xs font-black text-slate-600 uppercase tracking-tight">Hex: {color}</span>
+                             <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border w-fit ${mode === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-white border-gray-100 text-slate-600'}`}>
+                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+                                <span className="text-xs font-semibold uppercase tracking-tight">Hex: {color}</span>
                              </div>
-                             <p className="text-[12px] text-slate-500 font-bold leading-relaxed">Update your primary brand color, navigation layout, and global visual settings.</p>
+                             <p className={`text-xs ${mode === 'dark' ? 'text-slate-400' : 'text-slate-500'} font-medium leading-relaxed`}>Update your primary brand color, navigation layout, and global visual settings.</p>
                           </div>
                        </div>
 
-                       <div className="group p-8 rounded-[32px] border border-gray-100 bg-gray-50/50 transition-all">
-                          <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                             <Icon icon="solar:moon-bold-duotone" width={24} className="text-slate-700" />
+                       <div 
+                         onClick={() => router.push('/settings/personalization')}
+                         className={`group cursor-pointer p-6 rounded-2xl border transition-all ${mode === 'dark' ? 'border-slate-700 bg-slate-700/30 hover:bg-slate-700 hover:border-slate-600' : 'border-gray-100 bg-gray-50/50 hover:bg-white hover:border-gray-205 hover:shadow-sm'}`}
+                       >
+                          <div className={`w-10 h-10 rounded-xl shadow-sm flex items-center justify-center mb-4 group-hover:scale-105 transition-transform ${mode === 'dark' ? 'bg-slate-800 text-indigo-400' : 'bg-white text-slate-750'}`}>
+                             <Icon icon="solar:moon-bold-duotone" width={20} />
                           </div>
-                          <div className="space-y-3">
+                          <div className="space-y-2">
                              <div>
-                                <h4 className="font-black text-slate-800 leading-none">Dark Mode</h4>
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1.5">User Preference</p>
+                                <h4 className={`font-semibold leading-none text-base ${mode === 'dark' ? 'text-white' : 'text-slate-800'}`}>Appearance Mode</h4>
+                                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1.5">User Preference</p>
                              </div>
-                             <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-xl border border-gray-100 w-fit">
-                                <Icon icon="solar:sun-bold-duotone" width={14} className="text-amber-500" />
-                                <span className="text-xs font-black text-emerald-600 uppercase tracking-tight">
-                                   Active Mode: Standard Light
+                             <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border w-fit ${mode === 'dark' ? 'bg-slate-800 border-slate-700 text-indigo-400' : 'bg-white border-gray-100 text-emerald-600'}`}>
+                                <Icon icon={mode === 'dark' ? "solar:moon-bold-duotone" : "solar:sun-bold-duotone"} width={13} className={mode === 'dark' ? "text-indigo-400" : "text-amber-500"} />
+                                <span className="text-xs font-semibold uppercase tracking-tight">
+                                   Active Mode: {mode === 'dark' ? 'Premium Dark' : 'Standard Light'}
                                 </span>
                              </div>
-                             <p className="text-[12px] text-slate-500 font-bold leading-relaxed tracking-tight">Experience a sleek dark interface. High-fidelity dark themes are optimized for low-light environments.</p>
+                             <p className={`text-xs ${mode === 'dark' ? 'text-slate-400' : 'text-slate-500'} font-medium leading-relaxed tracking-tight`}>Experience a sleek dark interface. High-fidelity dark themes are optimized for low-light environments.</p>
                           </div>
                        </div>
                     </div>
@@ -371,29 +380,34 @@ export default function SettingsProfilePage() {
 
            {activeTab === 'security' && (
               <div className="col-span-1 lg:col-span-3">
-                 <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                 <div className={`rounded-2xl p-8 border shadow-sm space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 ${mode === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
                     <div className="flex items-center gap-3">
                        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                          <Icon icon="solar:shield-keyhole-bold-duotone" width={22} className="text-emerald-600" />
+                          <Icon icon="solar:shield-keyhole-bold-duotone" width={20} className="text-emerald-600" />
                        </div>
                        <div>
-                          <h3 className="text-lg font-black text-slate-900 tracking-tight">Security & Privacy</h3>
+                          <h3 className={`text-base font-semibold tracking-tight ${mode === 'dark' ? 'text-white' : 'text-slate-900'}`}>Security & Privacy</h3>
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Manage your credentials & access</p>
                        </div>
                     </div>
 
-                    <div className="max-w-2xl pt-4">
-                       <div className="p-6 rounded-2xl border border-dashed border-gray-200 flex items-center justify-between">
+                    <div className="max-w-2xl pt-2">
+                       <div className={`p-5 rounded-xl border border-dashed flex items-center justify-between ${mode === 'dark' ? 'border-slate-700' : 'border-gray-200'}`}>
                           <div className="flex items-center gap-4">
-                             <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
-                                <Icon icon="solar:lock-password-bold-duotone" width={20} />
+                             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${mode === 'dark' ? 'bg-slate-700 text-slate-300' : 'bg-slate-50 text-slate-400'}`}>
+                                <Icon icon="solar:lock-password-bold-duotone" width={18} />
                              </div>
                              <div>
-                                <p className="text-sm font-black text-slate-800">Account Password</p>
-                                <p className="text-xs font-bold text-slate-400">Change your login authentication password</p>
+                                <p className={`text-sm font-semibold ${mode === 'dark' ? 'text-white' : 'text-slate-800'}`}>Account Password</p>
+                                <p className="text-xs font-medium text-slate-400">Change your login authentication password</p>
                              </div>
                           </div>
-                          <Button variant="outline" className="text-xs font-bold px-4 py-2 hover:bg-slate-900 hover:text-white transition-all">Change</Button>
+                          <button
+                            onClick={() => toast.success("Password reset link dispatched")}
+                            className={`px-4 py-2 text-xs font-semibold rounded-lg border hover:bg-slate-900 hover:text-white transition-all ${mode === 'dark' ? 'border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white' : 'border-slate-200 text-slate-600 hover:bg-slate-900 hover:text-white'}`}
+                          >
+                            Change
+                          </button>
                        </div>
                     </div>
                  </div>

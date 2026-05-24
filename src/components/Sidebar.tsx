@@ -86,7 +86,7 @@ export const Sidebar = () => {
       </div>
 
       {/* Sidebar Menu */}
-      <div className="p-2 space-y-2 overflow-y-auto h-[calc(100vh-80px)] scrollbar-hide">
+      <div className="p-2 pb-16 space-y-2 overflow-y-auto h-[calc(100vh-100px)] scrollbar-hide">
         {MENU_ITEMS.map((item: any, index: number) => (
           <motion.div
             key={index}
@@ -128,7 +128,7 @@ export const Sidebar = () => {
                         : "var(--gray-400)",
                   }}
                 >
-                  <Icon icon={item.icon} className="w-5 h-5"/>
+                  <Icon icon={item.icon} className="w-5 h-5" />
                 </div>
                 {!isCollapsed && (
                   <span className="text-[13.5px] font-medium">{item.title}</span>

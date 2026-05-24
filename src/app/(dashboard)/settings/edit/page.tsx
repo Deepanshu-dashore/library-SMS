@@ -4,25 +4,25 @@ import React, { useEffect, useState, useRef } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Loader2, Save, X, Phone, Mail, MapPin, Clock, Calendar, Plus, Upload, Building, PenTool, Globe, Layers } from "lucide-react";
+import { Loader2, X, Upload, Plus } from "lucide-react";
 import { Button } from "@/components/shared/Button";
 import { Icon } from "@iconify/react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setUserSuccess } from "@/store/userSlice";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
 const inputBase =
-  "w-full text-[14px] px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 transition-all outline-none font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-medium";
+  "w-full text-sm px-4 py-2.5 border rounded-xl focus:ring-2 transition-all outline-none font-medium placeholder:font-normal";
 
-const Label = ({ children }: { children: React.ReactNode }) => (
-  <label className="text-[11px] mb-2 px-1 inline-block font-black text-slate-400 uppercase tracking-[0.1em]">
+const Label = ({ children, mode }: { children: React.ReactNode; mode?: string }) => (
+  <label className={`text-xs mb-1.5 px-1 inline-block font-semibold uppercase tracking-wider ${mode === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
     {children}
   </label>
 );
 
-const Hint = ({ children }: { children: React.ReactNode }) => (
-  <span className="mt-2 px-1 text-[11px] text-slate-400 leading-snug block font-bold italic">
+const Hint = ({ children, mode }: { children: React.ReactNode; mode?: string }) => (
+  <span className={`mt-1.5 px-1 text-[11px] leading-snug block font-medium ${mode === 'dark' ? 'text-slate-500' : 'text-slate-400'}`}>
     {children}
   </span>
 );
@@ -30,16 +30,16 @@ const Hint = ({ children }: { children: React.ReactNode }) => (
 // ─── Section Header ───────────────────────────────────────────────────────────
 
 function SectionHeader({
-  icon, title, sub, colorBadge,
-}: { icon: string; title: string; sub: string; colorBadge: string }) {
+  icon, title, sub, colorBadge, mode,
+}: { icon: string; title: string; sub: string; colorBadge: string; mode?: string }) {
   return (
-    <div className="flex items-center gap-4 mb-10 pb-6 border-b border-gray-50">
-      <div className={`w-14 h-14 ${colorBadge} rounded-[20px] flex items-center justify-center shadow-sm shrink-0`}>
-        <Icon icon={icon} width={28} />
+    <div className={`flex items-center gap-4 mb-8 pb-5 border-b ${mode === 'dark' ? 'border-slate-700/60' : 'border-gray-100'}`}>
+      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${mode === 'dark' ? 'bg-indigo-500/10 text-indigo-400' : colorBadge}`}>
+        <Icon icon={icon} width={24} />
       </div>
       <div>
-        <h3 className="text-xl font-black text-slate-900 tracking-tight">{title}</h3>
-        <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">{sub}</p>
+        <h3 className={`text-lg font-semibold tracking-tight ${mode === 'dark' ? 'text-white' : 'text-slate-800'}`}>{title}</h3>
+        <p className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">{sub}</p>
       </div>
     </div>
   );
@@ -53,9 +53,10 @@ interface ImageUploadFieldProps {
   preview: string;
   onFile: (file: File) => void;
   onClear: () => void;
+  mode?: string;
 }
 
-function ImageUploadField({ label, hint, preview, onFile, onClear }: ImageUploadFieldProps) {
+function ImageUploadField({ label, hint, preview, onFile, onClear, mode }: ImageUploadFieldProps) {
   const ref = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,36 +65,36 @@ function ImageUploadField({ label, hint, preview, onFile, onClear }: ImageUpload
   };
 
   return (
-    <div className="space-y-1">
-      <Label>{label}</Label>
+    <div className="space-y-1.5">
+      <Label mode={mode}>{label}</Label>
       {preview ? (
-        <div className="relative w-full border border-slate-200 rounded-3xl overflow-hidden bg-white shadow-inner group">
-          <img src={preview} alt={label} className="w-full h-40 object-contain p-6 mix-blend-multiply transition-transform duration-500 group-hover:scale-105" />
+        <div className={`relative w-full border rounded-2xl overflow-hidden group ${mode === 'dark' ? 'bg-slate-900 border-slate-700 shadow-none' : 'bg-white border-slate-200 shadow-inner'}`}>
+          <img src={preview} alt={label} className={`w-full h-36 object-contain p-4 transition-transform duration-500 group-hover:scale-105 ${mode === 'dark' ? '' : 'mix-blend-multiply'}`} />
           <button
             type="button"
             onClick={() => { onClear(); if (ref.current) ref.current.value = ""; }}
-            className="absolute top-4 right-4 bg-white/90 backdrop-blur-md border border-slate-200 rounded-xl p-2 hover:bg-red-50 hover:border-red-200 transition-all shadow-xl active:scale-95 group"
+            className={`absolute top-3 right-3 rounded-lg p-2 transition-all shadow-md active:scale-95 group ${mode === 'dark' ? 'bg-slate-800 border border-slate-700 hover:bg-red-950/30 hover:border-red-900/50' : 'bg-white/90 backdrop-blur-md border border-slate-200 hover:bg-red-50 hover:border-red-200'}`}
           >
-            <X className="w-4 h-4 text-slate-500 group-hover:text-red-500" strokeWidth={3} />
+            <X className="w-3.5 h-3.5 text-slate-400 group-hover:text-red-500" strokeWidth={2.5} />
           </button>
         </div>
       ) : (
         <button
           type="button"
           onClick={() => ref.current?.click()}
-          className="w-full flex flex-col items-center gap-4 py-12 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50 hover:bg-white hover:border-indigo-400 hover:shadow-xl transition-all group"
+          className={`w-full flex flex-col items-center gap-3 py-8 border-2 border-dashed rounded-2xl transition-all group ${mode === 'dark' ? 'bg-slate-900/30 border-slate-700 hover:bg-slate-800 hover:border-indigo-500' : 'bg-slate-50 border-slate-200 hover:bg-white hover:border-indigo-400 hover:shadow-md'}`}
         >
-          <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-             <Upload className="w-8 h-8" />
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${mode === 'dark' ? 'bg-indigo-500/10 text-indigo-400 group-hover:bg-indigo-600' : 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white'}`}>
+             <Upload className="w-5 h-5" />
           </div>
           <div className="text-center">
-             <p className="text-[13px] font-black text-slate-600 group-hover:text-indigo-600">Register {label}</p>
-             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">High fidelity JPG/PNG</p>
+             <p className={`text-xs font-semibold ${mode === 'dark' ? 'text-slate-300 group-hover:text-indigo-400' : 'text-slate-600 group-hover:text-indigo-600'}`}>Register {label}</p>
+             <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">High fidelity JPG/PNG</p>
           </div>
         </button>
       )}
       <input ref={ref} type="file" accept="image/*" className="hidden" onChange={handleChange} />
-      <Hint>{hint}</Hint>
+      <Hint mode={mode}>{hint}</Hint>
     </div>
   );
 }
@@ -120,6 +121,7 @@ interface LibraryProfile {
 export default function EditProfilePage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { mode } = useSelector((state: any) => state.theme);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [formData, setFormData] = useState<LibraryProfile>({
@@ -233,7 +235,7 @@ export default function EditProfilePage() {
       formDataToSend.append("address", formData.address);
       formDataToSend.append("helpDesk", JSON.stringify(formData.helpDesk));
       formDataToSend.append("floors", JSON.stringify(formData.floors || []));
-      
+
       if (formData.logo && typeof formData.logo !== "string") {
         formDataToSend.append("logo", formData.logo);
       }
@@ -271,8 +273,8 @@ export default function EditProfilePage() {
   }
 
   return (
-    <div className="bg-gray-50/50 min-h-screen font-public-sans pb-20">
-      <div className="max-w-6xl mx-auto">
+    <div className={`min-h-screen font-public-sans pb-20 ${mode === 'dark' ? 'bg-transparent' : 'bg-gray-50/50'}`}>
+      <div className=" mx-auto">
         <PageHeader
           title="Edit Framework"
           breadcrumbs={[
@@ -283,25 +285,26 @@ export default function EditProfilePage() {
           backLink="/settings"
         />
 
-        <form onSubmit={handleSubmit} className="px-6 pt-0 space-y-10 focus-within:outline-none">
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-            
+        <form onSubmit={handleSubmit} className="px-6 pt-0 space-y-8 focus-within:outline-none">
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
             {/* Left Col: Core Identity */}
-            <div className="lg:col-span-2 space-y-10">
-              <div className="bg-white rounded-[40px] shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_24px_48px_-8px_rgba(145,158,171,0.12)] border border-gray-100 p-10 md:p-12">
+            <div className="lg:col-span-2 space-y-8">
+              <div className={`rounded-3xl border p-8 md:p-10 shadow-sm ${mode === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
                 <SectionHeader
                   icon="solar:shield-user-bold-duotone"
                   title="Organization Identity"
                   sub="Global identifiers and branding assets"
                   colorBadge="bg-indigo-50 text-indigo-600"
+                  mode={mode}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2">
-                    <Label>Library Full Name</Label>
+                    <Label mode={mode}>Library Full Name</Label>
                     <div className="relative">
-                      <Icon icon="solar:library-bold-duotone" className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" width={22} />
+                      <Icon icon="solar:library-bold-duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" width={18} />
                       <input
                         type="text"
                         name="name"
@@ -309,15 +312,15 @@ export default function EditProfilePage() {
                         value={formData.name}
                         onChange={handleChange}
                         placeholder="e.g. Central National Library"
-                        className={`${inputBase} pl-14`}
+                        className={`${inputBase} pl-11 ${mode === 'dark' ? 'bg-slate-900 border-slate-700 text-white placeholder:text-gray-500 focus:ring-indigo-500/20 focus:border-indigo-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:ring-indigo-100 focus:border-indigo-600'}`}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label>Official Support Email</Label>
+                    <Label mode={mode}>Official Support Email</Label>
                     <div className="relative">
-                      <Icon icon="solar:letter-bold-duotone" className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" width={22} />
+                      <Icon icon="solar:letter-bold-duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" width={18} />
                       <input
                         type="email"
                         name="email"
@@ -325,22 +328,22 @@ export default function EditProfilePage() {
                         value={formData.email}
                         onChange={handleChange}
                         placeholder="support@library.com"
-                        className={`${inputBase} pl-14`}
+                        className={`${inputBase} pl-11 ${mode === 'dark' ? 'bg-slate-900 border-slate-700 text-white placeholder:text-gray-500 focus:ring-indigo-500/20 focus:border-indigo-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:ring-indigo-100 focus:border-indigo-600'}`}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label>Registered Phone</Label>
+                    <Label mode={mode}>Registered Phone</Label>
                     <div className="relative">
-                      <Icon icon="solar:phone-bold-duotone" className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" width={22} />
+                      <Icon icon="solar:phone-bold-duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" width={18} />
                       <input
                         type="text"
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
                         placeholder="+91 00000 00000"
-                        className={`${inputBase} pl-14`}
+                        className={`${inputBase} pl-11 ${mode === 'dark' ? 'bg-slate-900 border-slate-700 text-white placeholder:text-gray-500 focus:ring-indigo-500/20 focus:border-indigo-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:ring-indigo-100 focus:border-indigo-600'}`}
                       />
                     </div>
                   </div>
@@ -357,6 +360,7 @@ export default function EditProfilePage() {
                       setFormData(prev => ({ ...prev, logo: "" }));
                       setLogoPreview("");
                     }}
+                    mode={mode}
                   />
 
                   <ImageUploadField
@@ -371,137 +375,138 @@ export default function EditProfilePage() {
                       setFormData(prev => ({ ...prev, signature: "" }));
                       setSigPreview("");
                     }}
+                    mode={mode}
                   />
 
                   <div className="md:col-span-2">
-                    <Label>Official Corporate Address</Label>
+                    <Label mode={mode}>Official Corporate Address</Label>
                     <textarea
                       name="address"
                       rows={3}
                       value={formData.address}
                       onChange={handleChange}
                       placeholder="Enter the full physical location of headquarters..."
-                      className={`${inputBase} resize-none min-h-[120px]`}
+                      className={`${inputBase} resize-none min-h-[100px] ${mode === 'dark' ? 'bg-slate-900 border-slate-700 text-white placeholder:text-gray-500 focus:ring-indigo-500/20 focus:border-indigo-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:ring-indigo-100 focus:border-indigo-600'}`}
                     ></textarea>
                   </div>
                 </div>
               </div>
 
               {/* Infrastructure */}
-              <div className="bg-white rounded-[40px] shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_24px_48px_-8px_rgba(145,158,171,0.12)] border border-gray-100 p-10 md:p-12">
+              <div className={`rounded-3xl border p-8 md:p-10 shadow-sm ${mode === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
                 <SectionHeader
                   icon="solar:layers-bold-duotone"
                   title="Internal Infrastructure"
                   sub="Defining structural levels and floor plans"
                   colorBadge="bg-purple-50 text-purple-600"
+                  mode={mode}
                 />
 
-                <div className="space-y-6">
-                  <div className="flex flex-wrap gap-4 items-center">
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-3 items-center">
                     {(formData.floors || []).map((floor, idx) => (
-                      <div key={idx} className="flex items-center gap-3 bg-slate-900 text-white px-6 py-4 rounded-2xl font-black text-sm shadow-xl group hover:bg-slate-800 transition-all">
-                        <Icon icon="solar:ranking-bold-duotone" width={18} className="text-purple-400" />
+                      <div key={idx} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-xs border transition-all ${mode === 'dark' ? 'bg-slate-700 border-slate-600 text-slate-200' : 'bg-slate-100 border-slate-200 text-slate-700'}`}>
+                        <Icon icon="solar:ranking-bold-duotone" width={14} className="text-purple-500" />
                         {floor}
-                        <button type="button" onClick={() => handleRemoveFloor(idx)} className="ml-2 text-white/30 hover:text-red-400 transition-colors">
-                          <X size={20} strokeWidth={3} />
+                        <button type="button" onClick={() => handleRemoveFloor(idx)} className="ml-1 text-slate-400 hover:text-red-500 transition-colors">
+                          <X size={14} strokeWidth={2.5} />
                         </button>
                       </div>
                     ))}
                     <button
                       type="button"
                       onClick={handleAddFloor}
-                      className="flex items-center gap-3 bg-white border-2 border-dashed border-slate-200 text-slate-500 hover:border-indigo-400 hover:text-indigo-600 px-8 py-4 rounded-2xl font-black transition-all text-sm group"
+                      className={`flex items-center gap-2 border border-dashed px-5 py-2.5 rounded-xl font-semibold transition-all text-xs group ${mode === 'dark' ? 'bg-slate-700/55 border-slate-600 text-gray-300 hover:bg-slate-700 hover:border-indigo-400 hover:text-indigo-400' : 'bg-white border-slate-300 text-slate-600 hover:border-indigo-500 hover:text-indigo-600'}`}
                     >
-                      <Plus size={20} strokeWidth={3} className="group-hover:rotate-90 transition-transform" />
+                      <Plus size={14} strokeWidth={2.5} className="group-hover:rotate-90 transition-transform" />
                       Assign New Floor
                     </button>
                   </div>
-                  <Hint>These labels are used globally within the seat allocation system.</Hint>
+                  <Hint mode={mode}>These labels are used globally within the seat allocation system.</Hint>
                 </div>
               </div>
             </div>
 
             {/* Right Col: Support & Action */}
-            <div className="space-y-10">
-              <div className="bg-slate-900 rounded-[40px] shadow-2xl p-10 text-white relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-10 opacity-5 -mr-10 -mt-10 group-hover:scale-110 transition-transform">
-                   <Icon icon="solar:help-bold-duotone" width={240} />
+            <div className="space-y-8">
+              <div className={`rounded-3xl shadow-lg p-8 relative overflow-hidden group border ${mode === 'dark' ? 'bg-slate-950/40 border-slate-800 text-white' : 'bg-slate-900 text-white border-transparent'}`}>
+                <div className="absolute top-0 right-0 p-8 opacity-5 -mr-8 -mt-8 group-hover:scale-115 transition-transform duration-750 pointer-events-none">
+                  <Icon icon="solar:help-bold-duotone" width={200} />
                 </div>
 
-                <div className="flex items-center gap-4 mb-10 pb-6 border-b border-white/10">
-                   <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
-                      <Icon icon="solar:headphones-round-bold-duotone" width={24} className="text-indigo-400" />
-                   </div>
-                   <h3 className="text-lg font-black tracking-tight">Support Desk</h3>
+                <div className="flex items-center gap-3.5 mb-8 pb-5 border-b border-white/10">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                    <Icon icon="solar:headphones-round-bold-duotone" width={20} className="text-indigo-400" />
+                  </div>
+                  <h3 className="text-base font-semibold tracking-tight">Support Desk</h3>
                 </div>
 
-                <div className="space-y-8 relative z-10">
-                   <div className="space-y-6">
-                      <div>
-                        <Label>Support Hotline</Label>
-                        <input
-                          type="text"
-                          name="number"
-                          value={formData.helpDesk.number}
-                          onChange={handleHelpDeskChange}
-                          className="w-full bg-white/5 border border-white/5 rounded-2xl px-5 py-4 text-white font-bold outline-none focus:border-indigo-500 transition-all"
-                          placeholder="Hotline number"
-                        />
-                      </div>
-                      <div>
-                        <Label>Desk Email</Label>
-                        <input
-                          type="email"
-                          name="email"
-                          value={formData.helpDesk.email}
-                          onChange={handleHelpDeskChange}
-                          className="w-full bg-white/5 border border-white/5 rounded-2xl px-5 py-4 text-white font-bold outline-none focus:border-indigo-500 transition-all"
-                          placeholder="support@domain.com"
-                        />
-                      </div>
-                      <div>
-                        <Label>Operating Hours</Label>
-                        <input
-                          type="text"
-                          name="hours"
-                          value={formData.helpDesk.hours}
-                          onChange={handleHelpDeskChange}
-                          className="w-full bg-white/5 border border-white/5 rounded-2xl px-5 py-4 text-white font-bold outline-none focus:border-indigo-500 transition-all"
-                          placeholder="e.g. 9 AM - 6 PM"
-                        />
-                      </div>
-                      <div>
-                        <Label>Holidays</Label>
-                        <textarea
-                          name="holidays"
-                          rows={2}
-                          value={formData.helpDesk.holidays.join(", ")}
-                          onChange={handleHolidaysChange}
-                          className="w-full bg-white/5 border border-white/5 rounded-2xl px-5 py-4 text-white font-bold outline-none focus:border-indigo-500 transition-all resize-none"
-                          placeholder="Comma separated days"
-                        ></textarea>
-                      </div>
-                   </div>
+                <div className="space-y-6 relative z-10">
+                  <div className="space-y-5">
+                    <div>
+                      <Label mode="dark">Support Hotline</Label>
+                      <input
+                        type="text"
+                        name="number"
+                        value={formData.helpDesk.number}
+                        onChange={handleHelpDeskChange}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-medium placeholder:text-white/30 outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+                        placeholder="Hotline number"
+                      />
+                    </div>
+                    <div>
+                      <Label mode="dark">Desk Email</Label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.helpDesk.email}
+                        onChange={handleHelpDeskChange}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-medium placeholder:text-white/30 outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+                        placeholder="support@domain.com"
+                      />
+                    </div>
+                    <div>
+                      <Label mode="dark">Operating Hours</Label>
+                      <input
+                        type="text"
+                        name="hours"
+                        value={formData.helpDesk.hours}
+                        onChange={handleHelpDeskChange}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-medium placeholder:text-white/30 outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+                        placeholder="e.g. 9 AM - 6 PM"
+                      />
+                    </div>
+                    <div>
+                      <Label mode="dark">Holidays</Label>
+                      <textarea
+                        name="holidays"
+                        rows={2}
+                        value={formData.helpDesk.holidays.join(", ")}
+                        onChange={handleHolidaysChange}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-medium placeholder:text-white/30 outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none"
+                        placeholder="Comma separated days"
+                      ></textarea>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Form Action */}
-              <div className="bg-white rounded-[40px] border border-gray-100 p-10 flex flex-col gap-4 shadow-xl">
-                 <Button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-5 bg-indigo-600 text-white font-black rounded-3xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50"
-                 >
-                    {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <><Icon icon="solar:diskette-bold-duotone" width={24} /> Sync All Changes</>}
-                 </Button>
-                 <Button
-                    type="button"
-                    onClick={() => router.push("/settings")}
-                    variant="outline"
-                    className="w-full py-5 font-black text-slate-500 border-slate-100 rounded-3xl hover:bg-slate-50"
-                 >
-                    Discard Changes
-                 </Button>
+              <div className={`rounded-3xl border p-8 flex flex-col gap-3 shadow-md ${mode === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 text-sm shadow-md"
+                >
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Icon icon="solar:diskette-bold-duotone" width={20} /> Sync All Changes</>}
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/settings")}
+                  className={`w-full py-3.5 font-semibold text-sm border rounded-xl transition-all active:scale-95 text-center flex items-center justify-center ${mode === 'dark' ? 'border-slate-700 text-slate-300 hover:bg-slate-700 bg-transparent' : 'border-slate-200 text-slate-600 hover:bg-slate-50 bg-transparent'}`}
+                >
+                  Discard Changes
+                </button>
               </div>
             </div>
 

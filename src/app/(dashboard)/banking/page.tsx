@@ -80,14 +80,14 @@ function fmtDate(d: string) {
 }
 
 // ─── Sub-components ────────────────────────────────────────────────────────
-const StatCard = ({ title, value, description, icon, color }: any) => (
-  <div className="bg-white p-6 rounded-2xl shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.20)] border border-gray-100 flex flex-col gap-4 group hover:border-indigo-100 transition-all duration-500 relative overflow-hidden">
+const StatCard = ({ title, value, description, icon, color, mode }: any) => (
+  <div className={`p-6 rounded-2xl border flex flex-col gap-4 group transition-all duration-500 relative overflow-hidden ${mode === 'dark' ? 'bg-slate-800 border-slate-700 hover:border-indigo-500/30 shadow-none' : 'bg-white border-gray-100 hover:border-indigo-100 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.20)]'}`}>
     <div className="flex items-start justify-between">
       <div className="flex flex-col gap-1">
-        <p className="text-gray-700 font-public-sans font-semibold text-sm leading-[1.57143] mb-1.5">{title}</p>
-        <h3 className="text-3xl font-barlow font-bold text-gray-900">{fmt(value)}</h3>
+        <p className={`font-public-sans font-semibold text-sm leading-[1.57143] mb-1.5 ${mode === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{title}</p>
+        <h3 className={`text-3xl font-barlow font-bold ${mode === 'dark' ? 'text-white' : 'text-gray-900'}`}>{fmt(value)}</h3>
         {description && (
-          <p className="text-[11px] text-gray-400 font-medium mt-1 leading-tight">{description}</p>
+          <p className={`text-[11px] font-medium mt-1 leading-tight ${mode === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>{description}</p>
         )}
       </div>
       <div 
@@ -103,18 +103,18 @@ const StatCard = ({ title, value, description, icon, color }: any) => (
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden min-w-[140px]">
-        <div className="bg-gray-300 px-3 py-1.5 text-center">
-            <span className="text-xs font-semibold text-gray-500 capitalize">{label}</span>
+      <div className="bg-[#1e293b] rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.3)] border border-slate-700 overflow-hidden min-w-[140px]">
+        <div className="bg-slate-700 px-3 py-1.5 text-center">
+            <span className="text-xs font-semibold text-gray-300 capitalize">{label}</span>
         </div>
         <div className="p-3 space-y-2">
             {payload.map((entry: any, index: number) => (
                 <div key={index} className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
-                        <span className="text-[11px] font-semibold text-gray-600 capitalize">{entry.name}:</span>
+                        <span className="text-[11px] font-semibold text-gray-400 capitalize">{entry.name}:</span>
                     </div>
-                    <span className="text-xs font-medium text-gray-800 tracking-tight">{fmt(entry.value)}</span>
+                    <span className="text-xs font-medium text-white tracking-tight">{fmt(entry.value)}</span>
                 </div>
             ))}
         </div>
@@ -140,7 +140,7 @@ const RadialTooltip = ({ active, payload }: any) => {
 // ─── Main Page ──────────────────────────────────────────────────────────────
 export default function BankingPage() {
   const router = useRouter();
-  const { color: themeColor } = useSelector((state: any) => state.theme);
+  const { color: themeColor, mode } = useSelector((state: any) => state.theme);
   const { currentUser } = useSelector((state: any) => state.user);
   const [data, setData] = useState<BankingData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -212,7 +212,7 @@ export default function BankingPage() {
                 style={{ backgroundColor: meta.bg, color: meta.color }}
              >
                 <Icon icon={meta.icon} className="text-2xl" />
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center bg-gray-100 shadow-sm">
+                <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 flex items-center justify-center shadow-sm ${mode === 'dark' ? 'border-slate-800 bg-slate-700' : 'border-white bg-gray-100'}`}>
                    <Icon 
                       icon={isIncome ? "solar:round-alt-arrow-down-bold" : "solar:round-alt-arrow-up-bold"} 
                       className={`text-[8px] ${isIncome ? "text-emerald-500" : "text-rose-500"}`}
@@ -220,8 +220,8 @@ export default function BankingPage() {
                 </div>
              </div>
              <div className="flex flex-col gap-0.5 order-2">
-                <span className="text-sm font-semibold text-gray-700 transition-colors capitalize">{row.title}</span>
-                <span className="text-[11px] font-semibold text-gray-400 transition-colors capitalize">{isIncome ? "Payment" : "Expense"}</span>
+                <span className={`text-sm font-semibold transition-colors capitalize ${mode === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>{row.title}</span>
+                <span className={`text-[11px] font-semibold transition-colors capitalize ${mode === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>{isIncome ? "Payment" : "Expense"}</span>
              </div>
           </div>
         )
@@ -245,7 +245,7 @@ export default function BankingPage() {
       label: "Amount",
       type: "custom",
       render: (row) => (
-        <span className="text-sm font-medium font-barlow text-gray-900">{fmt(row.amount)}</span>
+        <span className={`text-sm font-medium font-barlow ${mode === 'dark' ? 'text-white' : 'text-gray-900'}`}>{fmt(row.amount)}</span>
       )
     }
   ];
@@ -438,14 +438,14 @@ export default function BankingPage() {
             <select
               value={selectedYear}
               onChange={e => setSelectedYear(Number(e.target.value))}
-              className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 font-medium h-9 outline-none focus:ring-2 focus:ring-indigo-100 transition-all"
+              className={`text-sm border rounded-lg px-3 py-2 font-medium h-9 outline-none focus:ring-2 transition-all ${mode === 'dark' ? 'border-slate-600 bg-slate-800 text-gray-200 focus:ring-slate-600' : 'border-gray-200 bg-white text-gray-700 focus:ring-indigo-100'}`}
             >
               {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
             </select>
             <select
               value={selectedMonth}
               onChange={e => setSelectedMonth(Number(e.target.value))}
-              className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 font-medium h-9 outline-none focus:ring-2 focus:ring-indigo-100 transition-all"
+              className={`text-sm border rounded-lg px-3 py-2 font-medium h-9 outline-none focus:ring-2 transition-all ${mode === 'dark' ? 'border-slate-600 bg-slate-800 text-gray-200 focus:ring-slate-600' : 'border-gray-200 bg-white text-gray-700 focus:ring-indigo-100'}`}
             >
               {MONTHS.map((m, i) => <option key={m} value={i}>{m}</option>)}
             </select>
@@ -469,19 +469,19 @@ export default function BankingPage() {
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-2xl z-50 overflow-hidden"
+                      className={`absolute right-0 mt-2 w-48 rounded-xl shadow-2xl z-50 overflow-hidden border ${mode === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}
                     >
                       <button
                         onClick={handleDownloadReport}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-700 hover:bg-slate-50 transition-colors"
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors ${mode === 'dark' ? 'text-gray-200 hover:bg-slate-700' : 'text-gray-700 hover:bg-slate-50'}`}
                       >
                         <Icon icon="solar:document-text-bold" className="text-indigo-500 text-lg" />
                         Export as PDF
                       </button>
-                      <div className="h-px bg-gray-50" />
+                      <div className={`h-px ${mode === 'dark' ? 'bg-slate-700' : 'bg-gray-50'}`} />
                       <button
                         onClick={handleDownloadExcel}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-700 hover:bg-slate-50 transition-colors"
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors ${mode === 'dark' ? 'text-gray-200 hover:bg-slate-700' : 'text-gray-700 hover:bg-slate-50'}`}
                       >
                         <Icon icon="solar:file-text-bold" className="text-emerald-500 text-lg" />
                         Export as Excel
@@ -495,7 +495,7 @@ export default function BankingPage() {
         }
       />
 
-      <div className="border-b border-gray-100 mb-8" />
+      <div className={`border-b mb-8 ${mode === 'dark' ? 'border-slate-700' : 'border-gray-100'}`} />
 
       {loading ? (
         <div className="flex-1 flex items-center justify-center min-h-64">
@@ -508,9 +508,9 @@ export default function BankingPage() {
         <div className="space-y-8">
           
             <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-              <StatCard title="Total Balance" value={totals.balance} description="Available funds across all accounts" icon="solar:wallet-bold-duotone" color="#6366f1" />
-              <StatCard title="Total Income" value={totals.totalIncome} description="Total revenue from memberships & fees" icon="solar:graph-up-bold" color="#00a76f" />
-              <StatCard title="Total Expenses" value={totals.totalExpense} description="Total maintenance & operational costs" icon="solar:graph-down-bold" color="#f43f5e" />
+              <StatCard title="Total Balance" value={totals.balance} description="Available funds across all accounts" icon="solar:wallet-bold-duotone" color="#6366f1" mode={mode} />
+              <StatCard title="Total Income" value={totals.totalIncome} description="Total revenue from memberships & fees" icon="solar:graph-up-bold" color="#00a76f" mode={mode} />
+              <StatCard title="Total Expenses" value={totals.totalExpense} description="Total maintenance & operational costs" icon="solar:graph-down-bold" color="#f43f5e" mode={mode} />
             </div>
           {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
@@ -569,17 +569,17 @@ export default function BankingPage() {
             </div>
           </div> */}
 
-          <div className="bg-white border border-gray-100 rounded-3xl p-8 transition-all duration-300">
+          <div className={`rounded-3xl p-8 transition-all duration-300 border ${mode === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
                 <div className="flex justify-between items-start mb-6">
                    <div className="flex flex-col gap-0.5">
                       <div className="flex items-center gap-2">
-                        <h2 className="text-lg font-bold text-gray-900 tracking-tight">Balance Statistics</h2>
+                        <h2 className={`text-lg font-bold tracking-tight ${mode === 'dark' ? 'text-white' : 'text-gray-900'}`}>Balance Statistics</h2>
                       </div>
-                      <p className="text-xs font-medium text-gray-400">Statistics on balance over time</p>
+                      <p className={`text-xs font-medium ${mode === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Statistics on balance over time</p>
                    </div>
-                   <div className="flex items-center gap-1 border border-gray-100 rounded-xl p-1 bg-gray-50/50">
+                   <div className={`flex items-center gap-1 border rounded-xl p-1 ${mode === 'dark' ? 'border-slate-600 bg-slate-700/50' : 'border-gray-100 bg-gray-50/50'}`}>
                       {(["monthly", "yearly"] as const).map(v => (
-                        <button key={v} onClick={() => setStatView(v)} className={`px-3 py-1 text-sm font-bold rounded-md transition-all capitalize ${statView === v ? "bg-white text-gray-800 shadow-sm" : "text-gray-400 hover:text-gray-600"}`}>
+                        <button key={v} onClick={() => setStatView(v)} className={`px-3 py-1 text-sm font-bold rounded-md transition-all capitalize ${statView === v ? (mode === 'dark' ? "bg-slate-600 text-white shadow-sm" : "bg-white text-gray-800 shadow-sm") : (mode === 'dark' ? "text-gray-400 hover:text-gray-200" : "text-gray-400 hover:text-gray-600")}`}>
                           {v}
                         </button>
                       ))}
@@ -588,18 +588,18 @@ export default function BankingPage() {
 
                 <div className="flex gap-10 mt-6 mb-8">
                     <div className="flex flex-col gap-1">
-                       <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+                       <div className={`flex items-center gap-2 text-xs font-semibold ${mode === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: themeColor }} />
                          Total Income
                        </div>
-                       <p className="text-xl font-medium text-gray-900">{formatCurrency(totals.totalIncome)}</p>
+                       <p className={`text-xl font-medium ${mode === 'dark' ? 'text-white' : 'text-gray-900'}`}>{formatCurrency(totals.totalIncome)}</p>
                     </div>
                     <div className="flex flex-col gap-1">
-                       <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+                       <div className={`flex items-center gap-2 text-xs font-semibold ${mode === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                          <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
                          Total Expenses
                        </div>
-                       <p className="text-xl font-medium text-gray-900">{formatCurrency(totals.totalExpense)}</p>
+                       <p className={`text-xl font-medium ${mode === 'dark' ? 'text-white' : 'text-gray-900'}`}>{formatCurrency(totals.totalExpense)}</p>
                     </div>
                 </div>
 
@@ -609,9 +609,9 @@ export default function BankingPage() {
                         <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={themeColor} stopOpacity={0.1}/><stop offset="95%" stopColor={themeColor} stopOpacity={0}/></linearGradient>
                         <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#fbbf24" stopOpacity={0.1}/><stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/></linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                      <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#9ca3af", fontWeight: 700 }} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#9ca3af", fontWeight: 700 }} tickFormatter={formatCurrency} />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={mode === 'dark' ? '#334155' : '#f3f4f6'} />
+                      <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: mode === 'dark' ? '#94a3b8' : '#9ca3af', fontWeight: 700 }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: mode === 'dark' ? '#94a3b8' : '#9ca3af', fontWeight: 700 }} tickFormatter={formatCurrency} />
                       <Tooltip content={<CustomTooltip />} />
                       <Area type="monotone" name="Total income" dataKey="income" stroke={themeColor} strokeWidth={3} fillOpacity={1} fill="url(#colorIncome)" />
                       <Area type="monotone" name="Total expenses" dataKey="expense" stroke="#fbbf24" strokeWidth={3} fillOpacity={1} fill="url(#colorExpense)" />
@@ -621,7 +621,7 @@ export default function BankingPage() {
 
           <div className="space-y-4">
              <div className="flex items-center justify-between px-2">
-                <h2 className="text-xl font-bold text-gray-900">Recent Transitions</h2>
+                <h2 className={`text-xl font-bold ${mode === 'dark' ? 'text-white' : 'text-gray-900'}`}>Recent Transitions</h2>
              </div>
 
              <DataTable

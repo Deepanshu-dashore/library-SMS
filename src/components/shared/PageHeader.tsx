@@ -42,7 +42,7 @@ export function PageHeader({ title, breadcrumbs, actionNode, backLink }: PageHea
                     <Link 
                       href={crumb.href} 
                       className={clsx(
-                        "transition-colors hover:text-primary hover:underline underline-offset-1 decoration-1",
+                        "transition-colors hover:text-primary hover:underline underline-offset-1 decoration-1 cursor-pointer",
                         mode === "dark" 
                           ? "text-slate-300 hover:underline-slate-200" 
                           : "text-gray-900 hover:underline-gray-800"
@@ -74,7 +74,7 @@ export function PageHeader({ title, breadcrumbs, actionNode, backLink }: PageHea
               <Link 
                 href={backLink}
                 className={clsx(
-                  "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors border",
+                  "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors border cursor-pointer",
                   mode === "dark"
                     ? "bg-slate-800 hover:bg-slate-700 text-slate-300 border-gray-700"
                     : "bg-gray-50/80 hover:bg-gray-200/80 text-gray-800 border-gray-100"
