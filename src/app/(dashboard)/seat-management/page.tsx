@@ -129,6 +129,26 @@ export default function SeatManagement() {
     }
   };
 
+  const handleSubscription = async (seat: Seat) => {
+    // console.log(seat);
+    const t = toast.loading("Loading seat subscription...");
+    try {
+      const res = await fetch(`/api/seat/${seat._id}/seat-subscription`);
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Seat subscription loaded", { id: t });
+        router.push(`/subscriptions/${data.data.subscription._id}`);
+      } else {
+        toast.error("Failed to load seat subscription.", { id: t });
+      }
+    } catch (error) {
+      toast.error("An error occurred", { id: t });
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const seatStatusStyles = [
     {
       status: "available",
@@ -167,11 +187,10 @@ export default function SeatManagement() {
               <div className="flex bg-gray-100/80 p-1 rounded-xl border border-gray-200/50">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 ${
-                    viewMode === "grid"
-                      ? "bg-white text-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
-                      : "text-gray-400 cursor-pointer hover:text-gray-600"
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 ${viewMode === "grid"
+                    ? "bg-white text-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                    : "text-gray-400 cursor-pointer hover:text-gray-600"
+                    }`}
                   title="Grid View"
                 >
                   <Grid size={16} />
@@ -179,11 +198,10 @@ export default function SeatManagement() {
                 </button>
                 <button
                   onClick={() => setViewMode("table")}
-                  className={`px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 ${
-                    viewMode === "table"
-                      ? "bg-white text-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
-                      : "text-gray-400 cursor-pointer hover:text-gray-600"
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 ${viewMode === "table"
+                    ? "bg-white text-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                    : "text-gray-400 cursor-pointer hover:text-gray-600"
+                    }`}
                   title="Table View"
                 >
                   <List size={16} />
@@ -200,9 +218,17 @@ export default function SeatManagement() {
                     error: "Error",
                   })
                 }
+                className="group hover:bg-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-200"
                 title="Refresh"
               >
-                <Database size={18} />
+                <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
+                  <g fill="none" stroke="currentColor" strokeWidth={1.5}>
+                    <ellipse cx={10} cy={5} rx={8} ry={3}></ellipse>
+                    <path strokeLinecap="round" d="M5 10.842c.602.18 1.274.33 2 .44m-2 6.56c.602.18 1.274.33 2 .44"></path>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m12 15.5l1.136 1.465a4 4 0 0 1 7.364-.901m1.5 4.434l-1.136-1.463a4 4 0 0 1-7.328.965M18 5v6.008M2 5v14.019c0 1.532 3.054 2.796 7 2.98"></path>
+                    <path strokeLinecap="round" d="M2 12c0 1.542 3.054 2.814 7 3"></path>
+                  </g>
+                </svg>
               </Button>
               <Button
                 variant="outline"
@@ -488,17 +514,68 @@ export default function SeatManagement() {
                     </div>
 
                     {/* hover actions */}
-                    <div className="absolute inset-0 flex items-center justify-center gap-2 bg-white/80 backdrop-blur-sm rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200">
-                      <button
-                        onClick={() => handleMaintenanceToggle(seat)}
-                        className={`p-1.5 cursor-pointer bg-white border border-gray-100 rounded-xl shadow-sm transition-colors ${seat.status === "maintenance" ? "text-emerald-500 hover:border-emerald-200" : "text-amber-500 hover:border-amber-200"}`}
-                        title={
-                          seat.status === "maintenance"
-                            ? "Complete Maintenance"
-                            : "Maintenance Mode"
-                        }
-                      >
-                        {seat.status === "maintenance" ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-white/80 backdrop-blur-sm rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200">
+                      {/* Top Row: 3 buttons */}
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => handleMaintenanceToggle(seat)}
+                          className={`p-1.5 cursor-pointer bg-white border border-gray-100 rounded-xl shadow-sm transition-colors ${seat.status === "maintenance" ? "text-emerald-500 hover:border-emerald-200" : "text-amber-500 hover:border-amber-200"}`}
+                          title={
+                            seat.status === "maintenance"
+                              ? "Complete Maintenance"
+                              : "Maintenance Mode"
+                          }
+                        >
+                          {seat.status === "maintenance" ? (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-5 h-5"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="currentColor"
+                                d="m11.602 13.76l1.412 1.412l8.466-8.466l1.414 1.415l-9.88 9.88l-6.364-6.365l1.414-1.414l2.125 2.125zm.002-2.828l4.952-4.953l1.41 1.41l-4.952 4.953zm-2.827 5.655L7.364 18L1 11.636l1.414-1.414l1.413 1.413l-.001.001z"
+                              ></path>
+                            </svg>
+                          ) : (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-5 h-5"
+                              viewBox="0 -1.5 24 24"
+                            >
+                              <path
+                                fill="currentColor"
+                                d="M2.131 5.668a1.5 1.5 0 0 1 .294-1.708l1.414-1.414a1.5 1.5 0 0 1 1.707-.293L7.021.778a2 2 0 0 1 2.828 0l2.829 2.829a2 2 0 0 1 0 2.828l-1.415 1.414l-.05-.05l-3.535 3.536l.05.05l-1.414 1.414a2 2 0 0 1-2.829 0L.657 9.971a2 2 0 0 1 0-2.829zm6.96 7.08l3.536-3.535l3.586 3.586l-3.535 3.536l-3.586-3.586zm5 5l3.536-3.535l1.768 1.768a2.5 2.5 0 0 1-3.535 3.536l-1.768-1.768zm2.83-15.556l4.242 4.243l-3.839 3.839c-.613.613-1.744.478-2.525-.303l-1.414-1.415c-.781-.78-.917-1.911-.303-2.525zM18.334.778l.303-.303c.613-.614 1.744-.478 2.525.303l1.414 1.414c.781.781.917 1.912.303 2.526l-.303.303L18.335.778zM5.607 16.335l2.12-2.122a1 1 0 1 1 1.415 1.414L7.021 17.75a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 0 1-1.415 0l-1.414-1.414a1 1 0 0 1 0-1.414l1.414-1.414a1 1 0 0 1 1.415 0z"
+                              ></path>
+                            </svg>
+                          )}
+                        </button>
+                        <button
+                          onClick={() =>
+                            router.push(`/seat-management/${seat._id}/edit`)
+                          }
+                          className="p-1.5 cursor-pointer bg-white border border-gray-100 rounded-xl text-gray-400 hover:text-indigo-500 hover:border-indigo-100 shadow-sm transition-colors"
+                          title="Edit"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-5 h-5"
+                            viewBox="0 0 24 24"
+                          >
+                            <g fill="none" fillRule="evenodd">
+                              <path d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"></path>
+                              <path
+                                fill="currentColor"
+                                d="m14.535 12.225l4.242 4.243l-4.243 4.243a1 1 0 0 1-.707.293H11a1 1 0 0 1-1-1v-2.829a1 1 0 0 1 .293-.707zM17 2a2 2 0 0 1 1.995 1.85L19 4v4.02a5 5 0 0 0-4.27 1.192l-.196.185l-5.656 5.657a3 3 0 0 0-.872 1.923l-.007.198v2.829a3 3 0 0 0 .11.804l.06.192H5a2 2 0 0 1-1.995-1.85L3 19V4a2 2 0 0 1 1.85-1.995L5 2zm3.191 8.811a3 3 0 0 1 0 4.243L15.95 10.81a3 3 0 0 1 4.242 0ZM11 6H7a1 1 0 0 0 0 2h4a1 1 0 1 0 0-2"
+                              ></path>
+                            </g>
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(seat)}
+                          className="p-1.5 cursor-pointer bg-white border border-gray-100 rounded-xl text-gray-400 hover:text-red-500 hover:border-red-100 shadow-sm transition-colors"
+                          title="Delete"
+                        >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="w-5 h-5"
@@ -506,70 +583,39 @@ export default function SeatManagement() {
                           >
                             <path
                               fill="currentColor"
-                              d="m11.602 13.76l1.412 1.412l8.466-8.466l1.414 1.415l-9.88 9.88l-6.364-6.365l1.414-1.414l2.125 2.125zm.002-2.828l4.952-4.953l1.41 1.41l-4.952 4.953zm-2.827 5.655L7.364 18L1 11.636l1.414-1.414l1.413 1.413l-.001.001z"
+                              d="M3 6.386c0-.484.345-.877.771-.877h2.665c.529-.016.996-.399 1.176-.965l.03-.1l.115-.391c.07-.24.131-.45.217-.637c.338-.739.964-1.252 1.687-1.383c.184-.033.378-.033.6-.033h3.478c.223 0 .417 0 .6.033c.723.131 1.35.644 1.687 1.383c.086.187.147.396.218.637l.114.391l.03.1c.18.566.74.95 1.27.965h2.57c.427 0 .772.393.772.877s-.345.877-.771.877H3.77c-.425 0-.77-.393-.77-.877"
                             ></path>
-                          </svg>
-                        ) : (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="w-5 h-5"
-                            viewBox="0 -1.5 24 24"
-                          >
                             <path
                               fill="currentColor"
-                              d="M2.131 5.668a1.5 1.5 0 0 1 .294-1.708l1.414-1.414a1.5 1.5 0 0 1 1.707-.293L7.021.778a2 2 0 0 1 2.828 0l2.829 2.829a2 2 0 0 1 0 2.828l-1.415 1.414l-.05-.05l-3.535 3.536l.05.05l-1.414 1.414a2 2 0 0 1-2.829 0L.657 9.971a2 2 0 0 1 0-2.829zm6.96 7.08l3.536-3.535l3.586 3.586l-3.535 3.536l-3.586-3.586zm5 5l3.536-3.535l1.768 1.768a2.5 2.5 0 0 1-3.535 3.536l-1.768-1.768zm2.83-15.556l4.242 4.243l-3.839 3.839c-.613.613-1.744.478-2.525-.303l-1.414-1.415c-.781-.78-.917-1.911-.303-2.525zM18.334.778l.303-.303c.613-.614 1.744-.478 2.525.303l1.414 1.414c.781.781.917 1.912.303 2.526l-.303.303L18.335.778zM5.607 16.335l2.12-2.122a1 1 0 1 1 1.415 1.414L7.021 17.75a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 0 1-1.415 0l-1.414-1.414a1 1 0 0 1 0-1.414l1.414-1.414a1 1 0 0 1 1.415 0z"
+                              fillRule="evenodd"
+                              d="M9.425 11.482c.413-.044.78.273.821.707l.5 5.263c.041.433-.26.82-.671.864c-.412.043-.78-.273-.821-.707l-.5-5.263c-.041-.434.26-.821.671-.864m5.15 0c.412.043.713.43.671.864l-.5 5.263c-.04.434-.408.75-.82.707c-.413-.044-.713-.43-.672-.864l.5-5.264c.041-.433.409-.75.82-.707"
+                              clipRule="evenodd"
                             ></path>
-                          </svg>
-                        )}
-                      </button>
-                      <button
-                        onClick={() =>
-                          router.push(`/seat-management/${seat._id}/edit`)
-                        }
-                        className="p-1.5 cursor-pointer bg-white border border-gray-100 rounded-xl text-gray-400 hover:text-indigo-500 hover:border-indigo-100 shadow-sm transition-colors"
-                        title="Edit"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="w-5 h-5"
-                          viewBox="0 0 24 24"
-                        >
-                          <g fill="none" fillRule="evenodd">
-                            <path d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"></path>
                             <path
                               fill="currentColor"
-                              d="m14.535 12.225l4.242 4.243l-4.243 4.243a1 1 0 0 1-.707.293H11a1 1 0 0 1-1-1v-2.829a1 1 0 0 1 .293-.707zM17 2a2 2 0 0 1 1.995 1.85L19 4v4.02a5 5 0 0 0-4.27 1.192l-.196.185l-5.656 5.657a3 3 0 0 0-.872 1.923l-.007.198v2.829a3 3 0 0 0 .11.804l.06.192H5a2 2 0 0 1-1.995-1.85L3 19V4a2 2 0 0 1 1.85-1.995L5 2zm3.191 8.811a3 3 0 0 1 0 4.243L15.95 10.81a3 3 0 0 1 4.242 0ZM11 6H7a1 1 0 0 0 0 2h4a1 1 0 1 0 0-2"
+                              d="M11.596 22h.808c2.783 0 4.174 0 5.08-.886c.904-.886.996-2.339 1.181-5.245l.267-4.188c.1-1.577.15-2.366-.303-2.865c-.454-.5-1.22-.5-2.753-.5H8.124c-1.533 0-2.3 0-2.753.5s-.404 1.288-.303 2.865l.267 4.188c.185 2.906.277 4.36 1.182 5.245c.905.886 2.296.886 5.079.886"
+                              opacity={0.5}
                             ></path>
-                          </g>
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => handleDelete(seat)}
-                        className="p-1.5 cursor-pointer bg-white border border-gray-100 rounded-xl text-gray-400 hover:text-red-500 hover:border-red-100 shadow-sm transition-colors"
-                        title="Delete"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="w-5 h-5"
-                          viewBox="0 0 24 24"
+                          </svg>
+                        </button>
+                      </div>
+
+                      {/* Bottom Row: 1 button */}
+                      {seat.status === "occupied" && <div className="flex items-center justify-start">
+                        <button
+                          onClick={() => handleSubscription(seat)}
+                          disabled={seat.status !== "occupied"}
+                          className={`p-1.5 cursor-pointer bg-white border border-gray-100 rounded-xl text-gray-400 shadow-sm transition-colors ${seat.status !== "occupied"
+                            ? "opacity-50 cursor-not-allowed"
+                            : "hover:text-emerald-500 hover:border-emerald-100"
+                            }`}
+                          title="Current Subscription"
                         >
-                          <path
-                            fill="currentColor"
-                            d="M3 6.386c0-.484.345-.877.771-.877h2.665c.529-.016.996-.399 1.176-.965l.03-.1l.115-.391c.07-.24.131-.45.217-.637c.338-.739.964-1.252 1.687-1.383c.184-.033.378-.033.6-.033h3.478c.223 0 .417 0 .6.033c.723.131 1.35.644 1.687 1.383c.086.187.147.396.218.637l.114.391l.03.1c.18.566.74.95 1.27.965h2.57c.427 0 .772.393.772.877s-.345.877-.771.877H3.77c-.425 0-.77-.393-.77-.877"
-                          ></path>
-                          <path
-                            fill="currentColor"
-                            fillRule="evenodd"
-                            d="M9.425 11.482c.413-.044.78.273.821.707l.5 5.263c.041.433-.26.82-.671.864c-.412.043-.78-.273-.821-.707l-.5-5.263c-.041-.434.26-.821.671-.864m5.15 0c.412.043.713.43.671.864l-.5 5.263c-.04.434-.408.75-.82.707c-.413-.044-.713-.43-.672-.864l.5-5.264c.041-.433.409-.75.82-.707"
-                            clipRule="evenodd"
-                          ></path>
-                          <path
-                            fill="currentColor"
-                            d="M11.596 22h.808c2.783 0 4.174 0 5.08-.886c.904-.886.996-2.339 1.181-5.245l.267-4.188c.1-1.577.15-2.366-.303-2.865c-.454-.5-1.22-.5-2.753-.5H8.124c-1.533 0-2.3 0-2.753.5s-.404 1.288-.303 2.865l.267 4.188c.185 2.906.277 4.36 1.182 5.245c.905.886 2.296.886 5.079.886"
-                            opacity={0.5}
-                          ></path>
-                        </svg>
-                      </button>
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24">
+                            <path fill="currentColor" fillRule="evenodd" d="M7.245 2h9.51c1.159 0 1.738 0 2.206.163a3.05 3.05 0 0 1 1.881 1.936C21 4.581 21 5.177 21 6.37v14.004c0 .858-.985 1.314-1.608.744a.946.946 0 0 0-1.284 0l-.483.442a1.657 1.657 0 0 1-2.25 0a1.657 1.657 0 0 0-2.25 0a1.657 1.657 0 0 1-2.25 0a1.657 1.657 0 0 0-2.25 0a1.657 1.657 0 0 1-2.25 0l-.483-.442a.946.946 0 0 0-1.284 0c-.623.57-1.608.114-1.608-.744V6.37c0-1.193 0-1.79.158-2.27c.3-.913.995-1.629 1.881-1.937C5.507 2 6.086 2 7.245 2M7 6.75a.75.75 0 0 0 0 1.5h.5a.75.75 0 0 0 0-1.5zm3.5 0a.75.75 0 0 0 0 1.5H17a.75.75 0 0 0 0-1.5zM7 10.25a.75.75 0 0 0 0 1.5h.5a.75.75 0 0 0 0-1.5zm3.5 0a.75.75 0 0 0 0 1.5H17a.75.75 0 0 0 0-1.5zM7 13.75a.75.75 0 0 0 0 1.5h.5a.75.75 0 0 0 0-1.5zm3.5 0a.75.75 0 0 0 0 1.5H17a.75.75 0 0 0 0-1.5z" clipRule="evenodd"></path>
+                          </svg>
+                        </button>
+                      </div>}
                     </div>
                   </div>
                 ))

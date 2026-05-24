@@ -4,6 +4,7 @@ import { Seat } from "../seat/seats.model";
 import { Subscription } from "./subscription.model";
 import { generateReceiptNumber } from "@/app/lib/utils/generateReceipt";
 import { connectDB } from "../../db/connectDB";
+import { IdCard } from "lucide-react";
 
 export class SubscriptionService {
   static async createSubscription(
@@ -76,23 +77,23 @@ export class SubscriptionService {
       const paymentsToCreate =
         splitPayments && splitPayments.length > 0
           ? splitPayments.map((p) => ({
+            userId,
+            subscriptionId: subscription._id,
+            amount: p.amount,
+            paymentMode: p.mode,
+            durationDays,
+            receiptNumber: commonReceiptNumber,
+          }))
+          : [
+            {
               userId,
               subscriptionId: subscription._id,
-              amount: p.amount,
-              paymentMode: p.mode,
+              amount,
+              paymentMode: paymentMode as string,
               durationDays,
               receiptNumber: commonReceiptNumber,
-            }))
-          : [
-              {
-                userId,
-                subscriptionId: subscription._id,
-                amount,
-                paymentMode: paymentMode as string,
-                durationDays,
-                receiptNumber: commonReceiptNumber,
-              },
-            ];
+            },
+          ];
 
       // Validate total amount
       if (splitPayments && splitPayments.length > 0) {
@@ -303,6 +304,20 @@ export class SubscriptionService {
       .populate("seatId")
       .select("-__v");
     const payment = await Payment.find({ subscriptionId })
+      .select("-__v")
+      .lean();
+    return { subscription, payment };
+  }
+
+  static async getSubscriptionBySeatId(id: string) {
+    await connectDB();
+    const subscription = await Subscription.findOne({ seatId: id })
+      .select("-__v");
+
+    if (!subscription) {
+      throw new Error("No subscription found for this seat");
+    }
+    const payment = await Payment.find({ subscriptionId: subscription._id })
       .select("-__v")
       .lean();
     return { subscription, payment };

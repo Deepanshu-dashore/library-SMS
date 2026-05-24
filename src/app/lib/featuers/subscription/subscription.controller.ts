@@ -64,6 +64,27 @@ export class SubscriptionController {
       return ApiResponse(500, null, "Failed to fetch subscription");
     }
   }
+
+  static async getSeatSubscription(params: Promise<{ id: string }>) {
+    const library = await verifyJWT();
+    if (!library) {
+      return ApiResponse(401, null, "Unauthorized");
+    }
+    const { id } = await params;
+    try {
+      const subscription = await SubscriptionService.getSubscriptionBySeatId(id);
+      return ApiResponse(
+        200,
+        subscription,
+        "Subscription fetched successfully",
+      );
+    } catch (error: any) {
+      console.log(error)
+      return ApiResponse(500, null, "Failed to fetch subscription");
+    }
+  }
+
+
   static async createSubscription(req: Request) {
     const library = await verifyJWT();
     if (!library) {
