@@ -1,7 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Icon } from "@iconify/react";
 import { useSelector, useDispatch } from "react-redux";
 import { setIsCollapsed, handleNavDirection } from "../store/themeSlice";
@@ -13,11 +13,38 @@ export const Sidebar = () => {
   const [openMenu, setOpenMenu] = useState<number | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
 
   const { color, darkColor, mode, isCollapsed } = useSelector(
     (state: any) => state.theme
   );
+
+  const isActiveRoute = (path: string) => {
+    if (path.includes("?")) {
+      const [basePath, searchStr] = path.split("?");
+      if (pathname !== basePath) return false;
+      const queryParams = new URLSearchParams(searchStr);
+      for (const [key, val] of queryParams.entries()) {
+        const actualVal = searchParams.get(key);
+        const checkVal = (key === "filter" && !actualVal) ? "members" : actualVal;
+        if (checkVal !== val) return false;
+      }
+      return true;
+    }
+    return pathname === path;
+  };
+
+  useEffect(() => {
+    const activeIndex = MENU_ITEMS.findIndex(
+      (item: any) =>
+        item.subItems &&
+        item.subItems.some((sub: any) => isActiveRoute(sub.path))
+    );
+    if (activeIndex !== -1) {
+      setOpenMenu(activeIndex);
+    }
+  }, [pathname, searchParams]);
 
   const handleMenuClick = (index: number, path: string, hasSubItems: boolean) => {
     if (hasSubItems) {
@@ -33,8 +60,6 @@ export const Sidebar = () => {
     dispatch(setIsCollapsed(newCollapsed));
     dispatch(handleNavDirection(newCollapsed ? "nav-close" : "nav-open"));
   };
-
-  const isActiveRoute = (path: string) => pathname === path;
 
   return (
     <motion.div
