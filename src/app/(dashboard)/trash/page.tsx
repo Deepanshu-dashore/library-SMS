@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Trash2, RotateCcw } from "lucide-react";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -11,22 +11,20 @@ import { TABLE_IDS } from "@/constants/tableIds";
 import { useTableState } from "@/hooks/useTableState";
 import { useSelector } from "react-redux";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function TrashPage() {
-  const [data, setData] = useState<any[]>([]);
   const { mode } = useSelector((state: any) => state.theme);
   const searchParams = useSearchParams();
   const router = useRouter();
   const filterParam = searchParams.get("filter");
+  const queryClient = useQueryClient();
 
   const {
     hydrated,
     activeFilter: activeTab,
     setActiveFilter: setActiveTab,
   } = useTableState(TABLE_IDS.TRASH, { defaultActiveFilter: "members" });
-  const [loading, setLoading] = useState(true);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [stats, setStats] = useState({ members: 0, seats: 0 });
 
   // Sync activeTab with filter query parameter if present
   useEffect(() => {
@@ -35,41 +33,39 @@ export default function TrashPage() {
     }
   }, [filterParam, setActiveTab]);
 
-  const fetchTrash = async (tab = activeTab) => {
-    setLoading(true);
-    try {
-      const [userRes, seatRes] = await Promise.all([
-        fetch("/api/user/trash"),
-        fetch("/api/seat/trash"),
-      ]);
-      const userResult = await userRes.json();
-      const seatResult = await seatRes.json();
+  // Fetch users trash using useQuery
+  const { data: userData, isLoading: isUserLoading } = useQuery({
+    queryKey: ["trash", "members"],
+    queryFn: async () => {
+      const res = await fetch("/api/user/trash");
+      const result = await res.json();
+      return result.success ? result.data : { users: [], total: 0 };
+    },
+    enabled: hydrated,
+  });
 
-      const users = userResult.success ? userResult.data.users : [];
-      const seats = seatResult.success ? seatResult.data : [];
+  // Fetch seats trash using useQuery
+  const { data: seatData, isLoading: isSeatLoading } = useQuery({
+    queryKey: ["trash", "seats"],
+    queryFn: async () => {
+      const res = await fetch("/api/seat/trash");
+      const result = await res.json();
+      return result.success ? result.data : [];
+    },
+    enabled: hydrated,
+  });
 
-      setStats({
-        members: userResult.success ? (userResult.data?.total || users.length) : 0,
-        seats: seatResult.success ? seats.length : 0,
-      });
+  const users = userData?.users || [];
+  const userTotal = userData?.total || users.length;
+  const seats = seatData || [];
 
-      if (tab === "members") {
-        setData(users);
-      } else {
-        setData(seats);
-      }
-    } catch (error) {
-      toast.error("Error fetching trash items");
-    } finally {
-      setLoading(false);
-      setIsInitialLoad(false);
-    }
+  const stats = {
+    members: userTotal,
+    seats: seats.length,
   };
 
-  useEffect(() => {
-    if (!hydrated) return;
-    fetchTrash(activeTab);
-  }, [hydrated, activeTab]);
+  const currentData = activeTab === "members" ? users : seats;
+  const loading = activeTab === "members" ? isUserLoading : isSeatLoading;
 
   const handleRestore = async (item: any) => {
     const loadingToast = toast.loading("Restoring item...");
@@ -85,7 +81,7 @@ export default function TrashPage() {
           activeTab === "members" ? "Member restored successfully" : "Seat restored successfully", 
           { id: loadingToast }
         );
-        fetchTrash();
+        queryClient.invalidateQueries({ queryKey: ["trash"] });
       } else {
         toast.error(result.message || "Failed to restore", { id: loadingToast });
       }
@@ -111,7 +107,7 @@ export default function TrashPage() {
           activeTab === "members" ? "Member permanently deleted" : "Seat permanently deleted", 
           { id: loadingToast }
         );
-        fetchTrash();
+        queryClient.invalidateQueries({ queryKey: ["trash"] });
       } else {
         toast.error(result.message || "Failed to delete", { id: loadingToast });
       }
@@ -198,7 +194,7 @@ export default function TrashPage() {
     }
   ];
 
-  if (isInitialLoad) return <SimpleLoader text="Cleaning up trash" />;
+  if (!hydrated) return <SimpleLoader text="Cleaning up trash" />;
 
   const currentCount = activeTab === "members" ? stats.members : stats.seats;
 
@@ -216,7 +212,7 @@ export default function TrashPage() {
         />
 
         <DataTable
-          data={data}
+          data={currentData}
           columns={columns}
           loading={loading}
           rowKey={(row) => row._id}

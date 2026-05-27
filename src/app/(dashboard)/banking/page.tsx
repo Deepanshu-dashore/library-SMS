@@ -19,6 +19,7 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { TABLE_IDS } from "@/constants/tableIds";
 import { useTableState } from "@/hooks/useTableState";
+import { useQuery } from "@tanstack/react-query";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 interface Transaction {
@@ -142,8 +143,6 @@ export default function BankingPage() {
   const router = useRouter();
   const { color: themeColor, mode } = useSelector((state: any) => state.theme);
   const { currentUser } = useSelector((state: any) => state.user);
-  const [data, setData] = useState<BankingData | null>(null);
-  const [loading, setLoading] = useState(true);
   const [statView, setStatView] = useState<"monthly" | "yearly">("monthly");
   const [selectedYear, setSelectedYear] = useState<number>(CURRENT_YEAR);
   const [selectedMonth, setSelectedMonth] = useState<number>(0);
@@ -154,23 +153,21 @@ export default function BankingPage() {
     { defaultActiveFilter: "all" },
   );
 
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true);
+  const { data: bankingQueryData, isLoading: loading } = useQuery({
+    queryKey: ["banking", { year: selectedYear, month: selectedMonth }],
+    queryFn: async () => {
       const params = new URLSearchParams({ year: String(selectedYear) });
       if (selectedMonth > 0) params.set("month", String(selectedMonth));
       const res = await fetch(`/api/banking?${params}`);
       const json = await res.json();
-      if (res.ok && json.success) setData(json.data);
-      else toast.error(json.message || "Failed to load banking data");
-    } catch {
-      toast.error("An error occurred while fetching banking data");
-    } finally {
-      setLoading(false);
+      if (res.ok && json.success) {
+        return json.data;
+      }
+      throw new Error(json.message || "Failed to load banking data");
     }
-  }, [selectedYear, selectedMonth]);
+  });
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  const data = bankingQueryData || null;
 
   const totals = data?.totals ?? { totalIncome: 0, totalExpense: 0, balance: 0 };
   const incomePct = totals.totalIncome > 0 ? "+43%" : null;
@@ -180,7 +177,7 @@ export default function BankingPage() {
     const allCategories = Object.keys(CATEGORY_META);
     
     const merged = allCategories.map(catName => {
-      const match = apiData.find(ad => ad.name.toLowerCase() === catName.toLowerCase());
+      const match = apiData.find((ad: CategoryData) => ad.name.toLowerCase() === catName.toLowerCase());
       return {
         name: catName.charAt(0).toUpperCase() + catName.slice(1),
         amount: match ? match.amount : 0
@@ -193,7 +190,7 @@ export default function BankingPage() {
     })).sort((a, b) => b.amount - a.amount);
   }, [data?.expenseCategories]);
 
-  const filteredTx = (data?.transactions ?? []).filter(tx =>
+  const filteredTx = (data?.transactions ?? []).filter((tx: Transaction) =>
     typeFilter === "all" ? true : tx.type === typeFilter
   );
 
@@ -252,8 +249,8 @@ export default function BankingPage() {
 
   const transactionTabs: TabDef[] = [
     { label: "All", value: "all", count: data?.transactions.length, color: "default" },
-    { label: "Income", value: "income", count: data?.transactions.filter(t => t.type === "income").length, color: "success" },
-    { label: "Expense", value: "expense", count: data?.transactions.filter(t => t.type === "expense").length, color: "error" },
+    { label: "Income", value: "income", count: data?.transactions.filter((t: Transaction) => t.type === "income").length, color: "success" },
+    { label: "Expense", value: "expense", count: data?.transactions.filter((t: Transaction) => t.type === "expense").length, color: "error" },
   ];
 
   const handleDownloadReport = async () => {
@@ -326,8 +323,8 @@ export default function BankingPage() {
 
     // Income Table
     const incomeData = data.transactions
-      .filter(t => t.type === "income")
-      .map(t => [fmtDate(t.date), t.title, fmtPDF(t.amount)]);
+      .filter((t: Transaction) => t.type === "income")
+      .map((t: Transaction) => [fmtDate(t.date), t.title, fmtPDF(t.amount)]);
 
     if (incomeData.length > 0) {
       doc.setFontSize(14);
@@ -348,8 +345,8 @@ export default function BankingPage() {
 
     // Expense Table
     const expenseData = data.transactions
-      .filter(t => t.type === "expense")
-      .map(t => [fmtDate(t.date), t.title, t.category, fmtPDF(t.amount)]);
+      .filter((t: Transaction) => t.type === "expense")
+      .map((t: Transaction) => [fmtDate(t.date), t.title, t.category, fmtPDF(t.amount)]);
 
     if (expenseData.length > 0) {
       doc.setFontSize(14);
@@ -400,24 +397,24 @@ export default function BankingPage() {
     XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
 
     // 2. Payment Sheet
-    const incomeTx = data.transactions.filter(t => t.type === "income");
+    const incomeTx = data.transactions.filter((t: Transaction) => t.type === "income");
     const incomeRows = [
       ["PAYMENT TRANSACTIONS"],
       [],
       ["Date", "Description", "Amount", "Status"],
-      ...incomeTx.map(t => [fmtDate(t.date), t.title, t.amount, t.status])
+      ...incomeTx.map((t: Transaction) => [fmtDate(t.date), t.title, t.amount, t.status])
     ];
     const wsIncome = XLSX.utils.aoa_to_sheet(incomeRows);
     wsIncome["!cols"] = [{ wch: 15 }, { wch: 40 }, { wch: 15 }, { wch: 15 }];
     XLSX.utils.book_append_sheet(wb, wsIncome, "Payment");
 
     // 3. Expenses Sheet
-    const expenseTx = data.transactions.filter(t => t.type === "expense");
+    const expenseTx = data.transactions.filter((t: Transaction) => t.type === "expense");
     const expenseRows = [
       ["EXPENSE TRANSACTIONS"],
       [],
       ["Date", "Description", "Category", "Amount", "Status"],
-      ...expenseTx.map(t => [fmtDate(t.date), t.title, t.category, t.amount, t.status])
+      ...expenseTx.map((t: Transaction) => [fmtDate(t.date), t.title, t.category, t.amount, t.status])
     ];
     const wsExpenses = XLSX.utils.aoa_to_sheet(expenseRows);
     wsExpenses["!cols"] = [{ wch: 15 }, { wch: 40 }, { wch: 15 }, { wch: 15 }, { wch: 15 }];
