@@ -22,6 +22,7 @@ import SlidingDropDown from "@/components/shared/SlidingDropDown";
 import { FilterChips, FilterBadge } from "@/components/shared/FilterChips";
 import { useSelector } from "react-redux";
 import clsx from "clsx";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface Seat {
   _id: string;
@@ -39,21 +40,9 @@ const TYPE_ALL = "All";
 export default function SeatManagement() {
   const router = useRouter();
   const { mode } = useSelector((state: any) => state.theme);
-  const [filteredSeats, setFilteredSeats] = useState<Seat[]>([]);
-  const [totalItems, setTotalItems] = useState(0);
+  const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [floors, setFloors] = useState<string[]>([FLOOR_ALL]);
-
-  const [stats, setStats] = useState({
-    totalSeats: 0,
-    available: 0,
-    occupied: 0,
-    maintenance: 0,
-    acSeats: 0,
-  });
-
-  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
 
   // Filters
@@ -61,9 +50,9 @@ export default function SeatManagement() {
   const [statusFilter, setStatusFilter] = useState(STATUS_ALL);
   const [typeFilter, setTypeFilter] = useState(TYPE_ALL);
 
-  const fetchSeats = async () => {
-    setLoading(true);
-    try {
+  const { data: seatQueryData, isLoading: loading, refetch } = useQuery({
+    queryKey: ["seats", { floor: floorFilter, status: statusFilter, type: typeFilter, page: currentPage, limit: rowsPerPage }],
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (floorFilter !== FLOOR_ALL) params.set("floor", floorFilter);
       if (statusFilter !== STATUS_ALL) params.set("status", statusFilter);
@@ -74,23 +63,16 @@ export default function SeatManagement() {
       const res = await fetch(`/api/seat?${params.toString()}`);
       const data = await res.json();
       if (data.success) {
-        setFilteredSeats(data.data.seats);
-        setTotalItems(data.data.totalCount);
-        setStats(data.data.stats);
-        setFloors([FLOOR_ALL, ...data.data.floors]);
-      } else {
-        toast.error("Failed to load seats.");
+        return data.data;
       }
-    } catch {
-      toast.error("Internal Server Error");
-    } finally {
-      setLoading(false);
+      throw new Error(data.message || "Failed to load seats.");
     }
-  };
+  });
 
-  useEffect(() => {
-    fetchSeats();
-  }, [floorFilter, statusFilter, typeFilter, currentPage, rowsPerPage]);
+  const filteredSeats = seatQueryData?.seats || [];
+  const totalItems = seatQueryData?.totalCount || 0;
+  const stats = seatQueryData?.stats || { totalSeats: 0, available: 0, occupied: 0, maintenance: 0, acSeats: 0 };
+  const floors = [FLOOR_ALL, ...(seatQueryData?.floors || [])];
 
   const handleDelete = async (seat: Seat) => {
     if (!confirm(`Confirm deletion of ${seat.seatNumber}?`)) return;
@@ -102,7 +84,7 @@ export default function SeatManagement() {
       const data = await res.json();
       if (data.success) {
         toast.success("Seat deleted", { id: t });
-        fetchSeats();
+        queryClient.invalidateQueries({ queryKey: ["seats"] });
       } else toast.error(data.message, { id: t });
     } catch {
       toast.error("An error occurred", { id: t });
@@ -123,7 +105,7 @@ export default function SeatManagement() {
       const data = await res.json();
       if (data.success) {
         toast.success(data.message, { id: t });
-        fetchSeats();
+        queryClient.invalidateQueries({ queryKey: ["seats"] });
       } else {
         toast.error(data.message || "Action failed", { id: t });
       }
@@ -147,8 +129,6 @@ export default function SeatManagement() {
     } catch (error) {
       toast.error("An error occurred", { id: t });
       console.log(error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -241,7 +221,7 @@ export default function SeatManagement() {
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  toast.promise(fetchSeats(), {
+                  toast.promise(refetch(), {
                     loading: "Refreshing...",
                     success: "Synced",
                     error: "Error",
@@ -488,7 +468,7 @@ export default function SeatManagement() {
                   No seats match the selected filters.
                 </div>
               ) : (
-                filteredSeats.map((seat) => (
+                filteredSeats.map((seat: Seat) => (
                   <div
                     key={seat._id}
                     className={clsx(

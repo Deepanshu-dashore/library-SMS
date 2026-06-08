@@ -14,6 +14,7 @@ import { TABLE_IDS } from "@/constants/tableIds";
 import { useTableState } from "@/hooks/useTableState";
 import { useSelector } from "react-redux";
 import clsx from "clsx";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface User {
   _id: string;
@@ -32,10 +33,7 @@ interface User {
 export default function UserManagement() {
   const router = useRouter();
   const { mode } = useSelector((state: any) => state.theme);
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ total: 0, active: 0, inactive: 0, unverify: 0, withoutSeat: 0 });
-  const [total, setTotal] = useState(0);
+  const queryClient = useQueryClient();
 
   const {
     hydrated,
@@ -50,44 +48,36 @@ export default function UserManagement() {
     clearFilters,
   } = useTableState(TABLE_IDS.USERS);
 
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      const searchParam = searchTerm ? `search=${searchTerm}` : "";
+  // Debounce the search term to prevent excessive requests
+  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const { data: usersQueryData, isLoading: loading } = useQuery({
+    queryKey: ["users", { search: debouncedSearch, status: statusFilter, page: currentPage, limit: rowsPerPage }],
+    queryFn: async () => {
+      const searchParam = debouncedSearch ? `search=${debouncedSearch}` : "";
       const statusParam = statusFilter !== "All" ? `status=${statusFilter}` : "";
       const limitParam = `limit=${rowsPerPage}`;
       const pageParam = `page=${currentPage}`;
       const query = [searchParam, statusParam, limitParam, pageParam].filter(Boolean).join("&");
       const { data } = await axios.get(`/api/user${query ? `?${query}` : ""}`);
       if (data.success) {
-        setUsers(data.data.users);
-        setTotal(data.data.total);
-        if (data.data.stats) {
-          setStats(data.data.stats);
-        }
-      } else {
-        toast.error(data.message || "Failed to fetch users");
+        return data.data;
       }
-    } catch (error) {
-      toast.error("An error occurred while fetching users");
-    } finally {
-      setLoading(false);
-    }
-  };
+      throw new Error(data.message || "Failed to fetch users");
+    },
+    enabled: hydrated,
+  });
 
-  useEffect(() => {
-    if (!hydrated) return;
-
-    if (!searchTerm && statusFilter === "All") {
-      fetchUsers();
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      fetchUsers();
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [hydrated, searchTerm, statusFilter, currentPage, rowsPerPage]);
+  const users = usersQueryData?.users || [];
+  const total = usersQueryData?.total || 0;
+  const stats = usersQueryData?.stats || { total: 0, active: 0, inactive: 0, unverify: 0, withoutSeat: 0 };
 
   const handleDelete = async (user: User) => {
     if (!confirm(`Are you sure you want to delete ${user.name}?`)) return;
@@ -97,7 +87,7 @@ export default function UserManagement() {
       const { data } = await axios.delete(`/api/user/soft-delete/${user._id}`);
       if (data.success) {
         toast.success("User deleted successfully", { id: loadingToast });
-        fetchUsers();
+        queryClient.invalidateQueries({ queryKey: ["users"] });
       } else {
         toast.error(data.message || "Failed to delete user", { id: loadingToast });
       }
@@ -112,7 +102,7 @@ export default function UserManagement() {
       const { data } = await axios.patch(`/api/user/verify/${user._id}`);
       if (data.success) {
         toast.success("User verified successfully", { id: loadingToast });
-        fetchUsers();
+        queryClient.invalidateQueries({ queryKey: ["users"] });
       } else {
         toast.error(data.message || "Verification failed", { id: loadingToast });
       }

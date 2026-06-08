@@ -12,6 +12,7 @@ import * as XLSX from "xlsx";
 import { Icon } from "@iconify/react";
 import { useSelector } from "react-redux";
 import clsx from "clsx";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface ExpenseData {
   _id: string;
@@ -24,35 +25,24 @@ interface ExpenseData {
 }
 
 export default function ManageExpensesPage() {
-  const [expenses, setExpenses] = useState<ExpenseData[]>([]);
-  const [totalAmount, setTotalAmount] = useState(0);
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { mode } = useSelector((state: any) => state.theme);
+  const queryClient = useQueryClient();
 
-  const fetchExpenses = async () => {
-    try {
-      setLoading(true);
+  const { data: expensesQueryData, isLoading: loading } = useQuery({
+    queryKey: ["expenses"],
+    queryFn: async () => {
       const res = await fetch("/api/expence");
       const data = await res.json();
       if (res.ok && data.success) {
-        // The service returns { data: expenseArray, total: number }
-        // So ApiResponse wraps it as { success, message, data: { data, total } }
-        setExpenses(data.data?.data || []);
-        setTotalAmount(data.data?.total || 0);
-      } else {
-        toast.error(data.message || "Failed to fetch expenses");
+        return data.data;
       }
-    } catch (error) {
-      toast.error("An error occurred while fetching expenses");
-    } finally {
-      setLoading(false);
+      throw new Error(data.message || "Failed to fetch expenses");
     }
-  };
+  });
 
-  useEffect(() => {
-    fetchExpenses();
-  }, []);
+  const expenses = expensesQueryData?.data || [];
+  const totalAmount = expensesQueryData?.total || 0;
 
   const handleDelete = async (row: ExpenseData) => {
     if (!confirm("Are you sure you want to delete this expense?")) return;
@@ -64,7 +54,7 @@ export default function ManageExpensesPage() {
       const data = await res.json();
       if (res.ok && data.success) {
         toast.success("Expense deleted successfully");
-        fetchExpenses();
+        queryClient.invalidateQueries({ queryKey: ["expenses"] });
       } else {
         toast.error(data.message || "Failed to delete expense");
       }
@@ -101,7 +91,7 @@ export default function ManageExpensesPage() {
       ["Generated At", now.toLocaleString()],
       [],
       ["Title", "Amount", "Category", "Date", "Note"],
-      ...expenses.map(e => [
+      ...expenses.map((e: ExpenseData) => [
         e.title, 
         e.amount, 
         e.category.charAt(0).toUpperCase() + e.category.slice(1), 

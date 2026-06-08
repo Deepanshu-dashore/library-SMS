@@ -29,6 +29,7 @@ import * as XLSX from "xlsx";
 import { Icon } from "@iconify/react";
 import { useSelector } from "react-redux";
 import clsx from "clsx";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface Subscription {
   _id: string;
@@ -58,14 +59,7 @@ interface Stats {
 export default function SubscriptionManagement() {
   const router = useRouter();
   const { mode } = useSelector((state: any) => state.theme);
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const [stats, setStats] = useState<Stats>({
-    totalActive: 0,
-    totalExpired: 0,
-    totalCancelled: 0,
-    totalSub: 0
-  });
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   const {
     hydrated,
@@ -76,34 +70,27 @@ export default function SubscriptionManagement() {
     clearFilters,
   } = useTableState(TABLE_IDS.SUBSCRIPTIONS);
 
-  const fetchSubscriptions = async (status?: string) => {
-    setLoading(true);
-    try {
-      const url = status && status !== "All" ? `/api/subscription?status=${status}` : `/api/subscription`;
+  const { data: subQueryData, isLoading: loading } = useQuery({
+    queryKey: ["subscriptions", { status: statusFilter }],
+    queryFn: async () => {
+      const url = statusFilter && statusFilter !== "All" ? `/api/subscription?status=${statusFilter}` : `/api/subscription`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.success) {
-        setSubscriptions(data.data.subscriptions);
-        setStats({
-          totalActive: data.data.totalActive,
-          totalExpired: data.data.totalExpired,
-          totalCancelled: data.data.totalCancelled,
-          totalSub: data.data.totalSub
-        });
-      } else {
-        toast.error(data.message || "Failed to fetch subscriptions");
+        return data.data;
       }
-    } catch (error) {
-      toast.error("An error occurred while fetching subscriptions");
-    } finally {
-      setLoading(false);
-    }
-  };
+      throw new Error(data.message || "Failed to fetch subscriptions");
+    },
+    enabled: hydrated,
+  });
 
-  useEffect(() => {
-    if (!hydrated) return;
-    fetchSubscriptions(statusFilter);
-  }, [hydrated, statusFilter]);
+  const subscriptions = subQueryData?.subscriptions || [];
+  const stats = {
+    totalActive: subQueryData?.totalActive || 0,
+    totalExpired: subQueryData?.totalExpired || 0,
+    totalCancelled: subQueryData?.totalCancelled || 0,
+    totalSub: subQueryData?.totalSub || 0
+  };
 
   const handleCancel = async (sub: Subscription) => {
     if (!confirm(`Are you sure you want to cancel the subscription for ${sub.userId.name}?`)) return;
@@ -118,7 +105,7 @@ export default function SubscriptionManagement() {
       const data = await res.json();
       if (data.success) {
         toast.success("Subscription cancelled successfully", { id: loadingToast });
-        fetchSubscriptions();
+        queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
       } else {
         toast.error(data.message || "Failed to cancel subscription", { id: loadingToast });
       }
@@ -247,7 +234,7 @@ export default function SubscriptionManagement() {
       ["Generated At", now.toLocaleString()],
       [],
       ["Member", "Email", "Seat Number", "Start Date", "End Date", "Status"],
-      ...subscriptions.map(s => [
+      ...subscriptions.map((s: Subscription) => [
         s.userId?.name || "Unknown",
         s.userId?.email || "No email",
         s.seatId?.seatNumber || "-",
@@ -349,7 +336,7 @@ Regards,
   const filteredData = React.useMemo(() => {
     if (!searchTerm.trim()) return subscriptions;
     const q = searchTerm.toLowerCase();
-    return subscriptions.filter((s) => {
+    return subscriptions.filter((s: Subscription) => {
       const name = s.userId?.name?.toLowerCase() ?? "";
       const email = s.userId?.email?.toLowerCase() ?? "";
       const seat = String(s.seatId?.seatNumber ?? "").toLowerCase();

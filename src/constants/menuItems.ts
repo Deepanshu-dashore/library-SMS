@@ -93,5 +93,9 @@ export const MENU_ITEMS = [
     title: "Recycle Bin",
     path: "/trash",
     icon: "solar:trash-bin-trash-bold-duotone",
+    subItems: [
+      { name: "Members Trash", path: "/trash?filter=members" },
+      { name: "Seats Trash", path: "/trash?filter=seats" },
+    ],
   },
 ];

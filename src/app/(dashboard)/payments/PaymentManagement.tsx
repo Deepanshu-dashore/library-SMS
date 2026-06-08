@@ -91,12 +91,25 @@ interface Payment {
   createdAt: string;
 }
 
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+interface Payment {
+  _id: string;
+  userId: {
+    name: string;
+    email: string;
+  };
+  amount: number;
+  paymentMode: string;
+  durationDays: number;
+  receiptNumber: string;
+  createdAt: string;
+}
+
 export default function PaymentManagement() {
   const router = useRouter();
   const { mode } = useSelector((state: any) => state.theme);
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<any>(null);
+  const queryClient = useQueryClient();
 
   const {
     hydrated,
@@ -107,35 +120,35 @@ export default function PaymentManagement() {
   } = useTableState(TABLE_IDS.PAYMENTS);
   const [sharingId, setSharingId] = useState<string | null>(null);
 
-  const fetchPayments = async () => {
-    setLoading(true);
-    try {
-      const searchParam = searchTerm ? `search=${searchTerm}` : "";
+  // Debounce search term to prevent excessive requests
+  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const { data: paymentQueryData, isLoading: loading } = useQuery({
+    queryKey: ["payments", { search: debouncedSearch, mode: activeTab }],
+    queryFn: async () => {
+      const searchParam = debouncedSearch ? `search=${debouncedSearch}` : "";
       const modeParam = activeTab !== "All" ? `mode=${activeTab}` : "";
       const query = [searchParam, modeParam].filter(Boolean).join("&");
       
       const res = await fetch(`/api/payment${query ? `?${query}` : ""}`);
       const data = await res.json();
       if (data.success) {
-        setPayments(data.data.payments);
-        setStats(data.data.stats);
-      } else {
-        toast.error(data.message || "Failed to fetch payments");
+        return data.data;
       }
-    } catch (error) {
-      toast.error("An error occurred while fetching payments");
-    } finally {
-      setLoading(false);
-    }
-  };
+      throw new Error(data.message || "Failed to fetch payments");
+    },
+    enabled: hydrated,
+  });
 
-  useEffect(() => {
-    if (!hydrated) return;
-    const timer = setTimeout(() => {
-      fetchPayments();
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [hydrated, activeTab, searchTerm]);
+  const payments = paymentQueryData?.payments || [];
+  const stats = paymentQueryData?.stats || null;
   
   const handleShareReceipt = async (payment: Payment) => {
     setSharingId(payment._id);
@@ -284,7 +297,7 @@ export default function PaymentManagement() {
       ["Generated At", now.toLocaleString()],
       [],
       ["Member", "Amount", "Mode", "Receipt No.", "Date"],
-      ...payments.map(p => [
+      ...payments.map((p: Payment) => [
         p.userId?.name || "Deleted User",
         p.amount,
         p.paymentMode.toUpperCase(),

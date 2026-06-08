@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
 import { useSelector } from "react-redux";
@@ -69,8 +70,20 @@ export default function DashboardPage() {
   const [greeting, setGreeting] = useState("Good Evening");
   const [activeSlide, setActiveSlide] = useState(0);
   const [statView, setStatView] = useState("monthly");
-  const [dashData, setDashData] = useState<any>(null);
-  const [dashLoading, setDashLoading] = useState(true);
+
+  const { data: dashboardQueryData, isLoading: dashLoading } = useQuery({
+    queryKey: ["dashboard"],
+    queryFn: async () => {
+      const res = await fetch("/api/dashboard");
+      const json = await res.json();
+      if (res.ok && json.success) {
+        return json.data;
+      }
+      throw new Error(json.message || "Failed to load dashboard data");
+    }
+  });
+
+  const dashData = dashboardQueryData || null;
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -84,21 +97,6 @@ export default function DashboardPage() {
       setActiveSlide((prev) => (prev + 1) % FEATURE_SLIDES.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const res = await fetch("/api/dashboard");
-        const json = await res.json();
-        if (json?.data) setDashData(json.data);
-      } catch (e) {
-        console.error("Dashboard fetch error", e);
-      } finally {
-        setDashLoading(false);
-      }
-    };
-    fetchDashboard();
   }, []);
 
   const sc = dashData?.StateCards;
