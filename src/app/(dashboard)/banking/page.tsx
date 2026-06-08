@@ -14,9 +14,6 @@ import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { DataTable, ColumnDef, TabDef } from "@/components/shared/DataTable";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import * as XLSX from "xlsx";
 import { TABLE_IDS } from "@/constants/tableIds";
 import { useTableState } from "@/hooks/useTableState";
 
@@ -259,173 +256,187 @@ export default function BankingPage() {
   const handleDownloadReport = async () => {
     if (!data) return;
 
-    const doc = new jsPDF();
-    const libraryName = currentUser?.libraryName || currentUser?.name || "My Library";
-    
-    // Format filename: Banking_CurrentDateFormalFormat_TimeCurrent
-    const now = new Date();
-    const formalDate = now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }).replace(/\s/g, "-");
-    const formalTime = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true }).replace(/[:\s]/g, "-");
-    const filename = `Banking_${formalDate}_${formalTime}.pdf`;
+    try {
+      const { default: jsPDF } = await import("jspdf");
+      const { default: autoTable } = await import("jspdf-autotable");
 
-    const dateStr = now.toLocaleString("en-IN", { 
-      day: "2-digit", month: "short", year: "numeric", 
-      hour: "2-digit", minute: "2-digit" 
-    });
+      const doc = new jsPDF();
+      const libraryName = currentUser?.libraryName || currentUser?.name || "My Library";
+      
+      // Format filename: Banking_CurrentDateFormalFormat_TimeCurrent
+      const now = new Date();
+      const formalDate = now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }).replace(/\s/g, "-");
+      const formalTime = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true }).replace(/[:\s]/g, "-");
+      const filename = `Banking_${formalDate}_${formalTime}.pdf`;
 
-    const fmtPDF = (v: number) => "Rs. " + v.toLocaleString("en-IN", { maximumFractionDigits: 0 });
-
-    // Logo Handling
-    let yAnchor = 20;
-    if (currentUser?.profileImage) {
-        try {
-            const img = new Image();
-            img.src = currentUser.profileImage;
-            await new Promise((resolve) => {
-                img.onload = resolve;
-                img.onerror = resolve; // Continue anyway if fails
-            });
-            if (img.complete && img.naturalWidth > 0) {
-               doc.addImage(img, 'PNG', 14, 15, 12, 12);
-               yAnchor = 35;
-            }
-        } catch (e) { console.error(e); }
-    }
-
-    // Header Left
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.setTextColor(30, 41, 59);
-    doc.text(libraryName, 14, (currentUser?.profileImage ? 33 : 22));
-    
-    doc.setFontSize(11);
-    doc.setTextColor(71, 85, 105);
-    doc.text("Banking & Financial Report", 14, (currentUser?.profileImage ? 40 : 28));
-
-    // Header Right
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(100, 116, 139);
-    doc.text(`Generated: ${dateStr}`, doc.internal.pageSize.width - 14, 22, { align: "right" });
-    doc.text(`Period: ${selectedYear} ${selectedMonth > 0 ? MONTHS[selectedMonth] : "(Yearly)"}`, doc.internal.pageSize.width - 14, 27, { align: "right" });
-
-    // Summary Table
-    autoTable(doc, {
-      startY: (currentUser?.profileImage ? 50 : 38),
-      head: [["Summary Category", "Total Amount"]],
-      body: [
-        ["Total Balance", fmtPDF(totals.balance)],
-        ["Total Income", fmtPDF(totals.totalIncome)],
-        ["Total Expenses", fmtPDF(totals.totalExpense)],
-      ],
-      theme: "striped",
-      headStyles: { fillColor: [30, 41, 59], textColor: 255, fontSize: 11, fontStyle: "bold" },
-      bodyStyles: { fontSize: 10, fontStyle: "bold" },
-      columnStyles: { 1: { halign: "right" } },
-    });
-
-    // Income Table
-    const incomeData = data.transactions
-      .filter(t => t.type === "income")
-      .map(t => [fmtDate(t.date), t.title, fmtPDF(t.amount)]);
-
-    if (incomeData.length > 0) {
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(5, 150, 105); // Emerald 600
-      doc.text("Income Details", 14, (doc as any).lastAutoTable.finalY + 12);
-
-      autoTable(doc, {
-        startY: (doc as any).lastAutoTable.finalY + 16,
-        head: [["Date", "Source Description", "Credit Amount"]],
-        body: incomeData,
-        theme: "grid",
-        headStyles: { fillColor: [16, 185, 129], textColor: 255, fontSize: 9 },
-        bodyStyles: { fontSize: 9 },
-        columnStyles: { 2: { halign: "right" } },
+      const dateStr = now.toLocaleString("en-IN", { 
+        day: "2-digit", month: "short", year: "numeric", 
+        hour: "2-digit", minute: "2-digit" 
       });
-    }
 
-    // Expense Table
-    const expenseData = data.transactions
-      .filter(t => t.type === "expense")
-      .map(t => [fmtDate(t.date), t.title, t.category, fmtPDF(t.amount)]);
+      const fmtPDF = (v: number) => "Rs. " + v.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 
-    if (expenseData.length > 0) {
-      doc.setFontSize(14);
+      // Logo Handling
+      let yAnchor = 20;
+      if (currentUser?.profileImage) {
+          try {
+              const img = new Image();
+              img.src = currentUser.profileImage;
+              await new Promise((resolve) => {
+                  img.onload = resolve;
+                  img.onerror = resolve; // Continue anyway if fails
+              });
+              if (img.complete && img.naturalWidth > 0) {
+                 doc.addImage(img, 'PNG', 14, 15, 12, 12);
+                 yAnchor = 35;
+              }
+          } catch (e) { console.error(e); }
+      }
+
+      // Header Left
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(225, 29, 72); // Rose 600
-      doc.text("Expense Details", 14, (doc as any).lastAutoTable.finalY + 12);
+      doc.setFontSize(18);
+      doc.setTextColor(30, 41, 59);
+      doc.text(libraryName, 14, (currentUser?.profileImage ? 33 : 22));
+      
+      doc.setFontSize(11);
+      doc.setTextColor(71, 85, 105);
+      doc.text("Banking & Financial Report", 14, (currentUser?.profileImage ? 40 : 28));
 
+      // Header Right
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Generated: ${dateStr}`, doc.internal.pageSize.width - 14, 22, { align: "right" });
+      doc.text(`Period: ${selectedYear} ${selectedMonth > 0 ? MONTHS[selectedMonth] : "(Yearly)"}`, doc.internal.pageSize.width - 14, 27, { align: "right" });
+
+      // Summary Table
       autoTable(doc, {
-        startY: (doc as any).lastAutoTable.finalY + 16,
-        head: [["Date", "Expense Description", "Category", "Debit Amount"]],
-        body: expenseData,
-        theme: "grid",
-        headStyles: { fillColor: [244, 63, 94], textColor: 255, fontSize: 9 },
-        bodyStyles: { fontSize: 9 },
-        columnStyles: { 3: { halign: "right" } },
+        startY: (currentUser?.profileImage ? 50 : 38),
+        head: [["Summary Category", "Total Amount"]],
+        body: [
+          ["Total Balance", fmtPDF(totals.balance)],
+          ["Total Income", fmtPDF(totals.totalIncome)],
+          ["Total Expenses", fmtPDF(totals.totalExpense)],
+        ],
+        theme: "striped",
+        headStyles: { fillColor: [30, 41, 59], textColor: 255, fontSize: 11, fontStyle: "bold" },
+        bodyStyles: { fontSize: 10, fontStyle: "bold" },
+        columnStyles: { 1: { halign: "right" } },
       });
-    }
 
-    doc.save(filename);
-    toast.success("PDF Financial report generated successfully");
-    setShowExportMenu(false);
+      // Income Table
+      const incomeData = data.transactions
+        .filter(t => t.type === "income")
+        .map(t => [fmtDate(t.date), t.title, fmtPDF(t.amount)]);
+
+      if (incomeData.length > 0) {
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(5, 150, 105); // Emerald 600
+        doc.text("Income Details", 14, (doc as any).lastAutoTable.finalY + 12);
+
+        autoTable(doc, {
+          startY: (doc as any).lastAutoTable.finalY + 16,
+          head: [["Date", "Source Description", "Credit Amount"]],
+          body: incomeData,
+          theme: "grid",
+          headStyles: { fillColor: [16, 185, 129], textColor: 255, fontSize: 9 },
+          bodyStyles: { fontSize: 9 },
+          columnStyles: { 2: { halign: "right" } },
+        });
+      }
+
+      // Expense Table
+      const expenseData = data.transactions
+        .filter(t => t.type === "expense")
+        .map(t => [fmtDate(t.date), t.title, t.category, fmtPDF(t.amount)]);
+
+      if (expenseData.length > 0) {
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(225, 29, 72); // Rose 600
+        doc.text("Expense Details", 14, (doc as any).lastAutoTable.finalY + 12);
+
+        autoTable(doc, {
+          startY: (doc as any).lastAutoTable.finalY + 16,
+          head: [["Date", "Expense Description", "Category", "Debit Amount"]],
+          body: expenseData,
+          theme: "grid",
+          headStyles: { fillColor: [244, 63, 94], textColor: 255, fontSize: 9 },
+          bodyStyles: { fontSize: 9 },
+          columnStyles: { 3: { halign: "right" } },
+        });
+      }
+
+      doc.save(filename);
+      toast.success("PDF Financial report generated successfully");
+      setShowExportMenu(false);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to generate PDF report");
+    }
   };
 
-  const handleDownloadExcel = () => {
+  const handleDownloadExcel = async () => {
     if (!data) return;
 
-    const wb = XLSX.utils.book_new();
-    const now = new Date();
-    const formalDate = now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }).replace(/\s/g, "-");
-    const formalTime = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true }).replace(/[:\s]/g, "-");
-    const filename = `Banking_${formalDate}_${formalTime}.xlsx`;
+    try {
+      const XLSX = await import("xlsx");
+      const wb = XLSX.utils.book_new();
+      const now = new Date();
+      const formalDate = now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }).replace(/\s/g, "-");
+      const formalTime = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true }).replace(/[:\s]/g, "-");
+      const filename = `Banking_${formalDate}_${formalTime}.xlsx`;
 
-    // 1. Summary Sheet
-    const summaryRows = [
-      ["FINANCIAL SUMMARY REPORT"],
-      [],
-      ["Property", "Value"],
-      ["Report Period", `${selectedYear} ${selectedMonth > 0 ? MONTHS[selectedMonth] : "(Yearly)"}`],
-      ["Generated At", now.toLocaleString()],
-      [],
-      ["Category", "Amount"],
-      ["Total Balance", totals.balance],
-      ["Total Income", totals.totalIncome],
-      ["Total Expenses", totals.totalExpense],
-    ];
-    const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
-    wsSummary["!cols"] = [{ wch: 25 }, { wch: 25 }];
-    XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
+      // 1. Summary Sheet
+      const summaryRows = [
+        ["FINANCIAL SUMMARY REPORT"],
+        [],
+        ["Property", "Value"],
+        ["Report Period", `${selectedYear} ${selectedMonth > 0 ? MONTHS[selectedMonth] : "(Yearly)"}`],
+        ["Generated At", now.toLocaleString()],
+        [],
+        ["Category", "Amount"],
+        ["Total Balance", totals.balance],
+        ["Total Income", totals.totalIncome],
+        ["Total Expenses", totals.totalExpense],
+      ];
+      const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
+      wsSummary["!cols"] = [{ wch: 25 }, { wch: 25 }];
+      XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
 
-    // 2. Payment Sheet
-    const incomeTx = data.transactions.filter(t => t.type === "income");
-    const incomeRows = [
-      ["PAYMENT TRANSACTIONS"],
-      [],
-      ["Date", "Description", "Amount", "Status"],
-      ...incomeTx.map(t => [fmtDate(t.date), t.title, t.amount, t.status])
-    ];
-    const wsIncome = XLSX.utils.aoa_to_sheet(incomeRows);
-    wsIncome["!cols"] = [{ wch: 15 }, { wch: 40 }, { wch: 15 }, { wch: 15 }];
-    XLSX.utils.book_append_sheet(wb, wsIncome, "Payment");
+      // 2. Payment Sheet
+      const incomeTx = data.transactions.filter(t => t.type === "income");
+      const incomeRows = [
+        ["PAYMENT TRANSACTIONS"],
+        [],
+        ["Date", "Description", "Amount", "Status"],
+        ...incomeTx.map(t => [fmtDate(t.date), t.title, t.amount, t.status])
+      ];
+      const wsIncome = XLSX.utils.aoa_to_sheet(incomeRows);
+      wsIncome["!cols"] = [{ wch: 15 }, { wch: 40 }, { wch: 15 }, { wch: 15 }];
+      XLSX.utils.book_append_sheet(wb, wsIncome, "Payment");
 
-    // 3. Expenses Sheet
-    const expenseTx = data.transactions.filter(t => t.type === "expense");
-    const expenseRows = [
-      ["EXPENSE TRANSACTIONS"],
-      [],
-      ["Date", "Description", "Category", "Amount", "Status"],
-      ...expenseTx.map(t => [fmtDate(t.date), t.title, t.category, t.amount, t.status])
-    ];
-    const wsExpenses = XLSX.utils.aoa_to_sheet(expenseRows);
-    wsExpenses["!cols"] = [{ wch: 15 }, { wch: 40 }, { wch: 15 }, { wch: 15 }, { wch: 15 }];
-    XLSX.utils.book_append_sheet(wb, wsExpenses, "Expenses");
+      // 3. Expenses Sheet
+      const expenseTx = data.transactions.filter(t => t.type === "expense");
+      const expenseRows = [
+        ["EXPENSE TRANSACTIONS"],
+        [],
+        ["Date", "Description", "Category", "Amount", "Status"],
+        ...expenseTx.map(t => [fmtDate(t.date), t.title, t.category, t.amount, t.status])
+      ];
+      const wsExpenses = XLSX.utils.aoa_to_sheet(expenseRows);
+      wsExpenses["!cols"] = [{ wch: 15 }, { wch: 40 }, { wch: 15 }, { wch: 15 }, { wch: 15 }];
+      XLSX.utils.book_append_sheet(wb, wsExpenses, "Expenses");
 
-    XLSX.writeFile(wb, filename);
-    toast.success("Excel Financial report generated successfully");
-    setShowExportMenu(false);
+      XLSX.writeFile(wb, filename);
+      toast.success("Excel Financial report generated successfully");
+      setShowExportMenu(false);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to generate Excel report");
+    }
   };
 
   return (

@@ -47,6 +47,10 @@ export const MENU_ITEMS = [
     title: "Payments",
     icon: "solar:card-bold-duotone",
     path: "/payments",
+    subItems: [
+      { name: "Manage Payments", path: "/payments" },
+      { name: "Payment Report", path: "/payments/report" },
+    ],
   },
 
   {

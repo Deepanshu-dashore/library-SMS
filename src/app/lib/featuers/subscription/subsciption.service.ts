@@ -214,7 +214,8 @@ export class SubscriptionService {
   static async renewSubscription(
     subscriptionId: string,
     durationDays: number,
-    paymentMode: string,
+    paymentMode?: string,
+    splitPayments?: { mode: string; amount: number }[],
   ) {
     await connectDB();
     const session = await mongoose.startSession();
@@ -251,8 +252,16 @@ export class SubscriptionService {
       const baseDate = new Date(subscription.endDate);
 
       const validModes = ["cash", "upi", "card"];
-      if (!validModes.includes(paymentMode)) {
+      if (paymentMode && !validModes.includes(paymentMode)) {
         throw Error("Invalid payment mode");
+      }
+
+      if (splitPayments) {
+        for (const p of splitPayments) {
+          if (!validModes.includes(p.mode)) {
+            throw Error(`Invalid payment mode: ${p.mode}`);
+          }
+        }
       }
 
       const newEndDate = new Date(baseDate);
@@ -273,22 +282,47 @@ export class SubscriptionService {
       const dayPrice = seat.price / 30; // acceptable assumption for now
       const amount = Math.round(dayPrice * durationDays);
 
-      const [payment] = await Payment.create(
-        [
-          {
-            userId: subscription.userId,
-            subscriptionId: subscription._id,
-            amount,
-            paymentMode,
-            durationDays,
-            receiptNumber: generateReceiptNumber(),
-          },
-        ],
-        { session },
-      );
+      const commonReceiptNumber = generateReceiptNumber();
+      const paymentsToCreate =
+        splitPayments && splitPayments.length > 0
+          ? splitPayments.map((p) => ({
+              userId: subscription.userId,
+              subscriptionId: subscription._id,
+              amount: p.amount,
+              paymentMode: p.mode,
+              durationDays,
+              receiptNumber: commonReceiptNumber,
+            }))
+          : [
+              {
+                userId: subscription.userId,
+                subscriptionId: subscription._id,
+                amount,
+                paymentMode: paymentMode as string,
+                durationDays,
+                receiptNumber: commonReceiptNumber,
+              },
+            ];
+
+      // Validate total amount
+      if (splitPayments && splitPayments.length > 0) {
+        const totalSplit = splitPayments.reduce((acc, p) => acc + p.amount, 0);
+        if (totalSplit !== amount) {
+          throw new Error(`Total split payments must be exactly ₹${amount}`);
+        }
+      }
+
+      const createdPayments = await Payment.create(paymentsToCreate, {
+        session,
+        ordered: true,
+      });
 
       await session.commitTransaction();
-      return { subscription, payment };
+      return {
+        subscription,
+        payment: createdPayments[0],
+        payments: createdPayments,
+      };
     } catch (error) {
       await session.abortTransaction();
       throw error;

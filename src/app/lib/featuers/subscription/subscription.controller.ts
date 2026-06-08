@@ -158,20 +158,25 @@ export class SubscriptionController {
     if (!library) {
       return ApiResponse(401, null, "Unauthorized");
     }
-    const { subscriptionId, durationDays, paymentMode } = await req.json();
+    const { subscriptionId, durationDays, paymentMode, splitPayments } = await req.json();
     try {
-      const subscription = await SubscriptionService.renewSubscription(
+      const result = await SubscriptionService.renewSubscription(
         subscriptionId,
         durationDays,
         paymentMode,
+        splitPayments,
       );
       return ApiResponse(
         200,
-        subscription,
+        result,
         "Subscription renewed successfully",
       );
-    } catch (error) {
-      return ApiResponse(500, null, "Failed to renew subscription");
+    } catch (error: any) {
+      return ApiResponse(
+        400,
+        null,
+        error.message || "Failed to renew subscription",
+      );
     }
   }
 

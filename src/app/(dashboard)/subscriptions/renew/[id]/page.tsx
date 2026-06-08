@@ -35,6 +35,9 @@ export default function RenewSubscriptionPage() {
     paymentMode: "cash"
   });
 
+  const [isSplitPayment, setIsSplitPayment] = useState(false);
+  const [splitPayments, setSplitPayments] = useState<{ mode: string; amount: number }[]>([]);
+
   useEffect(() => {
     const fetchSub = async () => {
       try {
@@ -56,6 +59,20 @@ export default function RenewSubscriptionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isSplitPayment) {
+      const total = splitPayments.reduce((s, p) => s + (p.amount || 0), 0);
+      if (total !== estimatedAmount) {
+        toast.error(`Split payments total must be exactly ₹${estimatedAmount}`);
+        return;
+      }
+      const hasInvalidAmount = splitPayments.some(p => (p.amount || 0) <= 0);
+      if (hasInvalidAmount) {
+        toast.error("Please enter a valid amount for all split payments");
+        return;
+      }
+    }
+
     setLoading(true);
     const loadingToast = toast.loading("Renewing subscription...");
     try {
@@ -64,7 +81,9 @@ export default function RenewSubscriptionPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           subscriptionId: id,
-          ...formData
+          durationDays: formData.durationDays,
+          splitPayments: isSplitPayment ? splitPayments : undefined,
+          paymentMode: isSplitPayment ? undefined : formData.paymentMode
         })
       });
       const result = await res.json();
@@ -86,6 +105,13 @@ export default function RenewSubscriptionPage() {
 
   const { subscription } = data;
   const estimatedAmount = Math.round((subscription.seatId.price / 30) * formData.durationDays);
+
+  const handleToggleSplit = () => {
+    setIsSplitPayment(!isSplitPayment);
+    if (!isSplitPayment && splitPayments.length === 0) {
+      setSplitPayments([{ mode: "cash", amount: estimatedAmount }]);
+    }
+  };
 
   return (
     <div className={clsx(mode === "dark" ? "bg-transparent" : "bg-gray-50/50", "min-h-screen")}>
@@ -148,7 +174,7 @@ export default function RenewSubscriptionPage() {
                         min="1"
                         required
                         value={formData.durationDays}
-                        onChange={(e) => setFormData({ ...formData, durationDays: parseInt(e.target.value) })}
+                        onChange={(e) => setFormData({ ...formData, durationDays: parseInt(e.target.value) || 0 })}
                         className={clsx("flex-1 w-full px-4 py-4 bg-transparent outline-none text-[15px] font-public-sans font-mono", mode === "dark" ? "text-white" : "text-gray-900")}
                       />
                       <div className={clsx("border-l px-4 flex items-center justify-center text-[13px] font-public-sans font-bold uppercase tracking-widest shrink-0", mode === "dark" ? "bg-slate-950/40 border-gray-800 text-slate-500" : "bg-gray-50/80 border-gray-300/80 text-gray-500")}>
@@ -159,26 +185,113 @@ export default function RenewSubscriptionPage() {
                 </div>
 
                 {/* Payment Mode */}
-                <div className="space-y-2 pt-2">
-                  <div>
-                    <label className={clsx("block text-[15px] font-public-sans font-bold", mode === "dark" ? "text-gray-200" : "text-gray-900")}>Payment Mode</label>
-                    <p className={clsx("text-[13px] font-public-sans mt-0.5 mb-2", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Select how the user paid for this renewal.</p>
-                  </div>
-                  <div className="relative">
-                    <select
-                      required
-                      value={formData.paymentMode}
-                      onChange={(e) => setFormData({ ...formData, paymentMode: e.target.value })}
-                      className={clsx("w-full px-4 py-4 border rounded-xl text-[15px] font-public-sans outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 hover:border-gray-400 transition-all appearance-none cursor-pointer", mode === "dark" ? "bg-slate-900 border-gray-800 text-white" : "bg-white border-gray-300/60 text-gray-900")}
-                    >
-                      <option value="cash">Cash</option>
-                      <option value="upi">UPI</option>
-                      <option value="card">Card</option>
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                      <Icon icon="solar:alt-arrow-down-linear" width={20} height={20} />
+                <div className="space-y-4 pt-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <label className={clsx("block text-[15px] font-public-sans font-bold", mode === "dark" ? "text-gray-200" : "text-gray-900")}>Payment Details</label>
+                      <p className={clsx("text-[13px] font-public-sans mt-0.5 mb-2", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Select payment mode or split between multiple modes.</p>
                     </div>
+                    <button
+                      type="button"
+                      onClick={handleToggleSplit}
+                      className={clsx(
+                        "px-4 py-2 rounded-lg text-xs font-semibold transition-all border flex items-center gap-2",
+                        isSplitPayment
+                          ? (mode === "dark" ? "bg-amber-950/20 text-amber-500 border-amber-900/40" : "bg-amber-50 text-amber-600 border-amber-200")
+                          : (mode === "dark" ? "bg-slate-900 text-gray-400 border-gray-800 hover:bg-slate-800" : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100")
+                      )}
+                    >
+                      <Icon icon={isSplitPayment ? "solar:close-circle-bold" : "solar:bill-list-bold"} width={16} />
+                      {isSplitPayment ? "Cancel Split Payment" : "Enable Split Payment"}
+                    </button>
                   </div>
+
+                  {!isSplitPayment ? (
+                    <div className="relative">
+                      <select
+                        required
+                        value={formData.paymentMode}
+                        onChange={(e) => setFormData({ ...formData, paymentMode: e.target.value })}
+                        className={clsx("w-full px-4 py-4 border rounded-xl text-[15px] font-public-sans outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 hover:border-gray-400 transition-all appearance-none cursor-pointer", mode === "dark" ? "bg-slate-900 border-gray-800 text-white" : "bg-white border-gray-300/60 text-gray-900")}
+                      >
+                        <option value="cash">Cash</option>
+                        <option value="upi">UPI</option>
+                        <option value="card">Card</option>
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                        <Icon icon="solar:alt-arrow-down-linear" width={20} height={20} />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className={clsx("space-y-3 p-4 rounded-xl border", mode === "dark" ? "bg-slate-900/40 border-gray-800" : "bg-gray-50/50 border-gray-200/60")}>
+                      {splitPayments.map((payment, index) => (
+                        <div key={index} className="flex flex-col sm:flex-row gap-3 items-end">
+                          <div className="flex-1 w-full">
+                            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block px-1">Mode</label>
+                            <div className="relative">
+                              <select
+                                value={payment.mode}
+                                onChange={(e) => {
+                                  const newPayments = [...splitPayments];
+                                  newPayments[index].mode = e.target.value;
+                                  setSplitPayments(newPayments);
+                                }}
+                                className={clsx("w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-indigo-500 transition-all border", mode === "dark" ? "bg-slate-900 border-gray-800 text-gray-300" : "bg-white border-gray-200 text-gray-800")}
+                              >
+                                <option value="cash">Cash</option>
+                                <option value="upi">UPI</option>
+                                <option value="card">Card</option>
+                              </select>
+                              <Icon icon="solar:alt-arrow-down-linear" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            </div>
+                          </div>
+                          <div className="flex-1 w-full">
+                            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block px-1">Amount</label>
+                            <input
+                              type="number"
+                              placeholder="0"
+                              value={payment.amount}
+                              onChange={(e) => {
+                                const newPayments = [...splitPayments];
+                                newPayments[index].amount = parseInt(e.target.value) || 0;
+                                setSplitPayments(newPayments);
+                              }}
+                              className={clsx("w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-indigo-500 transition-all font-mono border", mode === "dark" ? "bg-slate-900 border-gray-800 text-gray-300" : "bg-white border-gray-200 text-gray-800")}
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newPayments = splitPayments.filter((_, i) => i !== index);
+                              setSplitPayments(newPayments);
+                              if (newPayments.length === 0) setIsSplitPayment(false);
+                            }}
+                            className={clsx("p-3 rounded-lg transition-all shrink-0 border", mode === "dark" ? "bg-red-950/20 border-red-900/30 text-red-400 hover:bg-red-950/40" : "bg-white border-red-100 text-red-500 hover:bg-red-50")}
+                          >
+                            <Icon icon="solar:trash-bin-trash-bold" width={20} />
+                          </button>
+                        </div>
+                      ))}
+
+                      <div className={clsx("flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 mt-3 border-t border-dashed", mode === "dark" ? "border-gray-800" : "border-gray-200")}>
+                        <button
+                          type="button"
+                          onClick={() => setSplitPayments([...splitPayments, { mode: "cash", amount: 0 }])}
+                          className={clsx("flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-colors border", mode === "dark" ? "bg-indigo-950/40 text-indigo-400 border-indigo-900/50 hover:bg-indigo-950/60" : "bg-indigo-50 text-indigo-600 border-indigo-100 hover:bg-indigo-100")}
+                        >
+                          <Icon icon="solar:add-circle-bold" width={18} />
+                          Add Payment Row
+                        </button>
+
+                        <div className={clsx("flex items-center gap-3 px-4 py-1.5 rounded-lg border", mode === "dark" ? "bg-amber-950/20 border-amber-900/40" : "bg-amber-100")}>
+                          <span className={clsx("text-[11px] font-barlow font-semibold uppercase", mode === "dark" ? "text-amber-400" : "text-gray-600")}>Total Split:</span>
+                          <span className={`text-sm font-bold ${splitPayments.reduce((s, p) => s + p.amount, 0) !== estimatedAmount ? "text-red-500" : "text-emerald-700"}`}>
+                            ₹{splitPayments.reduce((s, p) => s + p.amount, 0)} / ₹{estimatedAmount}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <Button
@@ -204,6 +317,20 @@ export default function RenewSubscriptionPage() {
                   <span className={clsx("font-semibold tracking-wide", mode === "dark" ? "text-gray-400" : "text-gray-500")}>Renewal Fee</span>
                   <span className={clsx("font-bold", mode === "dark" ? "text-white" : "text-gray-900")}>₹{estimatedAmount}</span>
                 </div>
+
+                {isSplitPayment && splitPayments.length > 0 && (
+                  <div className={clsx("p-4 rounded-xl space-y-3 border", mode === "dark" ? "bg-slate-900/60 border-gray-800" : "bg-gray-50 border-gray-100")}>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Payment Breakdown</p>
+                    <div className="space-y-2">
+                      {splitPayments.map((p, i) => (
+                        <div key={i} className="flex justify-between items-center text-xs font-public-sans px-1">
+                          <span className={clsx("font-medium capitalize", mode === "dark" ? "text-gray-400" : "text-gray-500")}>{p.mode}</span>
+                          <span className={clsx("font-bold font-mono", mode === "dark" ? "text-white" : "text-gray-900")}>₹{p.amount}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className={clsx("pt-6 border-t border-dashed", mode === "dark" ? "border-gray-800" : "border-gray-200")}>
                    <div className={clsx("p-2 rounded-xl border flex gap-4 items-center", mode === "dark" ? "bg-emerald-950/20 border-emerald-900/30" : "bg-emerald-50/80 border-emerald-100/50")}>

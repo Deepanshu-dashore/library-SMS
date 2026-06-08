@@ -18,8 +18,6 @@ import { useSelector } from "react-redux";
 import { Icon } from "@iconify/react";
 import { Button } from "@/components/shared/Button";
 import { SimpleLoader } from "@/components/shared/SimpleLoader";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import { Invoice } from "@/components/Invoice";
 import clsx from "clsx";
 
@@ -80,29 +78,32 @@ export default function ViewPaymentPage() {
     if (!payment || downloading) return;
     setDownloading(true);
 
-    const doc = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-
-    // Helper to get image as base64
-    const getImageData = (url: string): Promise<string> => {
-      return new Promise((resolve) => {
-        const img = new (window as any).Image();
-        img.crossOrigin = 'Anonymous';
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0);
-          resolve(canvas.toDataURL('image/png'));
-        };
-        img.onerror = () => resolve('');
-        img.src = url;
-      });
-    };
-
     try {
+      const { default: jsPDF } = await import("jspdf");
+      const { default: autoTable } = await import("jspdf-autotable");
+
+      const doc = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      // Helper to get image as base64
+      const getImageData = (url: string): Promise<string> => {
+        return new Promise((resolve) => {
+          const img = new (window as any).Image();
+          img.crossOrigin = 'Anonymous';
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL('image/png'));
+          };
+          img.onerror = () => resolve('');
+          img.src = url;
+        });
+      };
+
       // Load all required images
       const [bgData, logoData, signData] = await Promise.all([
         getImageData('/Recipet.png'),

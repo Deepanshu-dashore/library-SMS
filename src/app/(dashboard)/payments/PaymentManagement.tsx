@@ -403,7 +403,7 @@ export default function PaymentManagement() {
               <CircularProgress 
                 id="grad-upi"
                 value={stats?.count ? Math.round((stats.upi?.count / stats.count) * 100) : 0} 
-                icon="solar:clapperboard-edit-bold-duotone" 
+                icon="solar:smartphone-bold-duotone" 
                 color1="#6366f1" 
                 color2="#4f46e5"
                 mode={mode}

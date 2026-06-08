@@ -71,4 +71,27 @@ export class PaymentController {
       );
     }
   }
+
+  static async getPaymentReport(req: Request) {
+    await connectDB();
+    const libraryInfo = await verifyJWT();
+    if (!libraryInfo) {
+      return ApiResponse(401, null, "Unauthorized");
+    }
+
+    const { searchParams } = new URL(req.url);
+    const year = Number(searchParams.get("year")) || new Date().getFullYear();
+    const month = searchParams.get("month") ? Number(searchParams.get("month")) : undefined;
+
+    try {
+      const reportData = await PaymentService.getPaymentReportData(year, month);
+      return ApiResponse(
+        200,
+        reportData,
+        "Payment report data fetched successfully",
+      );
+    } catch (error: any) {
+      return ApiResponse(500, null, error.message || "Failed to fetch payment report");
+    }
+  }
 }
